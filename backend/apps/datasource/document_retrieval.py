@@ -122,7 +122,23 @@ def search_document_chunks(
         # 显式排除 table_overlap 类型的分块（防御性过滤）
         sql_str = """SELECT
      c.id,
-     """
+     c.text,
+     c.source_type,
+     c.source_name,
+     c.source_file,
+     c.section_title,
+     c.page_number,
+     c.chunk_type,
+     c.info,
+     c.library_id,
+     d.filename,
+     1 - (c.embedding <=> :embedding::vector) AS similarity
+FROM core_document_chunk c
+JOIN core_document d ON c.document_id = d.id
+WHERE d.oid = :oid
+  AND c.embedding IS NOT NULL
+  AND (c.chunk_type IS NULL OR c.chunk_type != 'table_overlap')
+  AND 1 - (c.embedding <=> :embedding::vector) >= :threshold"""
         
         params = {
             "embedding": emb_str,
