@@ -1,7 +1,14 @@
 # ChatBI - 基于RAG与大语言模型的商业智能分析对话系统
 
 <p align="center">
-  <img src="frontend/public/favicon.png" alt="ChatBI" width="200" />
+  <img src="demo/homepage.png" alt="ChatBI" width="200" />
+</p>
+
+<p align="center">
+  <img src="demo/sqldemo.png" alt="SQL 数据分析与可视化" width="800" />
+</p>
+<p align="center">
+  <img src="demo/filedemo.png" alt="文档知识问答" width="800" />
 </p>
 
 <h3 align="center">Business Intelligence Analysis Dialogue System based on RAG and Large Language Models</h3>
