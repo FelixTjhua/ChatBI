@@ -1,0 +1,23 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 文档图标 (PDF/Word) - 专业文档设计 -->
+  <defs>
+    <linearGradient id="dg" x1="8" y1="2" x2="40" y2="46" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D32F2F"/>
+      <stop offset="50%" stop-color="#9C27B0"/>
+      <stop offset="100%" stop-color="#2B579A"/>
+    </linearGradient>
+    <filter id="ds" x="-4" y="-2" width="56" height="56">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <!-- 文档主体 -->
+  <path d="M12 4C12 2.89543 12.8954 2 14 2H30L40 12V44C40 45.1046 39.1046 46 38 46H14C12.8954 46 12 45.1046 12 44V4Z" fill="url(#dg)" filter="url(#ds)"/>
+  <!-- 折角 -->
+  <path d="M30 2V10C30 11.1046 30.8954 12 32 12H40L30 2Z" fill="white" fill-opacity="0.3"/>
+  <!-- 文本行 -->
+  <rect x="18" y="18" width="16" height="2" rx="1" fill="white" fill-opacity="0.85"/>
+  <rect x="18" y="23" width="12" height="2" rx="1" fill="white" fill-opacity="0.6"/>
+  <rect x="18" y="28" width="14" height="2" rx="1" fill="white" fill-opacity="0.6"/>
+  <rect x="18" y="33" width="10" height="2" rx="1" fill="white" fill-opacity="0.45"/>
+  <rect x="18" y="38" width="7" height="2" rx="1" fill="white" fill-opacity="0.3"/>
+</svg>

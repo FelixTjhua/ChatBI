@@ -1,0 +1,21 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="favicon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="50%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- 圆角矩形背景 -->
+  <rect width="32" height="32" rx="7" fill="url(#favicon-gradient)"/>
+  
+  <!-- 聊天气泡 -->
+  <path d="M6 8C6 6.89543 6.89543 6 8 8H24C25.1046 6 26 6.89543 26 8V18C26 19.1046 25.1046 20 24 20H14L9 25V20H8C6.89543 20 6 19.1046 6 18V8Z" fill="white" fill-opacity="0.95"/>
+  
+  <!-- 数据柱状图 -->
+  <rect x="9" y="14" width="3" height="4" rx="0.75" fill="#a78bfa"/>
+  <rect x="13" y="10" width="3" height="8" rx="0.75" fill="#7c3aed"/>
+  <rect x="17" y="12" width="3" height="6" rx="0.75" fill="#a78bfa"/>
+  <rect x="21" y="8" width="3" height="10" rx="0.75" fill="#7c3aed"/>
+</svg>

@@ -1,0 +1,188 @@
+// ============================================
+// ChatBI 页面标题统一样式
+// ============================================
+
+@primary-400: #a78bfa;
+@primary-500: #8b5cf6;
+@primary-600: #7c3aed;
+@accent-bright: #c4b5fd;
+@accent-glow: #ddd6fe;
+@border-glow: rgba(168, 85, 247, 0.4);
+
+// 统一的高级紫色渐变
+@title-gradient: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 25%, #a78bfa 50%, #8b5cf6 75%, #7c3aed 100%);
+@title-glow-color: rgba(139, 92, 246, 0.5);
+@title-line-gradient: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 50%, transparent 100%);
+@title-line-shadow: 0 0 16px rgba(139, 92, 246, 0.7);
+
+// 页面标题基础样式 - 统一高级紫色（全局唯一定义，各页面不要重复）
+.chatbi-page-title {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.5px !important;
+  margin: 0 !important;
+  padding: 8px 0 16px 0 !important;
+  display: inline-block !important;
+  position: relative !important;
+  
+  // 统一的渐变文字效果
+  background: @title-gradient !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  
+  // 文字阴影/发光效果
+  filter: drop-shadow(0 0 24px @title-glow-color) !important;
+  
+  // 底部装饰线 - 左对齐
+  &::after {
+    content: '' !important;
+    position: absolute !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 50px !important;
+    height: 3px !important;
+    background: @title-line-gradient !important;
+    border-radius: 2px !important;
+    box-shadow: @title-line-shadow !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  
+  // 悬停效果
+  &:hover {
+    filter: drop-shadow(0 0 32px rgba(139, 92, 246, 0.7)) !important;
+    
+    &::after {
+      width: 70px !important;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.9) !important;
+    }
+  }
+  
+  // 过渡动画
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  
+  // 确保内部文字也应用渐变
+  .title-text,
+  span {
+    background: inherit !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+}
+
+// 页面标题容器
+.chatbi-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.12);
+  position: relative;
+  
+  // 背景光晕
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 200px;
+    height: 100%;
+    background: radial-gradient(ellipse at left, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+// 所有页面标题使用统一样式
+// 不需要单独的颜色类，所有页面都继承 .chatbi-page-title 的统一紫色渐变
+
+// 响应式设计
+@media (max-width: 1024px) {
+  .chatbi-page-title {
+    font-size: 24px;
+    padding: 6px 12px;
+    
+    &::after {
+      width: 40px;
+      height: 2.5px;
+      left: 12px;
+    }
+  }
+  
+  .chatbi-page-header {
+    margin-bottom: 20px;
+    padding: 12px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .chatbi-page-title {
+    font-size: 20px;
+    padding: 4px 8px;
+    
+    &::after {
+      width: 30px;
+      height: 2px;
+      left: 8px;
+    }
+  }
+  
+  .chatbi-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding: 8px 0;
+    
+    .header-left,
+    .header-right {
+      width: 100%;
+    }
+  }
+}
+
+// 小尺寸标题变体
+.chatbi-page-title-small {
+  font-size: 20px;
+  padding: 4px 12px;
+  
+  &::after {
+    width: 35px;
+    height: 2px;
+  }
+}
+
+// 中等尺寸标题变体
+.chatbi-page-title-medium {
+  font-size: 24px;
+  padding: 6px 14px;
+  
+  &::after {
+    width: 45px;
+    height: 2.5px;
+  }
+}
+
+// 大尺寸标题变体
+.chatbi-page-title-large {
+  font-size: 32px;
+  padding: 10px 18px;
+  
+  &::after {
+    width: 60px;
+    height: 3.5px;
+  }
+}

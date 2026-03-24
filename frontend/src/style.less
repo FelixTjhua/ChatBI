@@ -1,0 +1,3164 @@
+/* 导入 ChatBI 设计系统 */
+@import './styles/chatbi-design-system.less';
+@import './styles/drawer-input-fix.less';
+@import './styles/page-titles.less';
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* ChatBI 紫色主题 - 高级设计 */
+  --chatbi-primary: #7c3aed;
+  --chatbi-primary-light: #a78bfa;
+  --chatbi-primary-lighter: #c4b5fd;
+  --chatbi-primary-dark: #6d28d9;
+  --chatbi-primary-darker: #5b21b6;
+  --chatbi-primary-bg: #f5f3ff;
+  --chatbi-primary-bg-light: #faf5ff;
+  --chatbi-gradient: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  --chatbi-gradient-hover: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+
+  /* Element Plus 主题覆盖 - 紫色 */
+  --ed-color-primary: #7c3aed !important;
+  --ed-color-primary-light-1: #8b5cf6 !important;
+  --ed-color-primary-light-2: #a78bfa !important;
+  --ed-color-primary-light-3: #c4b5fd !important;
+  --ed-color-primary-light-4: #ddd6fe !important;
+  --ed-color-primary-light-5: #ede9fe !important;
+  --ed-color-primary-light-6: #f5f3ff !important;
+  --ed-color-primary-light-7: #f5f3ff !important;
+  --ed-color-primary-light-8: #faf5ff !important;
+  --ed-color-primary-light-9: #faf5ff !important;
+  --ed-color-primary-dark-2: #6d28d9 !important;
+  --ed-color-primary-1a: rgba(124, 58, 237, 0.1) !important;
+  --ed-color-primary-15-d: #5b21b6 !important;
+  --ed-color-primary-60: #a78bfa !important;
+  --ed-color-primary-80: #8b5cf6 !important;
+
+  --primary-color: var(--chatbi-primary);
+  --primary-light: #f5f3ff;
+  --secondary-color: #5f6368;
+  --danger-color: #ea4335;
+  --success-color: #34a853;
+  --warning-color: #fbbc05;
+  --text-color: #202124;
+  --text-light: #5f6368;
+  --bg-color: #f8f9fa;
+  --white: #ffffff;
+  --border-color: #dadce0;
+  --sidebar-width: 240px;
+  --header-height: 64px;
+  --border-radius: 8px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --ed-border-radius-base: 6px !important;
+  --ed-border-color: #d9dcdf !important;
+  --ed-border-color: #d9dcdf !important;
+  --ed-border-radius-base: 6px !important;
+  --ed-disabled-border-color: #d9dcdf !important;
+  --ed-border-color-light: #dee0e3 !important;
+  --ed-border-color-lighter: #dee0e3 !important;
+  --ed-fill-color: rgba(139, 92, 246, 0.08) !important;
+  --ed-fill-color-darker: rgba(139, 92, 246, 0.15) !important;
+  --ed-fill-color-light: rgba(139, 92, 246, 0.06) !important;
+  --ed-fill-color-lighter: rgba(139, 92, 246, 0.04) !important;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #0f0a1a;
+  color: #f1f5f9;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#app {
+  width: 100%;
+  margin: 0;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #f1f5f9;
+    background-color: #0f0a1a;
+  }
+
+  a:hover {
+    color: #747bff;
+  }
+
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-item_primary {
+  height: 40px;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+
+  .ed-icon + .label {
+    margin-left: 5.33px;
+  }
+
+  .label {
+    width: 85%;
+    font-size: 14px;
+    .ellipsis;
+  }
+
+  &:not(.active):hover {
+    background: rgba(31, 35, 41, 0.1);
+  }
+
+  &.active {
+    background: var(--ed-color-primary-1a, rgba(124, 58, 237, 0.1));
+    color: var(--chatbi-primary);
+  }
+}
+
+.border-radius_8 {
+  border-radius: 8px !important;
+}
+
+.hover-icon {
+  cursor: pointer;
+  height: 24px !important;
+  width: 24px !important;
+  font-size: 16px !important;
+  border-radius: 6px;
+  color: #646a73 !important;
+
+  &[aria-expanded='true'] {
+    background: rgba(31, 35, 41, 0.1);
+  }
+
+  &:hover {
+    background: rgba(31, 35, 41, 0.1);
+  }
+
+  &:active {
+    background: rgba(31, 35, 41, 0.2);
+  }
+}
+
+.tox-toolbar__primary {
+  min-width: 780px !important;
+  flex-wrap: wrap !important;
+}
+.clone_img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 100;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ed-input__prefix-inner .ed-icon {
+  color: #646a73;
+}
+
+.confirm-no_icon {
+  border-radius: 12px;
+  padding: 24px;
+  .tip {
+    margin-top: 24px;
+  }
+
+  .ed-message-box__message {
+    width: 95%;
+  }
+}
+
+.confirm-with_icon {
+  border-radius: 12px;
+}
+
+.form-content_error {
+  .ed-form-item--default {
+    margin-bottom: 16px;
+
+    &.is-error {
+      margin-bottom: 40px;
+    }
+  }
+}
+
+.form-content_error_a {
+  .ed-form-item--default {
+    margin-bottom: 8px;
+
+    &.is-error {
+      margin-bottom: 12px;
+    }
+  }
+}
+
+.ed-dialog:not(.chart-fullscreen-dialog) {
+  border-radius: 12px !important;
+}
+
+.tox-tinymce-inline {
+  z-index: 10 !important;
+}
+
+.ed-message-box__container {
+  display: block !important;
+}
+
+// MessageBox 深色主题 - 强制高对比度
+.ed-message-box,
+.el-message-box {
+  background: linear-gradient(145deg, rgba(30, 18, 69, 0.98) 0%, rgba(26, 16, 51, 0.98) 100%) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7) !important;
+  z-index: 9999 !important;
+  
+  .ed-message-box__title,
+  .el-message-box__title {
+    color: #f8fafc !important;
+    font-weight: 700 !important;
+    font-size: 18px !important;
+  }
+  
+  .ed-message-box__message,
+  .el-message-box__message {
+    color: #e2e8f0 !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+  }
+  
+  .ed-message-box__content,
+  .el-message-box__content {
+    color: #e2e8f0 !important;
+  }
+  
+  .ed-message-box__btns,
+  .el-message-box__btns {
+    .ed-button,
+    .el-button {
+      font-weight: 600 !important;
+    }
+  }
+}
+
+// MessageBox 遮罩层
+.ed-overlay,
+.el-overlay {
+  z-index: 9998 !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+
+// MessageBox 容器
+.ed-overlay-message-box,
+.el-overlay-message-box {
+  z-index: 9999 !important;
+}
+
+em {
+  font-synthesis: style weight !important;
+}
+
+strong {
+  font-synthesis: style weight !important;
+}
+
+.ed-button.is-plain:active {
+  background-color: var(--ed-color-primary-60, #a4e3d3) !important;
+}
+
+.ed-drawer__footer {
+  border-top: 1px solid #1f232926;
+  box-shadow: none !important;
+}
+
+.ed-select__popper {
+  padding: 0 4px !important;
+  .ed-select-dropdown__item {
+    border-radius: 4px;
+  }
+}
+
+.markdown-body {
+  hr {
+    border: none !important;
+    background: #1f232926 !important;
+    height: 1px !important;
+  }
+}
+
+.sq-message-success {
+  border: 1px solid #34c724 !important;
+  background: #f0fbef !important;
+
+  .ed-message__icon {
+    color: #34c724;
+  }
+}
+
+.sq-message-export {
+  min-width: 20px !important;
+  padding: 16px 20px !important;
+  display: flex;
+  align-items: center;
+  box-shadow: 0px 4px 8px 0px #1f23291a;
+
+  & > p {
+    font-family: var(--de-custom_font, 'PingFang');
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: 0px;
+    text-align: left;
+    color: #1f2329;
+    display: flex;
+    align-items: center;
+    padding-right: 24px;
+  }
+
+  .m50-export {
+    max-width: 200px;
+  }
+
+  .btn-text {
+    padding: 2px 4px;
+
+    &:hover {
+      background: var(--primary10, #3370ff1a);
+    }
+  }
+
+  .ed-message__closeBtn {
+    margin-left: 28px;
+    position: relative;
+    margin-right: 0;
+    top: 0;
+    right: 0;
+    transform: translateY(0);
+    color: #646a73;
+  }
+
+  .ed-message__icon {
+    height: 16px;
+    width: 16px;
+    margin-right: 8px;
+  }
+}
+
+.ed-button.is-secondary.is-disabled {
+  border-color: #d9dcdf !important;
+}
+
+.ed-drawer.btt {
+  .ed-drawer__body {
+    padding-bottom: 64px;
+  }
+}
+
+// 全局标签深色主题 - 最高优先级
+.el-tag.is-plain,
+.ed-tag.is-plain,
+.el-tag,
+.ed-tag {
+  &.status-disabled {
+    --el-tag-bg-color: rgba(251, 191, 36, 0.15) !important;
+    --el-tag-text-color: #fbbf24 !important;
+    --el-tag-border-color: rgba(251, 191, 36, 0.4) !important;
+    --ed-tag-bg-color: rgba(251, 191, 36, 0.15) !important;
+    --ed-tag-text-color: #fbbf24 !important;
+    --ed-tag-border-color: rgba(251, 191, 36, 0.4) !important;
+    background-color: rgba(251, 191, 36, 0.15) !important;
+    background: rgba(251, 191, 36, 0.15) !important;
+    color: #fbbf24 !important;
+    border-color: rgba(251, 191, 36, 0.4) !important;
+    
+    .el-icon,
+    .ed-icon,
+    svg,
+    path {
+      color: #fbbf24 !important;
+      fill: #fbbf24 !important;
+    }
+    
+    span {
+      color: #fbbf24 !important;
+    }
+  }
+  
+  &.status-enabled {
+    --el-tag-bg-color: rgba(16, 185, 129, 0.15) !important;
+    --el-tag-text-color: #34d399 !important;
+    --el-tag-border-color: rgba(16, 185, 129, 0.4) !important;
+    --ed-tag-bg-color: rgba(16, 185, 129, 0.15) !important;
+    --ed-tag-text-color: #34d399 !important;
+    --ed-tag-border-color: rgba(16, 185, 129, 0.4) !important;
+    background-color: rgba(16, 185, 129, 0.15) !important;
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #34d399 !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+    
+    .el-icon,
+    .ed-icon,
+    svg,
+    path {
+      color: #34d399 !important;
+      fill: #34d399 !important;
+    }
+    
+    span {
+      color: #34d399 !important;
+    }
+  }
+}
+
+// 全局标签深色主题
+.ed-tag,
+.el-tag {
+  &.ed-tag--info,
+  &.el-tag--info {
+    --ed-tag-bg-color: rgba(251, 191, 36, 0.15) !important;
+    --ed-tag-text-color: #fbbf24 !important;
+    --ed-tag-border-color: rgba(251, 191, 36, 0.4) !important;
+    --el-tag-bg-color: rgba(251, 191, 36, 0.15) !important;
+    --el-tag-text-color: #fbbf24 !important;
+    --el-tag-border-color: rgba(251, 191, 36, 0.4) !important;
+    background: rgba(251, 191, 36, 0.15) !important;
+    color: #fbbf24 !important;
+    border-color: rgba(251, 191, 36, 0.4) !important;
+    
+    .ed-icon,
+    .el-icon,
+    svg,
+    path {
+      color: #fbbf24 !important;
+      fill: #fbbf24 !important;
+    }
+  }
+  
+  &.ed-tag--success,
+  &.el-tag--success {
+    --ed-tag-bg-color: rgba(16, 185, 129, 0.15) !important;
+    --ed-tag-text-color: #34d399 !important;
+    --ed-tag-border-color: rgba(16, 185, 129, 0.4) !important;
+    --el-tag-bg-color: rgba(16, 185, 129, 0.15) !important;
+    --el-tag-text-color: #34d399 !important;
+    --el-tag-border-color: rgba(16, 185, 129, 0.4) !important;
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #34d399 !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+    
+    .ed-icon,
+    .el-icon,
+    svg,
+    path {
+      color: #34d399 !important;
+      fill: #34d399 !important;
+    }
+  }
+}
+
+.ed-tag.ed-tag--info {
+  --ed-tag-bg-color: rgba(251, 191, 36, 0.15) !important;
+  --ed-tag-text-color: #fbbf24 !important;
+  --ed-tag-font-size: 14px;
+  background: rgba(251, 191, 36, 0.15) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(251, 191, 36, 0.4) !important;
+}
+
+.hover-icon_with_bg.ed-icon {
+  cursor: pointer;
+  position: relative;
+  &:hover {
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1f23291a;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+    }
+  }
+
+  &.primary-icon:hover {
+    &::after {
+      background: var(--ed-color-primary-1a, #1cba901a);
+    }
+  }
+}
+
+.ed-popper__arrow {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+.ed-popper[data-popper-placement^='top'] > .ed-popper__arrow {
+  bottom: -5px !important;
+}
+
+.ed-popper[data-popper-placement^='right'] > .ed-popper__arrow {
+  left: -5px !important;
+}
+
+.ed-form.last {
+  .ed-form-item {
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.icon-primary.icon-primary {
+  color: var(--ed-color-primary);
+  fill: var(--ed-color-primary);
+}
+
+.icon-primary_15_d.icon-primary_15_d {
+  color: var(--ed-color-primary-15-d);
+}
+
+.icon-primary_60.icon-primary_60 {
+  color: var(--ed-color-primary-60);
+}
+
+.ed-checkbox {
+  --ed-checkbox-font-weight: 400 !important;
+}
+
+.ed-form-item__label.ed-form-item__label.ed-form-item__label {
+  height: 22px;
+  line-height: 22px;
+}
+
+.ed-pager li.number.number.number {
+  &:hover {
+    background-color: var(--ed-color-primary-60);
+  }
+
+  &:active {
+    background-color: var(--ed-color-primary-80);
+  }
+}
+
+.ed-table.ed-table.ed-table {
+  --ed-table-border-color: #1f232926;
+  border-radius: 0 !important;
+  
+  &::before {
+    display: none;
+  }
+  
+  .ed-table__inner-wrapper {
+    border-radius: 0 !important;
+  }
+}
+
+/* RAG 页面表格深色主题 - 强制覆盖 */
+.rag-page .ed-table,
+.rag-page .el-table,
+.tabs-content .ed-table,
+.tabs-content .el-table,
+.tab-content .ed-table,
+.tab-content .el-table,
+.tab-table .ed-table,
+.tab-table .el-table,
+.dark-table.ed-table,
+.dark-table.el-table {
+  --ed-table-bg-color: transparent !important;
+  --el-table-bg-color: transparent !important;
+  --ed-table-tr-bg-color: transparent !important;
+  --el-table-tr-bg-color: transparent !important;
+  --ed-table-header-bg-color: rgba(139, 92, 246, 0.12) !important;
+  --el-table-header-bg-color: rgba(139, 92, 246, 0.12) !important;
+  --ed-table-row-hover-bg-color: rgba(139, 92, 246, 0.1) !important;
+  --el-table-row-hover-bg-color: rgba(139, 92, 246, 0.1) !important;
+  --ed-table-border-color: rgba(139, 92, 246, 0.2) !important;
+  --el-table-border-color: rgba(139, 92, 246, 0.2) !important;
+  --ed-table-text-color: rgba(255, 255, 255, 0.95) !important;
+  --el-table-text-color: rgba(255, 255, 255, 0.95) !important;
+  --ed-table-header-text-color: rgba(196, 181, 253, 0.8) !important;
+  --el-table-header-text-color: rgba(196, 181, 253, 0.8) !important;
+  --ed-fill-color-blank: transparent !important;
+  --el-fill-color-blank: transparent !important;
+  --ed-bg-color: transparent !important;
+  --el-bg-color: transparent !important;
+  
+  background-color: transparent !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  
+  &::before {
+    display: none !important;
+  }
+  
+  .ed-table__inner-wrapper,
+  .el-table__inner-wrapper,
+  .ed-table__header-wrapper,
+  .el-table__header-wrapper,
+  .ed-table__body-wrapper,
+  .el-table__body-wrapper,
+  .ed-scrollbar,
+  .el-scrollbar,
+  .ed-scrollbar__wrap,
+  .el-scrollbar__wrap,
+  .ed-scrollbar__view,
+  .el-scrollbar__view,
+  .ed-table__body,
+  .el-table__body,
+  table,
+  thead,
+  tbody,
+  tr,
+  .ed-table__empty-block,
+  .el-table__empty-block {
+    background-color: transparent !important;
+    background: transparent !important;
+  }
+  
+  th,
+  th.ed-table__cell,
+  th.el-table__cell {
+    background-color: rgba(139, 92, 246, 0.12) !important;
+    background: rgba(139, 92, 246, 0.12) !important;
+    color: rgba(196, 181, 253, 0.8) !important;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+    
+    .cell {
+      color: rgba(196, 181, 253, 0.8) !important;
+    }
+  }
+  
+  td,
+  td.ed-table__cell,
+  td.el-table__cell {
+    background-color: transparent !important;
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.1) !important;
+    
+    .cell {
+      color: rgba(255, 255, 255, 0.95) !important;
+    }
+  }
+  
+  .ed-table__row:hover > td,
+  .el-table__row:hover > td,
+  tr:hover > td,
+  .ed-table__row.hover-row > td,
+  .el-table__row.hover-row > td {
+    background-color: rgba(139, 92, 246, 0.1) !important;
+    background: rgba(139, 92, 246, 0.1) !important;
+  }
+}
+
+/* 全局 ed-table 行背景修复 */
+.tab-table .ed-table tr,
+.tab-content .ed-table tr,
+.tabs-content .ed-table tr,
+.rag-page .ed-table tr,
+.dark-table tr {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.tab-table .ed-table td.ed-table__cell,
+.tab-content .ed-table td.ed-table__cell,
+.tabs-content .ed-table td.ed-table__cell,
+.rag-page .ed-table td.ed-table__cell,
+.dark-table td.ed-table__cell {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.ed-input__password {
+  svg {
+    path {
+      fill: #646a73;
+    }
+  }
+}
+
+.ed-icon.done {
+  svg {
+    path {
+      fill: var(--ed-color-primary);
+    }
+  }
+}
+
+.ed-dropdown__popper {
+  --ed-dropdown-menuItem-hover-fill: rgba(139, 92, 246, 0.2) !important;
+  background: linear-gradient(145deg, rgba(30, 22, 45, 0.98) 0%, rgba(24, 18, 38, 0.98) 100%) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6) !important;
+  
+  .ed-dropdown-menu__item,
+  .el-dropdown-menu__item {
+    color: rgba(226, 232, 240, 0.95) !important;
+    
+    &:hover {
+      color: rgba(255, 255, 255, 1) !important;
+      background: rgba(139, 92, 246, 0.2) !important;
+    }
+    
+    &:focus {
+      color: rgba(255, 255, 255, 1) !important;
+      background: rgba(139, 92, 246, 0.15) !important;
+    }
+  }
+}
+
+.el-popover.el-popper,
+.ed-popover.ed-popper {
+  background: linear-gradient(145deg, rgba(30, 22, 45, 0.98) 0%, rgba(24, 18, 38, 0.98) 100%) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6) !important;
+  color: rgba(226, 232, 240, 0.95) !important;
+}
+
+/* 数据源卡片弹出菜单样式 - 高优先级覆盖 */
+.el-popper.popover-card,
+.ed-popper.popover-card,
+.popover-card.el-popover,
+.popover-card.ed-popover,
+.el-popover.popover-card.el-popper,
+.ed-popover.popover-card.ed-popper {
+  background: linear-gradient(145deg, rgb(40, 32, 55) 0%, rgb(32, 26, 46) 100%) !important;
+  backdrop-filter: blur(20px) !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(139, 92, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+  width: fit-content !important;
+  min-width: 160px !important;
+  padding: 8px !important;
+  overflow: hidden !important;
+  z-index: 2000 !important;
+  position: relative !important;
+
+  &::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, transparent 0%, #a78bfa 50%, transparent 100%) !important;
+    opacity: 1 !important;
+    z-index: 1 !important;
+  }
+
+  .content {
+    position: relative !important;
+
+    &::after {
+      position: absolute !important;
+      content: '' !important;
+      top: 48px !important;
+      left: 12px !important;
+      width: calc(100% - 24px) !important;
+      height: 1px !important;
+      background: linear-gradient(90deg, transparent 0%, rgba(139, 92, 246, 0.5) 50%, transparent 100%) !important;
+    }
+
+    .item {
+      position: relative !important;
+      padding: 0 16px !important;
+      height: 44px !important;
+      display: flex !important;
+      align-items: center !important;
+      cursor: pointer !important;
+      color: rgb(248, 250, 252) !important;
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      border-radius: 8px !important;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      z-index: 1 !important;
+      margin-bottom: 2px !important;
+
+      &:last-child {
+        margin-bottom: 0 !important;
+      }
+
+      .ed-icon,
+      .el-icon {
+        margin-right: 12px !important;
+        color: rgb(233, 213, 255) !important;
+        transition: all 0.25s ease !important;
+        font-size: 16px !important;
+      }
+
+      &:first-child:hover {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.35) 0%, rgba(124, 58, 237, 0.3) 100%) !important;
+        color: rgb(255, 255, 255) !important;
+        transform: translateX(2px) !important;
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4) !important;
+
+        .ed-icon,
+        .el-icon {
+          color: #ffffff !important;
+          transform: scale(1.1) !important;
+        }
+      }
+
+      &:last-child:hover {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.35) 0%, rgba(220, 38, 38, 0.3) 100%) !important;
+        color: #fecaca !important;
+        transform: translateX(2px) !important;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4) !important;
+
+        .ed-icon,
+        .el-icon {
+          color: #fca5a5 !important;
+          transform: scale(1.1) !important;
+        }
+      }
+
+      &::after {
+        display: none !important;
+      }
+    }
+  }
+}
+.ed-dialog__headerbtn {
+  border-radius: 6px !important;
+  &.mrt {
+    margin-top: -7px;
+  }
+}
+
+/* ChatBI 紫色主题 - 全局按钮样式 */
+.ed-button--primary {
+  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%) !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+
+  &:hover, &:focus {
+    background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &.is-disabled {
+    background: rgba(139, 92, 246, 0.15) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.25) !important;
+    color: rgba(196, 181, 253, 0.7) !important;
+    transform: none !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+    
+    // 禁用状态的图标
+    .ed-icon,
+    .el-icon,
+    i,
+    svg {
+      color: rgba(196, 181, 253, 0.7) !important;
+      fill: rgba(196, 181, 253, 0.7) !important;
+    }
+    
+    // 禁用状态的文字
+    span {
+      color: rgba(196, 181, 253, 0.7) !important;
+    }
+  }
+}
+
+// 仪表板页面按钮特殊样式
+.dv-preview {
+  .guide-actions {
+    .el-button--primary,
+    .ed-button--primary {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+      border: none !important;
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4) !important;
+      border-radius: 14px !important;
+      height: 52px !important;
+      min-width: 160px !important;
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      position: relative !important;
+      overflow: hidden !important;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      &:hover {
+        background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%) !important;
+        box-shadow: 0 12px 32px rgba(139, 92, 246, 0.5) !important;
+        transform: translateY(-3px) scale(1.02) !important;
+
+        &::before {
+          left: 100%;
+        }
+      }
+
+      &:active {
+        transform: translateY(-1px) scale(0.98) !important;
+      }
+    }
+
+    .el-button:not(.el-button--primary),
+    .ed-button:not(.ed-button--primary) {
+      background: rgba(139, 92, 246, 0.1) !important;
+      border: 1px solid rgba(139, 92, 246, 0.3) !important;
+      color: #c4b5fd !important;
+      border-radius: 14px !important;
+      height: 52px !important;
+      min-width: 160px !important;
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      backdrop-filter: blur(10px) !important;
+      position: relative !important;
+      overflow: hidden !important;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(139, 92, 246, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1), height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      &:hover {
+        background: rgba(139, 92, 246, 0.15) !important;
+        border-color: #8b5cf6 !important;
+        color: #ddd6fe !important;
+        transform: translateY(-3px) scale(1.02) !important;
+        box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3) !important;
+
+        &::before {
+          width: 400px;
+          height: 400px;
+        }
+      }
+
+      &:active {
+        transform: translateY(-1px) scale(0.98) !important;
+      }
+    }
+  }
+}
+
+.ed-button.is-plain:active {
+  background-color: var(--ed-color-primary-60, #a78bfa) !important;
+}
+
+/* 紫色主题链接样式 */
+a {
+  color: var(--chatbi-primary, #7c3aed);
+
+  &:hover {
+    color: var(--chatbi-primary-dark, #6d28d9);
+  }
+}
+
+/* 紫色主题复选框 - 深色主题 */
+/* 未选中状态 - 透明背景，只显示边框，无勾选标记 */
+.ed-checkbox__inner,
+.el-checkbox__inner {
+  background-color: transparent !important;
+  border-color: rgba(139, 92, 246, 0.4) !important;
+  border-width: 1.5px !important;
+  
+  /* 隐藏未选中状态的勾选标记 */
+  &::after {
+    border-color: transparent !important;
+    opacity: 0 !important;
+  }
+}
+
+/* 悬停状态 */
+.ed-checkbox:hover .ed-checkbox__inner,
+.el-checkbox:hover .el-checkbox__inner {
+  border-color: rgba(139, 92, 246, 0.6) !important;
+}
+
+/* 选中状态 - 显示勾选标记 */
+.ed-checkbox__input.is-checked .ed-checkbox__inner,
+.el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: var(--chatbi-primary, #7c3aed) !important;
+  border-color: var(--chatbi-primary, #7c3aed) !important;
+  
+  &::after {
+    border-color: #fff !important;
+    opacity: 1 !important;
+  }
+}
+
+/* 半选状态（indeterminate） */
+.ed-checkbox__input.is-indeterminate .ed-checkbox__inner,
+.el-checkbox__input.is-indeterminate .el-checkbox__inner {
+  background-color: var(--chatbi-primary, #7c3aed) !important;
+  border-color: var(--chatbi-primary, #7c3aed) !important;
+  
+  &::before {
+    background-color: #fff !important;
+  }
+}
+
+.ed-radio__input.is-checked .ed-radio__inner {
+  background-color: var(--chatbi-primary, #7c3aed) !important;
+  border-color: var(--chatbi-primary, #7c3aed) !important;
+}
+
+/* 紫色主题开关 */
+.ed-switch.is-checked .ed-switch__core {
+  background-color: var(--chatbi-primary, #7c3aed) !important;
+  border-color: var(--chatbi-primary, #7c3aed) !important;
+}
+
+/* 紫色主题输入框聚焦 */
+.ed-input__wrapper:focus-within {
+  box-shadow: 0 0 0 1px var(--chatbi-primary, #7c3aed) inset !important;
+}
+
+.ed-textarea__inner:focus {
+  box-shadow: 0 0 0 1px var(--chatbi-primary, #7c3aed) inset !important;
+}
+
+/* 紫色主题选择器 */
+.ed-select .ed-input.is-focus .ed-input__wrapper {
+  box-shadow: 0 0 0 1px var(--chatbi-primary, #7c3aed) inset !important;
+}
+
+
+/* ============================================
+ * 教程弹窗深色主题 - 强制覆盖
+ * ============================================ */
+
+/* 遮罩层深色 */
+.tutorial-dialog-overlay {
+  background-color: rgba(0, 0, 0, 0.65) !important;
+}
+
+/* 弹窗主体 - 使用 custom-class */
+.tutorial-dialog-inner.ed-dialog,
+.tutorial-dialog-inner.el-dialog {
+  background: #1a1a2e !important;
+  border: 1px solid rgba(139, 92, 246, 0.35) !important;
+  border-radius: 24px !important;
+  overflow: hidden !important;
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.6),
+    0 10px 40px rgba(0, 0, 0, 0.4),
+    0 0 80px rgba(124, 58, 237, 0.12) !important;
+}
+
+.tutorial-dialog-inner .ed-dialog__header,
+.tutorial-dialog-inner .el-dialog__header,
+.tutorial-dialog-inner.ed-dialog .ed-dialog__header,
+.tutorial-dialog-inner.el-dialog .el-dialog__header {
+  display: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.tutorial-dialog-inner .ed-dialog__body,
+.tutorial-dialog-inner .el-dialog__body,
+.tutorial-dialog-inner.ed-dialog .ed-dialog__body,
+.tutorial-dialog-inner.el-dialog .el-dialog__body {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: #1a1a2e !important;
+  border: none !important;
+}
+
+.tutorial-dialog-inner .ed-dialog__footer,
+.tutorial-dialog-inner .el-dialog__footer,
+.tutorial-dialog-inner.ed-dialog .ed-dialog__footer,
+.tutorial-dialog-inner.el-dialog .el-dialog__footer {
+  display: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* 备用选择器 - 使用 class 属性 */
+.tutorial-dialog.ed-dialog,
+.tutorial-dialog .ed-dialog,
+.tutorial-dialog.el-dialog,
+.tutorial-dialog .el-dialog,
+.ed-overlay-dialog .tutorial-dialog,
+.el-overlay-dialog .tutorial-dialog {
+  background: #1a1a2e !important;
+  border: 1px solid rgba(139, 92, 246, 0.35) !important;
+  border-radius: 24px !important;
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.6),
+    0 10px 40px rgba(0, 0, 0, 0.4),
+    0 0 80px rgba(124, 58, 237, 0.12) !important;
+}
+
+.tutorial-dialog .ed-dialog__header,
+.tutorial-dialog .el-dialog__header {
+  display: none !important;
+}
+
+.tutorial-dialog .ed-dialog__body,
+.tutorial-dialog .el-dialog__body {
+  padding: 0 !important;
+  background: #1a1a2e !important;
+  border: none !important;
+}
+
+.tutorial-dialog .ed-dialog__footer,
+.tutorial-dialog .el-dialog__footer {
+  display: none !important;
+}
+
+
+/* ============================================
+ * RAG 页面深色表格 - 作用域 CSS 变量覆盖
+ * ============================================ */
+.rag-page,
+.tabs-content,
+.tab-content,
+.tab-table {
+  /* 覆盖 Element Plus Secondary 核心变量 - 这些是表格背景色的根源 */
+  --ed-bg-color: transparent !important;
+  --ed-fill-color-blank: transparent !important;
+  --ed-fill-color: transparent !important;
+  --ed-fill-color-light: transparent !important;
+  --ed-fill-color-lighter: transparent !important;
+  
+  /* 覆盖 Element Plus Secondary 表格变量 */
+  --ed-table-bg-color: transparent !important;
+  --ed-table-tr-bg-color: transparent !important;
+  --ed-table-expanded-cell-bg-color: transparent !important;
+  --ed-table-header-bg-color: rgba(139, 92, 246, 0.12) !important;
+  --ed-table-row-hover-bg-color: rgba(139, 92, 246, 0.1) !important;
+  --ed-table-current-row-bg-color: rgba(139, 92, 246, 0.15) !important;
+  --ed-table-border-color: rgba(139, 92, 246, 0.2) !important;
+  --ed-table-text-color: rgba(255, 255, 255, 0.95) !important;
+  --ed-table-header-text-color: rgba(196, 181, 253, 0.8) !important;
+}
+
+/* 强制 ed-table 行背景透明 - 最高优先级 */
+.rag-page .ed-table__body-wrapper tr,
+.tabs-content .ed-table__body-wrapper tr,
+.tab-content .ed-table__body-wrapper tr,
+.tab-table .ed-table__body-wrapper tr,
+.dark-table .ed-table__body-wrapper tr,
+.rag-page .ed-table__body tr,
+.tabs-content .ed-table__body tr,
+.tab-content .ed-table__body tr,
+.tab-table .ed-table__body tr,
+.dark-table .ed-table__body tr {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.rag-page .ed-table__body-wrapper td.ed-table__cell,
+.tabs-content .ed-table__body-wrapper td.ed-table__cell,
+.tab-content .ed-table__body-wrapper td.ed-table__cell,
+.tab-table .ed-table__body-wrapper td.ed-table__cell,
+.dark-table .ed-table__body-wrapper td.ed-table__cell,
+.rag-page .ed-table__body td.ed-table__cell,
+.tabs-content .ed-table__body td.ed-table__cell,
+.tab-content .ed-table__body td.ed-table__cell,
+.tab-table .ed-table__body td.ed-table__cell,
+.dark-table .ed-table__body td.ed-table__cell {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.rag-page .ed-table__body-wrapper .ed-table__row:hover td.ed-table__cell,
+.tabs-content .ed-table__body-wrapper .ed-table__row:hover td.ed-table__cell,
+.tab-content .ed-table__body-wrapper .ed-table__row:hover td.ed-table__cell,
+.tab-table .ed-table__body-wrapper .ed-table__row:hover td.ed-table__cell,
+.dark-table .ed-table__body-wrapper .ed-table__row:hover td.ed-table__cell {
+  background-color: rgba(139, 92, 246, 0.1) !important;
+  background: rgba(139, 92, 246, 0.1) !important;
+}
+
+/* ============================================
+ * RAG 页面表格 - 终极样式覆盖
+ * 使用最高优先级选择器确保深色主题生效
+ * ============================================ */
+
+/* 强制覆盖所有表格元素的背景色 */
+.rag-page .ed-table,
+.rag-page .ed-table *,
+.tabs-content .ed-table,
+.tabs-content .ed-table *,
+.tab-content .ed-table,
+.tab-content .ed-table *,
+.tab-table .ed-table,
+.tab-table .ed-table * {
+  --ed-bg-color: transparent !important;
+  --ed-fill-color-blank: transparent !important;
+}
+
+/* 表格主体 - 强制透明 */
+.rag-page .ed-table,
+.tabs-content .ed-table,
+.tab-content .ed-table,
+.tab-table .ed-table,
+.dark-table.ed-table {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.rag-page .ed-table .ed-table__inner-wrapper,
+.tabs-content .ed-table .ed-table__inner-wrapper,
+.tab-content .ed-table .ed-table__inner-wrapper,
+.tab-table .ed-table .ed-table__inner-wrapper,
+.dark-table.ed-table .ed-table__inner-wrapper {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* 表头区域 */
+.rag-page .ed-table .ed-table__header-wrapper,
+.tabs-content .ed-table .ed-table__header-wrapper,
+.tab-content .ed-table .ed-table__header-wrapper,
+.tab-table .ed-table .ed-table__header-wrapper,
+.dark-table.ed-table .ed-table__header-wrapper {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.rag-page .ed-table .ed-table__header-wrapper table,
+.tabs-content .ed-table .ed-table__header-wrapper table,
+.tab-content .ed-table .ed-table__header-wrapper table,
+.tab-table .ed-table .ed-table__header-wrapper table,
+.dark-table.ed-table .ed-table__header-wrapper table {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.rag-page .ed-table th.ed-table__cell,
+.tabs-content .ed-table th.ed-table__cell,
+.tab-content .ed-table th.ed-table__cell,
+.tab-table .ed-table th.ed-table__cell,
+.dark-table.ed-table th.ed-table__cell {
+  background-color: rgba(139, 92, 246, 0.12) !important;
+  background: rgba(139, 92, 246, 0.12) !important;
+  color: rgba(196, 181, 253, 0.8) !important;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+}
+
+.rag-page .ed-table th.ed-table__cell .cell,
+.tabs-content .ed-table th.ed-table__cell .cell,
+.tab-content .ed-table th.ed-table__cell .cell,
+.tab-table .ed-table th.ed-table__cell .cell,
+.dark-table.ed-table th.ed-table__cell .cell {
+  color: rgba(196, 181, 253, 0.8) !important;
+}
+
+/* 表格内容区域 - 滚动容器 */
+.rag-page .ed-table .ed-table__body-wrapper,
+.tabs-content .ed-table .ed-table__body-wrapper,
+.tab-content .ed-table .ed-table__body-wrapper,
+.tab-table .ed-table .ed-table__body-wrapper,
+.dark-table.ed-table .ed-table__body-wrapper {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.rag-page .ed-table .ed-scrollbar,
+.tabs-content .ed-table .ed-scrollbar,
+.tab-content .ed-table .ed-scrollbar,
+.tab-table .ed-table .ed-scrollbar,
+.dark-table.ed-table .ed-scrollbar {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.rag-page .ed-table .ed-scrollbar__wrap,
+.tabs-content .ed-table .ed-scrollbar__wrap,
+.tab-content .ed-table .ed-scrollbar__wrap,
+.tab-table .ed-table .ed-scrollbar__wrap,
+.dark-table.ed-table .ed-scrollbar__wrap {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.rag-page .ed-table .ed-scrollbar__view,
+.tabs-content .ed-table .ed-scrollbar__view,
+.tab-content .ed-table .ed-scrollbar__view,
+.tab-table .ed-table .ed-scrollbar__view,
+.dark-table.ed-table .ed-scrollbar__view {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* 表格 body */
+.rag-page .ed-table .ed-table__body-wrapper table,
+.tabs-content .ed-table .ed-table__body-wrapper table,
+.tab-content .ed-table .ed-table__body-wrapper table,
+.tab-table .ed-table .ed-table__body-wrapper table,
+.dark-table.ed-table .ed-table__body-wrapper table {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.rag-page .ed-table .ed-table__body,
+.tabs-content .ed-table .ed-table__body,
+.tab-content .ed-table .ed-table__body,
+.tab-table .ed-table .ed-table__body,
+.dark-table.ed-table .ed-table__body {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.rag-page .ed-table tbody,
+.tabs-content .ed-table tbody,
+.tab-content .ed-table tbody,
+.tab-table .ed-table tbody,
+.dark-table.ed-table tbody {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* 表格行 - 最关键的部分 */
+.rag-page .ed-table tr,
+.tabs-content .ed-table tr,
+.tab-content .ed-table tr,
+.tab-table .ed-table tr,
+.dark-table.ed-table tr {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.rag-page .ed-table .ed-table__row,
+.tabs-content .ed-table .ed-table__row,
+.tab-content .ed-table .ed-table__row,
+.tab-table .ed-table .ed-table__row,
+.dark-table.ed-table .ed-table__row {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* 表格单元格 */
+.rag-page .ed-table td.ed-table__cell,
+.tabs-content .ed-table td.ed-table__cell,
+.tab-content .ed-table td.ed-table__cell,
+.tab-table .ed-table td.ed-table__cell,
+.dark-table.ed-table td.ed-table__cell {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1) !important;
+}
+
+.rag-page .ed-table td.ed-table__cell .cell,
+.tabs-content .ed-table td.ed-table__cell .cell,
+.tab-content .ed-table td.ed-table__cell .cell,
+.tab-table .ed-table td.ed-table__cell .cell,
+.dark-table.ed-table td.ed-table__cell .cell {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* 行悬停效果 */
+.rag-page .ed-table .ed-table__row:hover > td.ed-table__cell,
+.tabs-content .ed-table .ed-table__row:hover > td.ed-table__cell,
+.tab-content .ed-table .ed-table__row:hover > td.ed-table__cell,
+.tab-table .ed-table .ed-table__row:hover > td.ed-table__cell,
+.dark-table.ed-table .ed-table__row:hover > td.ed-table__cell,
+.rag-page .ed-table tr:hover > td.ed-table__cell,
+.tabs-content .ed-table tr:hover > td.ed-table__cell,
+.tab-content .ed-table tr:hover > td.ed-table__cell,
+.tab-table .ed-table tr:hover > td.ed-table__cell,
+.dark-table.ed-table tr:hover > td.ed-table__cell {
+  background-color: rgba(139, 92, 246, 0.1) !important;
+  background: rgba(139, 92, 246, 0.1) !important;
+}
+
+/* hover-row 类 */
+.rag-page .ed-table tr.hover-row > td.ed-table__cell,
+.tabs-content .ed-table tr.hover-row > td.ed-table__cell,
+.tab-content .ed-table tr.hover-row > td.ed-table__cell,
+.tab-table .ed-table tr.hover-row > td.ed-table__cell,
+.dark-table.ed-table tr.hover-row > td.ed-table__cell {
+  background-color: rgba(139, 92, 246, 0.1) !important;
+  background: rgba(139, 92, 246, 0.1) !important;
+}
+
+/* 空状态区域 */
+.rag-page .ed-table .ed-table__empty-block,
+.tabs-content .ed-table .ed-table__empty-block,
+.tab-content .ed-table .ed-table__empty-block,
+.tab-table .ed-table .ed-table__empty-block,
+.dark-table.ed-table .ed-table__empty-block {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* 固定列补丁 - Element Plus Secondary 硬编码了白色背景 */
+.rag-page .ed-table .ed-table__fixed-right-patch,
+.tabs-content .ed-table .ed-table__fixed-right-patch,
+.tab-content .ed-table .ed-table__fixed-right-patch,
+.tab-table .ed-table .ed-table__fixed-right-patch,
+.dark-table.ed-table .ed-table__fixed-right-patch {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* 固定列 */
+.rag-page .ed-table .ed-table-fixed-column--left,
+.rag-page .ed-table .ed-table-fixed-column--right,
+.tabs-content .ed-table .ed-table-fixed-column--left,
+.tabs-content .ed-table .ed-table-fixed-column--right,
+.tab-content .ed-table .ed-table-fixed-column--left,
+.tab-content .ed-table .ed-table-fixed-column--right,
+.tab-table .ed-table .ed-table-fixed-column--left,
+.tab-table .ed-table .ed-table-fixed-column--right,
+.dark-table.ed-table .ed-table-fixed-column--left,
+.dark-table.ed-table .ed-table-fixed-column--right {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* 选择列复选框样式 */
+.rag-page .ed-table .ed-checkbox,
+.tabs-content .ed-table .ed-checkbox,
+.tab-content .ed-table .ed-checkbox,
+.tab-table .ed-table .ed-checkbox,
+.dark-table.ed-table .ed-checkbox {
+  --ed-checkbox-checked-bg-color: #7c3aed;
+  --ed-checkbox-checked-border-color: #7c3aed;
+}
+
+
+/* ============================================
+ * RAG 页面复选框 - 强制修复未选中状态
+ * ============================================ */
+
+/* 表格中的复选框 - 未选中状态必须为空 */
+.rag-page .ed-checkbox__inner,
+.tabs-content .ed-checkbox__inner,
+.tab-content .ed-checkbox__inner,
+.tab-table .ed-checkbox__inner,
+.dark-table .ed-checkbox__inner {
+  background-color: transparent !important;
+  border-color: rgba(139, 92, 246, 0.5) !important;
+  border-width: 1.5px !important;
+}
+
+/* 未选中状态 - 隐藏勾选标记 */
+.rag-page .ed-checkbox__inner::after,
+.tabs-content .ed-checkbox__inner::after,
+.tab-content .ed-checkbox__inner::after,
+.tab-table .ed-checkbox__inner::after,
+.dark-table .ed-checkbox__inner::after {
+  border-color: transparent !important;
+  opacity: 0 !important;
+  display: none !important;
+}
+
+/* 选中状态 - 显示勾选标记 */
+.rag-page .ed-checkbox__input.is-checked .ed-checkbox__inner,
+.tabs-content .ed-checkbox__input.is-checked .ed-checkbox__inner,
+.tab-content .ed-checkbox__input.is-checked .ed-checkbox__inner,
+.tab-table .ed-checkbox__input.is-checked .ed-checkbox__inner,
+.dark-table .ed-checkbox__input.is-checked .ed-checkbox__inner {
+  background-color: #7c3aed !important;
+  border-color: #7c3aed !important;
+}
+
+.rag-page .ed-checkbox__input.is-checked .ed-checkbox__inner::after,
+.tabs-content .ed-checkbox__input.is-checked .ed-checkbox__inner::after,
+.tab-content .ed-checkbox__input.is-checked .ed-checkbox__inner::after,
+.tab-table .ed-checkbox__input.is-checked .ed-checkbox__inner::after,
+.dark-table .ed-checkbox__input.is-checked .ed-checkbox__inner::after {
+  border-color: #fff !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+/* 半选状态 */
+.rag-page .ed-checkbox__input.is-indeterminate .ed-checkbox__inner,
+.tabs-content .ed-checkbox__input.is-indeterminate .ed-checkbox__inner,
+.tab-content .ed-checkbox__input.is-indeterminate .ed-checkbox__inner,
+.tab-table .ed-checkbox__input.is-indeterminate .ed-checkbox__inner,
+.dark-table .ed-checkbox__input.is-indeterminate .ed-checkbox__inner {
+  background-color: #7c3aed !important;
+  border-color: #7c3aed !important;
+}
+
+.rag-page .ed-checkbox__input.is-indeterminate .ed-checkbox__inner::before,
+.tabs-content .ed-checkbox__input.is-indeterminate .ed-checkbox__inner::before,
+.tab-content .ed-checkbox__input.is-indeterminate .ed-checkbox__inner::before,
+.tab-table .ed-checkbox__input.is-indeterminate .ed-checkbox__inner::before,
+.dark-table .ed-checkbox__input.is-indeterminate .ed-checkbox__inner::before {
+  background-color: #fff !important;
+}
+
+/* ============================================
+ * RAG 页面操作按钮 - 强制可见
+ * ============================================ */
+
+/* 编辑和删除按钮图标颜色 */
+.rag-page .actions-cell .action-btn,
+.tabs-content .actions-cell .action-btn,
+.tab-content .actions-cell .action-btn,
+.tab-table .actions-cell .action-btn {
+  color: #e9d5ff !important;
+  background: rgba(139, 92, 246, 0.15) !important;
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+}
+
+.rag-page .actions-cell .action-btn svg,
+.tabs-content .actions-cell .action-btn svg,
+.tab-content .actions-cell .action-btn svg,
+.tab-table .actions-cell .action-btn svg {
+  color: #e9d5ff !important;
+  fill: #e9d5ff !important;
+}
+
+.rag-page .actions-cell .action-btn svg path,
+.tabs-content .actions-cell .action-btn svg path,
+.tab-content .actions-cell .action-btn svg path,
+.tab-table .actions-cell .action-btn svg path {
+  fill: #e9d5ff !important;
+  stroke: #e9d5ff !important;
+}
+
+.rag-page .actions-cell .action-btn:hover,
+.tabs-content .actions-cell .action-btn:hover,
+.tab-content .actions-cell .action-btn:hover,
+.tab-table .actions-cell .action-btn:hover {
+  color: #f5f3ff !important;
+  background: rgba(139, 92, 246, 0.25) !important;
+  border-color: rgba(139, 92, 246, 0.5) !important;
+}
+
+.rag-page .actions-cell .action-btn:hover svg,
+.tabs-content .actions-cell .action-btn:hover svg,
+.tab-content .actions-cell .action-btn:hover svg,
+.tab-table .actions-cell .action-btn:hover svg {
+  color: #f5f3ff !important;
+  fill: #f5f3ff !important;
+}
+
+.rag-page .actions-cell .action-btn:hover svg path,
+.tabs-content .actions-cell .action-btn:hover svg path,
+.tab-content .actions-cell .action-btn:hover svg path,
+.tab-table .actions-cell .action-btn:hover svg path {
+  fill: #f5f3ff !important;
+  stroke: #f5f3ff !important;
+}
+
+/* 删除按钮特殊样式 */
+.rag-page .actions-cell .action-btn.delete,
+.tabs-content .actions-cell .action-btn.delete,
+.tab-content .actions-cell .action-btn.delete,
+.tab-table .actions-cell .action-btn.delete {
+  color: #fca5a5 !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.rag-page .actions-cell .action-btn.delete svg,
+.tabs-content .actions-cell .action-btn.delete svg,
+.tab-content .actions-cell .action-btn.delete svg,
+.tab-table .actions-cell .action-btn.delete svg {
+  color: #fca5a5 !important;
+  fill: #fca5a5 !important;
+}
+
+.rag-page .actions-cell .action-btn.delete svg path,
+.tabs-content .actions-cell .action-btn.delete svg path,
+.tab-content .actions-cell .action-btn.delete svg path,
+.tab-table .actions-cell .action-btn.delete svg path {
+  fill: #fca5a5 !important;
+  stroke: #fca5a5 !important;
+}
+
+.rag-page .actions-cell .action-btn.delete:hover,
+.tabs-content .actions-cell .action-btn.delete:hover,
+.tab-content .actions-cell .action-btn.delete:hover,
+.tab-table .actions-cell .action-btn.delete:hover {
+  color: #fecaca !important;
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+}
+
+.rag-page .actions-cell .action-btn.delete:hover svg,
+.tabs-content .actions-cell .action-btn.delete:hover svg,
+.tab-content .actions-cell .action-btn.delete:hover svg,
+.tab-table .actions-cell .action-btn.delete:hover svg {
+  color: #fecaca !important;
+  fill: #fecaca !important;
+}
+
+.rag-page .actions-cell .action-btn.delete:hover svg path,
+.tabs-content .actions-cell .action-btn.delete:hover svg path,
+.tab-content .actions-cell .action-btn.delete:hover svg path,
+.tab-table .actions-cell .action-btn.delete:hover svg path {
+  fill: #fecaca !important;
+  stroke: #fecaca !important;
+}
+
+
+/* ============================================
+ * RAG 页面按钮 - 强制文字可见
+ * ============================================ */
+
+/* 默认按钮 - 白色文字，确保可见 */
+.rag-page .ed-button--default,
+.rag-page .el-button--default,
+.tabs-content .ed-button--default,
+.tabs-content .el-button--default,
+.tab-content .ed-button--default,
+.tab-content .el-button--default,
+.tab-toolbar .ed-button--default,
+.tab-toolbar .el-button--default,
+.rag-page .ed-button:not(.ed-button--primary):not(.ed-button--danger),
+.tabs-content .ed-button:not(.ed-button--primary):not(.ed-button--danger),
+.tab-content .ed-button:not(.ed-button--primary):not(.ed-button--danger),
+.tab-toolbar .ed-button:not(.ed-button--primary):not(.ed-button--danger) {
+  color: #ffffff !important;
+  background: rgba(139, 92, 246, 0.2) !important;
+  border: 1.5px solid rgba(139, 92, 246, 0.5) !important;
+}
+
+.rag-page .ed-button--default span,
+.rag-page .el-button--default span,
+.tabs-content .ed-button--default span,
+.tabs-content .el-button--default span,
+.tab-content .ed-button--default span,
+.tab-content .el-button--default span,
+.tab-toolbar .ed-button--default span,
+.tab-toolbar .el-button--default span,
+.rag-page .ed-button:not(.ed-button--primary):not(.ed-button--danger) span,
+.tabs-content .ed-button:not(.ed-button--primary):not(.ed-button--danger) span,
+.tab-content .ed-button:not(.ed-button--primary):not(.ed-button--danger) span,
+.tab-toolbar .ed-button:not(.ed-button--primary):not(.ed-button--danger) span {
+  color: #ffffff !important;
+}
+
+.rag-page .ed-button--default svg,
+.rag-page .el-button--default svg,
+.tabs-content .ed-button--default svg,
+.tabs-content .el-button--default svg,
+.tab-content .ed-button--default svg,
+.tab-content .el-button--default svg,
+.tab-toolbar .ed-button--default svg,
+.tab-toolbar .el-button--default svg,
+.rag-page .ed-button--default .ed-icon,
+.rag-page .el-button--default .el-icon,
+.tabs-content .ed-button--default .ed-icon,
+.tabs-content .el-button--default .el-icon,
+.tab-content .ed-button--default .ed-icon,
+.tab-content .el-button--default .el-icon,
+.tab-toolbar .ed-button--default .ed-icon,
+.tab-toolbar .el-button--default .el-icon {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.rag-page .ed-button--default svg path,
+.rag-page .el-button--default svg path,
+.tabs-content .ed-button--default svg path,
+.tabs-content .el-button--default svg path,
+.tab-content .ed-button--default svg path,
+.tab-content .el-button--default svg path,
+.tab-toolbar .ed-button--default svg path,
+.tab-toolbar .el-button--default svg path {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* 悬停状态 */
+.rag-page .ed-button--default:hover,
+.rag-page .el-button--default:hover,
+.tabs-content .ed-button--default:hover,
+.tabs-content .el-button--default:hover,
+.tab-content .ed-button--default:hover,
+.tab-content .el-button--default:hover,
+.tab-toolbar .ed-button--default:hover,
+.tab-toolbar .el-button--default:hover {
+  color: #ffffff !important;
+  background: rgba(139, 92, 246, 0.35) !important;
+  border-color: rgba(139, 92, 246, 0.7) !important;
+}
+
+.rag-page .ed-button--default:hover span,
+.rag-page .el-button--default:hover span,
+.tabs-content .ed-button--default:hover span,
+.tabs-content .el-button--default:hover span,
+.tab-content .ed-button--default:hover span,
+.tab-content .el-button--default:hover span,
+.tab-toolbar .ed-button--default:hover span,
+.tab-toolbar .el-button--default:hover span {
+  color: #ffffff !important;
+}
+
+.rag-page .ed-button--default:hover svg,
+.rag-page .el-button--default:hover svg,
+.tabs-content .ed-button--default:hover svg,
+.tabs-content .el-button--default:hover svg,
+.tab-content .ed-button--default:hover svg,
+.tab-content .el-button--default:hover svg,
+.tab-toolbar .ed-button--default:hover svg,
+.tab-toolbar .el-button--default:hover svg,
+.rag-page .ed-button--default:hover .ed-icon,
+.rag-page .el-button--default:hover .el-icon,
+.tabs-content .ed-button--default:hover .ed-icon,
+.tabs-content .el-button--default:hover .el-icon,
+.tab-content .ed-button--default:hover .ed-icon,
+.tab-content .el-button--default:hover .el-icon,
+.tab-toolbar .ed-button--default:hover .ed-icon,
+.tab-toolbar .el-button--default:hover .el-icon {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.rag-page .ed-button--default:hover svg path,
+.rag-page .el-button--default:hover svg path,
+.tabs-content .ed-button--default:hover svg path,
+.tabs-content .el-button--default:hover svg path,
+.tab-content .ed-button--default:hover svg path,
+.tab-content .el-button--default:hover svg path,
+.tab-toolbar .ed-button--default:hover svg path,
+.tab-toolbar .el-button--default:hover svg path {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+
+/* ============================================
+ * RAG 页面分页和输入框 - 强制文字可见
+ * ============================================ */
+
+/* 分页文字 - "共 20 条"、"跳转至"、"页" */
+.rag-page .ed-pagination,
+.tabs-content .ed-pagination,
+.tab-content .ed-pagination,
+.tab-pagination .ed-pagination {
+  color: #ffffff !important;
+}
+
+.rag-page .ed-pagination__total,
+.tabs-content .ed-pagination__total,
+.tab-content .ed-pagination__total,
+.tab-pagination .ed-pagination__total,
+.rag-page .ed-pagination__jump,
+.tabs-content .ed-pagination__jump,
+.tab-content .ed-pagination__jump,
+.tab-pagination .ed-pagination__jump {
+  color: #ffffff !important;
+}
+
+/* 分页选择器 - "10条/页" */
+.rag-page .ed-pagination__sizes .ed-select,
+.tabs-content .ed-pagination__sizes .ed-select,
+.tab-content .ed-pagination__sizes .ed-select,
+.tab-pagination .ed-pagination__sizes .ed-select {
+  color: #ffffff !important;
+}
+
+.rag-page .ed-pagination__sizes .ed-select .ed-select__wrapper,
+.tabs-content .ed-pagination__sizes .ed-select .ed-select__wrapper,
+.tab-content .ed-pagination__sizes .ed-select .ed-select__wrapper,
+.tab-pagination .ed-pagination__sizes .ed-select .ed-select__wrapper,
+.rag-page .ed-pagination__sizes .ed-select .ed-input__wrapper,
+.tabs-content .ed-pagination__sizes .ed-select .ed-input__wrapper,
+.tab-content .ed-pagination__sizes .ed-select .ed-input__wrapper,
+.tab-pagination .ed-pagination__sizes .ed-select .ed-input__wrapper {
+  background: rgba(139, 92, 246, 0.15) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+}
+
+.rag-page .ed-pagination__sizes .ed-select .ed-select__selected-item,
+.tabs-content .ed-pagination__sizes .ed-select .ed-select__selected-item,
+.tab-content .ed-pagination__sizes .ed-select .ed-select__selected-item,
+.tab-pagination .ed-pagination__sizes .ed-select .ed-select__selected-item,
+.rag-page .ed-pagination__sizes .ed-select .ed-input__inner,
+.tabs-content .ed-pagination__sizes .ed-select .ed-input__inner,
+.tab-content .ed-pagination__sizes .ed-select .ed-input__inner,
+.tab-pagination .ed-pagination__sizes .ed-select .ed-input__inner {
+  color: #ffffff !important;
+}
+
+.rag-page .ed-pagination__sizes .ed-select .ed-select__suffix,
+.tabs-content .ed-pagination__sizes .ed-select .ed-select__suffix,
+.tab-content .ed-pagination__sizes .ed-select .ed-select__suffix,
+.tab-pagination .ed-pagination__sizes .ed-select .ed-select__suffix,
+.rag-page .ed-pagination__sizes .ed-select .ed-select__caret,
+.tabs-content .ed-pagination__sizes .ed-select .ed-select__caret,
+.tab-content .ed-pagination__sizes .ed-select .ed-select__caret,
+.tab-pagination .ed-pagination__sizes .ed-select .ed-select__caret {
+  color: #ffffff !important;
+}
+
+/* 跳转输入框 */
+.rag-page .ed-pagination__editor,
+.tabs-content .ed-pagination__editor,
+.tab-content .ed-pagination__editor,
+.tab-pagination .ed-pagination__editor {
+  background: rgba(139, 92, 246, 0.15) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+}
+
+.rag-page .ed-pagination__editor .ed-input__wrapper,
+.tabs-content .ed-pagination__editor .ed-input__wrapper,
+.tab-content .ed-pagination__editor .ed-input__wrapper,
+.tab-pagination .ed-pagination__editor .ed-input__wrapper {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.rag-page .ed-pagination__editor .ed-input__inner,
+.tabs-content .ed-pagination__editor .ed-input__inner,
+.tab-content .ed-pagination__editor .ed-input__inner,
+.tab-pagination .ed-pagination__editor .ed-input__inner {
+  color: #ffffff !important;
+}
+
+/* 刷新按钮和其他默认按钮 - 全局深色主题 */
+.system-layout .ed-button--default,
+.system-layout .el-button--default,
+.rag-page .ed-button--default,
+.rag-page .el-button--default {
+  color: #ffffff !important;
+  background: rgba(139, 92, 246, 0.2) !important;
+  border: 1.5px solid rgba(139, 92, 246, 0.5) !important;
+}
+
+.system-layout .ed-button--default span,
+.system-layout .el-button--default span,
+.rag-page .ed-button--default span,
+.rag-page .el-button--default span {
+  color: #ffffff !important;
+}
+
+.system-layout .ed-button--default svg,
+.system-layout .el-button--default svg,
+.rag-page .ed-button--default svg,
+.rag-page .el-button--default svg,
+.system-layout .ed-button--default .ed-icon,
+.system-layout .el-button--default .el-icon,
+.rag-page .ed-button--default .ed-icon,
+.rag-page .el-button--default .el-icon {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.system-layout .ed-button--default svg path,
+.system-layout .el-button--default svg path,
+.rag-page .ed-button--default svg path,
+.rag-page .el-button--default svg path {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.system-layout .ed-button--default:hover,
+.system-layout .el-button--default:hover,
+.rag-page .ed-button--default:hover,
+.rag-page .el-button--default:hover {
+  color: #ffffff !important;
+  background: rgba(139, 92, 246, 0.35) !important;
+  border-color: rgba(139, 92, 246, 0.7) !important;
+}
+
+/* 禁用折叠菜单的 hover 弹出效果 - 全局样式 - 加强版 */
+.ed-popper.is-light:has(.ed-menu--popup),
+.ed-popper:has(.ed-menu--popup),
+.el-popper.is-light:has(.el-menu--popup),
+.el-popper:has(.el-menu--popup),
+[class*="ed-popper"][class*="menu"],
+[class*="el-popper"][class*="menu"],
+.ed-menu--popup-container,
+.el-menu--popup-container {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -9999 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 禁用菜单 tooltip */
+.ed-tooltip__popper:has([class*="ed-menu"]),
+.el-tooltip__popper:has([class*="el-menu"]) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 禁用折叠菜单的子菜单 popper */
+.ed-menu--collapse .ed-sub-menu .ed-menu--popup,
+.el-menu--collapse .el-sub-menu .el-menu--popup {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 强制统一折叠菜单按钮大小 - 最高优先级 */
+.ed-menu--collapse .ed-menu-item,
+.el-menu--collapse .el-menu-item,
+.ed-menu--collapse .ed-sub-menu__title,
+.el-menu--collapse .el-sub-menu__title,
+.ed-menu.ed-menu--collapse .ed-menu-item,
+.el-menu.el-menu--collapse .el-menu-item,
+.ed-menu.ed-menu--collapse .ed-sub-menu__title,
+.el-menu.el-menu--collapse .el-sub-menu__title,
+.ed-menu-vertical.ed-menu--collapse .ed-menu-item,
+.ed-menu-vertical.ed-menu--collapse .ed-sub-menu__title,
+.system-layout .left-side-collapse .ed-menu-item,
+.system-layout .left-side-collapse .ed-sub-menu__title {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  line-height: 52px !important;
+  padding: 0 !important;
+  margin: 0 auto 6px !important;
+  border-radius: 14px !important;
+}
+
+/* 强制统一所有底部按钮大小 */
+.system-layout .left-side .bottom .personal-info .fold,
+.system-layout .left-side-collapse .bottom .personal-info .fold {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  border-radius: 14px !important;
+}
+
+/* 返回首页按钮 - 只在折叠状态下限制宽度 */
+.system-layout .left-side-collapse .bottom .back-to_workspace {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  border-radius: 14px !important;
+}
+
+/* 强制统一用户按钮大小 */
+.person,
+.person.collapse {
+  height: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+}
+
+.person.collapse {
+  width: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+}
+
+/* ========================================
+   ChatBI 全局深色主题 - 输入框和表单组件
+   ======================================== */
+
+// 深色主题变量
+@dark-bg: #0f0a1a;
+@dark-bg-secondary: #1a1033;
+@dark-bg-card: #1e1245;
+@dark-border: rgba(139, 92, 246, 0.2);
+@dark-text: rgba(255, 255, 255, 0.95);
+@dark-text-secondary: rgba(196, 181, 253, 0.85);
+@dark-text-muted: rgba(196, 181, 253, 0.6);
+@primary-500: #8b5cf6;
+@primary-600: #7c3aed;
+
+// 全局输入框深色主题
+.ed-input,
+.el-input {
+  .ed-input__wrapper,
+  .el-input__wrapper {
+    background: rgba(139, 92, 246, 0.08) !important;
+    border: 1px solid @dark-border !important;
+    box-shadow: none !important;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: rgba(139, 92, 246, 0.4) !important;
+    }
+
+    &.is-focus {
+      border-color: @primary-500 !important;
+      box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2) !important;
+    }
+  }
+
+  .ed-input__inner,
+  .el-input__inner,
+  input {
+    color: @dark-text !important;
+    background: transparent !important;
+
+    &::placeholder {
+      color: @dark-text-muted !important;
+    }
+  }
+
+  .ed-input__prefix,
+  .el-input__prefix,
+  .ed-input__suffix,
+  .el-input__suffix {
+    color: @dark-text-muted !important;
+
+    .ed-icon,
+    .el-icon {
+      color: @dark-text-muted !important;
+    }
+  }
+  
+  // 字数统计深色主题
+  .ed-input__count,
+  .el-input__count {
+    background: transparent !important;
+    color: @dark-text-muted !important;
+  }
+  
+  .ed-input__count-inner,
+  .el-input__count-inner {
+    background: transparent !important;
+    color: @dark-text-muted !important;
+  }
+}
+
+// 全局文本域深色主题
+.ed-textarea,
+.el-textarea {
+  .ed-textarea__inner,
+  .el-textarea__inner,
+  textarea {
+    background: rgba(139, 92, 246, 0.08) !important;
+    border: 1px solid @dark-border !important;
+    color: @dark-text !important;
+    box-shadow: none !important;
+
+    &::placeholder {
+      color: @dark-text-muted !important;
+    }
+
+    &:hover {
+      border-color: rgba(139, 92, 246, 0.4) !important;
+    }
+
+    &:focus {
+      border-color: @primary-500 !important;
+      box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2) !important;
+    }
+  }
+}
+
+// 全局选择器深色主题
+.ed-select,
+.el-select {
+  .ed-select__wrapper,
+  .el-select__wrapper {
+    background: rgba(139, 92, 246, 0.08) !important;
+    border: 1px solid @dark-border !important;
+    box-shadow: none !important;
+
+    &:hover {
+      border-color: rgba(139, 92, 246, 0.4) !important;
+    }
+
+    &.is-focused {
+      border-color: @primary-500 !important;
+      box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2) !important;
+    }
+  }
+
+  .ed-select__placeholder,
+  .el-select__placeholder {
+    color: @dark-text-muted !important;
+  }
+
+  .ed-select__selected-item,
+  .el-select__selected-item,
+  .ed-select__input,
+  .el-select__input {
+    color: @dark-text !important;
+  }
+
+  .ed-select__suffix,
+  .el-select__suffix {
+    color: @dark-text-muted !important;
+  }
+}
+
+// 下拉菜单深色主题
+.ed-select-dropdown,
+.el-select-dropdown,
+.ed-popper,
+.el-popper {
+  background: @dark-bg-card !important;
+  border: 1px solid @dark-border !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+
+  .ed-select-dropdown__item,
+  .el-select-dropdown__item,
+  .ed-dropdown-menu__item,
+  .el-dropdown-menu__item {
+    color: @dark-text-secondary !important;
+    background: transparent !important;
+
+    &:hover {
+      background: rgba(139, 92, 246, 0.15) !important;
+      color: @dark-text !important;
+    }
+
+    &.is-selected {
+      background: rgba(139, 92, 246, 0.25) !important;
+      color: #a78bfa !important;
+      font-weight: 600;
+    }
+
+    &.is-disabled {
+      color: @dark-text-muted !important;
+      opacity: 0.5;
+    }
+  }
+
+  .ed-select-dropdown__empty,
+  .el-select-dropdown__empty {
+    color: @dark-text-muted !important;
+  }
+}
+
+// 登录页语言下拉菜单 - 覆盖上方全局深色主题
+.login-lang-dropdown.el-popper,
+.login-lang-dropdown.ed-popper {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+
+  .el-popper__arrow,
+  .ed-popper__arrow {
+    display: none !important;
+  }
+
+  .el-dropdown-menu,
+  .ed-dropdown-menu {
+    background: #ffffff !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 6px !important;
+    box-shadow: none !important;
+    min-width: 160px !important;
+  }
+
+  .el-dropdown-menu__item,
+  .ed-dropdown-menu__item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 14px !important;
+    border-radius: 8px !important;
+    color: #1f2937 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    background: transparent !important;
+    transition: all 0.15s ease !important;
+    margin: 2px 0 !important;
+
+    &:hover,
+    &:focus {
+      background: #f3f4f6 !important;
+      color: #6d28d9 !important;
+    }
+
+    &.is-active {
+      background: #f5f3ff !important;
+      color: #6d28d9 !important;
+
+      &:hover {
+        background: #ede9fe !important;
+      }
+    }
+  }
+}
+
+// Select dropdown 紧凑尺寸 + 暗色优化
+.ed-select-dropdown,
+.el-select-dropdown {
+  padding: 4px !important;
+  border-radius: 10px !important;
+
+  .ed-select-dropdown__list,
+  .el-select-dropdown__list {
+    padding: 0 !important;
+  }
+
+  .ed-select-dropdown__item,
+  .el-select-dropdown__item {
+    height: 32px !important;
+    line-height: 32px !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    margin-bottom: 2px;
+
+    &:last-child { margin-bottom: 0; }
+  }
+}
+
+// 全局表单标签深色主题
+.ed-form-item,
+.el-form-item {
+  .ed-form-item__label,
+  .el-form-item__label {
+    color: @dark-text !important;
+    font-weight: 500;
+  }
+
+  .ed-form-item__error,
+  .el-form-item__error {
+    color: #ef4444 !important;
+  }
+}
+
+// 全局 Alert 提示框深色主题
+.el-alert,
+.ed-alert {
+  background: rgba(59, 130, 246, 0.12) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  border-radius: 10px !important;
+  
+  &.el-alert--info,
+  &.ed-alert--info {
+    background: rgba(59, 130, 246, 0.12) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  }
+  
+  .el-alert__title,
+  .ed-alert__title {
+    color: #60a5fa !important;
+    font-weight: 600 !important;
+  }
+  
+  .el-alert__content,
+  .ed-alert__content {
+    color: #93c5fd !important;
+    font-weight: 500 !important;
+  }
+  
+  .el-alert__description,
+  .ed-alert__description {
+    color: #93c5fd !important;
+    font-weight: 500 !important;
+  }
+  
+  .el-alert__icon,
+  .ed-alert__icon {
+    color: #60a5fa !important;
+    font-size: 18px !important;
+  }
+}
+
+// 全局开关深色主题
+.ed-switch,
+.el-switch {
+  --el-switch-on-color: @primary-500 !important;
+  --el-switch-off-color: rgba(139, 92, 246, 0.3) !important;
+  --el-switch-border-color: @dark-border !important;
+  
+  // 开关文字颜色 - 全局设置
+  .el-switch__label,
+  .ed-switch__label {
+    color: @dark-text-muted !important;
+    font-weight: 500 !important;
+    
+    // 被选中的文字显示紫色
+    &.is-active {
+      color: @primary-500 !important;
+    }
+  }
+  
+  // 左侧文字
+  .el-switch__label--left,
+  .ed-switch__label--left {
+    color: @dark-text-muted !important;
+    
+    &.is-active {
+      color: @primary-500 !important;
+    }
+  }
+  
+  // 右侧文字
+  .el-switch__label--right,
+  .ed-switch__label--right {
+    color: @dark-text-muted !important;
+    
+    &.is-active {
+      color: @primary-500 !important;
+    }
+  }
+}
+
+// 全局复选框深色主题
+.ed-checkbox,
+.el-checkbox {
+  --el-checkbox-checked-bg-color: @primary-500 !important;
+  --el-checkbox-checked-border-color: @primary-500 !important;
+  --el-checkbox-text-color: @dark-text-secondary !important;
+  --el-checkbox-border-color: @dark-border !important;
+
+  .ed-checkbox__inner,
+  .el-checkbox__inner {
+    background: rgba(139, 92, 246, 0.1) !important;
+    border-color: @dark-border !important;
+  }
+
+  .ed-checkbox__input.is-checked .ed-checkbox__inner,
+  .el-checkbox__input.is-checked .el-checkbox__inner,
+  .ed-checkbox__input.is-indeterminate .ed-checkbox__inner,
+  .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+    background: @primary-500 !important;
+    border-color: @primary-500 !important;
+  }
+
+  .ed-checkbox__label,
+  .el-checkbox__label {
+    color: @dark-text-secondary !important;
+  }
+}
+
+// 全局单选框深色主题
+.ed-radio,
+.el-radio {
+  --el-radio-text-color: @dark-text-secondary !important;
+  --el-radio-input-border-color: @dark-border !important;
+
+  .ed-radio__inner,
+  .el-radio__inner {
+    background: rgba(139, 92, 246, 0.1) !important;
+    border-color: @dark-border !important;
+  }
+
+  .ed-radio__input.is-checked .ed-radio__inner,
+  .el-radio__input.is-checked .el-radio__inner {
+    background: @primary-500 !important;
+    border-color: @primary-500 !important;
+  }
+
+  .ed-radio__label,
+  .el-radio__label {
+    color: @dark-text-secondary !important;
+  }
+}
+
+// 全局按钮深色主题优化
+.ed-button,
+.el-button {
+  // 全局禁用按钮样式 - 统一深色主题
+  &.is-disabled,
+  &[disabled],
+  &.is-disabled:hover,
+  &[disabled]:hover {
+    background: rgba(139, 92, 246, 0.12) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.2) !important;
+    color: rgba(196, 181, 253, 0.5) !important;
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    
+    // 禁用状态的图标
+    .ed-icon,
+    .el-icon,
+    i,
+    svg {
+      color: rgba(196, 181, 253, 0.5) !important;
+      fill: rgba(196, 181, 253, 0.5) !important;
+    }
+    
+    // 禁用状态的文字
+    span,
+    .ed-button__text {
+      color: rgba(196, 181, 253, 0.5) !important;
+    }
+  }
+
+  &.ed-button--primary,
+  &.el-button--primary {
+    background: linear-gradient(135deg, @primary-600 0%, @primary-500 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3) !important;
+
+    &:hover {
+      background: linear-gradient(135deg, #6d28d9 0%, @primary-600 100%) !important;
+      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4) !important;
+    }
+
+    &:active {
+      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3) !important;
+    }
+  }
+
+  &.ed-button--secondary,
+  &.el-button--secondary {
+    background: rgba(139, 92, 246, 0.1) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    color: @dark-text-secondary !important;
+
+    &:hover {
+      background: rgba(139, 92, 246, 0.2) !important;
+      border-color: rgba(139, 92, 246, 0.4) !important;
+      color: @dark-text !important;
+    }
+  }
+
+  &.ed-button--text,
+  &.el-button--text {
+    color: @dark-text-secondary !important;
+
+    &:hover {
+      color: #a78bfa !important;
+      background: rgba(139, 92, 246, 0.1) !important;
+    }
+  }
+}
+
+// 全局对话框深色主题
+.ed-dialog,
+.el-dialog {
+  background: @dark-bg-secondary !important;
+  border: 1px solid @dark-border !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6) !important;
+
+  .ed-dialog__header,
+  .el-dialog__header {
+    background: rgba(139, 92, 246, 0.08) !important;
+    border-bottom: 1px solid @dark-border !important;
+    color: @dark-text !important;
+
+    .ed-dialog__title,
+    .el-dialog__title {
+      color: @dark-text !important;
+      font-weight: 600;
+    }
+
+    .ed-dialog__headerbtn,
+    .el-dialog__headerbtn {
+      .ed-dialog__close,
+      .el-dialog__close {
+        color: @dark-text-muted !important;
+
+        &:hover {
+          color: @dark-text !important;
+        }
+      }
+    }
+  }
+
+  .ed-dialog__body,
+  .el-dialog__body {
+    background: @dark-bg-secondary !important;
+    color: @dark-text-secondary !important;
+
+    // 对话框内表单样式
+    .ed-form,
+    .el-form {
+      .ed-form-item__label,
+      .el-form-item__label {
+        color: @dark-text !important;
+        font-weight: 500;
+      }
+
+      .ed-input__wrapper,
+      .el-input__wrapper {
+        background: rgba(139, 92, 246, 0.08) !important;
+        border: 1px solid @dark-border !important;
+        border-radius: 10px !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: rgba(139, 92, 246, 0.4) !important;
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+        }
+
+        &.is-focus {
+          border-color: #8b5cf6 !important;
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15) !important;
+        }
+      }
+
+      .ed-input__inner,
+      .el-input__inner {
+        color: @dark-text !important;
+
+        &::placeholder {
+          color: @dark-text-muted !important;
+        }
+      }
+
+      .ed-textarea__inner,
+      .el-textarea__inner {
+        background: rgba(139, 92, 246, 0.08) !important;
+        border: 1px solid @dark-border !important;
+        border-radius: 10px !important;
+        color: @dark-text !important;
+
+        &::placeholder {
+          color: @dark-text-muted !important;
+        }
+
+        &:hover {
+          border-color: rgba(139, 92, 246, 0.4) !important;
+        }
+
+        &:focus {
+          border-color: #8b5cf6 !important;
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15) !important;
+        }
+      }
+
+      .ed-form-item__error,
+      .el-form-item__error {
+        color: #ef4444 !important;
+      }
+    }
+  }
+
+  .ed-dialog__footer,
+  .el-dialog__footer {
+    background: @dark-bg-secondary !important;
+    border-top: 1px solid @dark-border !important;
+  }
+}
+
+// 全局抽屉深色主题
+.ed-drawer,
+.el-drawer {
+  background: @dark-bg-secondary !important;
+  border-left: 1px solid @dark-border !important;
+
+  .ed-drawer__header,
+  .el-drawer__header {
+    background: rgba(139, 92, 246, 0.08) !important;
+    border-bottom: 1px solid @dark-border !important;
+    color: @dark-text !important;
+
+    .ed-drawer__title,
+    .el-drawer__title {
+      color: @dark-text !important;
+      font-weight: 600;
+    }
+
+    .ed-drawer__close-btn,
+    .el-drawer__close-btn {
+      color: @dark-text-muted !important;
+
+      &:hover {
+        color: @dark-text !important;
+      }
+    }
+  }
+
+  .ed-drawer__body,
+  .el-drawer__body {
+    background: @dark-bg-secondary !important;
+    color: @dark-text-secondary !important;
+  }
+}
+
+// 全局消息提示深色主题 - 强制高对比度
+.ed-message,
+.el-message {
+  z-index: 99999 !important;
+  background: linear-gradient(145deg, rgba(30, 18, 69, 0.98) 0%, rgba(26, 16, 51, 0.98) 100%) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.2) inset !important;
+  backdrop-filter: blur(20px) !important;
+
+  .ed-message__content,
+  .el-message__content {
+    color: #f8fafc !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+  }
+
+  .ed-message__icon,
+  .el-message__icon {
+    font-size: 18px !important;
+  }
+  
+  // 成功消息
+  &.ed-message--success,
+  &.el-message--success {
+    .ed-message__icon,
+    .el-message__icon {
+      color: #34c759 !important;
+    }
+  }
+  
+  // 警告消息
+  &.ed-message--warning,
+  &.el-message--warning {
+    .ed-message__icon,
+    .el-message__icon {
+      color: #ff9f0a !important;
+    }
+  }
+  
+  // 错误消息
+  &.ed-message--error,
+  &.el-message--error {
+    .ed-message__icon,
+    .el-message__icon {
+      color: #ff3b30 !important;
+    }
+  }
+  
+  // 信息消息
+  &.ed-message--info,
+  &.el-message--info {
+    .ed-message__icon,
+    .el-message__icon {
+      color: #8b5cf6 !important;
+    }
+  }
+}
+
+// 全局通知深色主题 - 强制高对比度
+.ed-notification,
+.el-notification {
+  background: linear-gradient(145deg, rgba(30, 18, 69, 0.98) 0%, rgba(26, 16, 51, 0.98) 100%) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.2) inset !important;
+  backdrop-filter: blur(20px) !important;
+
+  .ed-notification__title,
+  .el-notification__title {
+    color: #f8fafc !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+  }
+
+  .ed-notification__content,
+  .el-notification__content {
+    color: #e2e8f0 !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+  }
+  
+  .ed-notification__icon,
+  .el-notification__icon {
+    font-size: 24px !important;
+  }
+  
+  // 成功通知
+  &.ed-notification--success,
+  &.el-notification--success {
+    .ed-notification__icon,
+    .el-notification__icon {
+      color: #34c759 !important;
+    }
+  }
+  
+  // 警告通知
+  &.ed-notification--warning,
+  &.el-notification--warning {
+    .ed-notification__icon,
+    .el-notification__icon {
+      color: #ff9f0a !important;
+    }
+  }
+  
+  // 错误通知
+  &.ed-notification--error,
+  &.el-notification--error {
+    .ed-notification__icon,
+    .el-notification__icon {
+      color: #ff3b30 !important;
+    }
+  }
+  
+  // 信息通知
+  &.ed-notification--info,
+  &.el-notification--info {
+    .ed-notification__icon,
+    .el-notification__icon {
+      color: #8b5cf6 !important;
+    }
+  }
+}
+
+// 全局提示框深色主题
+.ed-tooltip,
+.el-tooltip {
+  &.is-dark {
+    background: @dark-bg-card !important;
+    border: 1px solid @dark-border !important;
+    color: @dark-text !important;
+  }
+}
+
+// 全局弹出框深色主题
+.ed-popover,
+.el-popover {
+  background: @dark-bg-card !important;
+  border: 1px solid @dark-border !important;
+  color: @dark-text-secondary !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+// 全局表格深色主题
+.ed-table,
+.el-table {
+  --el-table-bg-color: transparent !important;
+  --el-table-tr-bg-color: transparent !important;
+  --el-table-header-bg-color: rgba(139, 92, 246, 0.08) !important;
+  --el-table-row-hover-bg-color: rgba(139, 92, 246, 0.12) !important;
+  --el-table-border-color: @dark-border !important;
+  --el-table-text-color: @dark-text-secondary !important;
+  --el-table-header-text-color: @dark-text !important;
+
+  background: transparent !important;
+
+  th.ed-table__cell,
+  th.el-table__cell {
+    background: rgba(139, 92, 246, 0.08) !important;
+    color: @dark-text !important;
+    font-weight: 600;
+    border-bottom: 1px solid @dark-border !important;
+  }
+
+  td.ed-table__cell,
+  td.el-table__cell {
+    background: transparent !important;
+    color: @dark-text-secondary !important;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.1) !important;
+  }
+
+  tr:hover > td {
+    background: rgba(139, 92, 246, 0.08) !important;
+  }
+}
+
+// 全局分页器深色主题
+.ed-pagination,
+.el-pagination {
+  --el-pagination-bg-color: rgba(139, 92, 246, 0.08) !important;
+  --el-pagination-text-color: @dark-text-secondary !important;
+  --el-pagination-button-color: @dark-text-secondary !important;
+  --el-pagination-hover-color: @primary-500 !important;
+  --el-pagination-button-disabled-color: @dark-text-muted !important;
+
+  .ed-pager li,
+  .el-pager li {
+    background: rgba(139, 92, 246, 0.08) !important;
+    color: @dark-text-secondary !important;
+    border: 1px solid @dark-border !important;
+
+    &:hover {
+      color: #a78bfa !important;
+      border-color: rgba(139, 92, 246, 0.4) !important;
+    }
+
+    &.is-active {
+      background: linear-gradient(135deg, @primary-600 0%, @primary-500 100%) !important;
+      color: #fff !important;
+      border-color: @primary-500 !important;
+    }
+  }
+
+  .btn-prev,
+  .btn-next {
+    background: rgba(139, 92, 246, 0.08) !important;
+    color: @dark-text-secondary !important;
+    border: 1px solid @dark-border !important;
+
+    &:hover {
+      color: #a78bfa !important;
+      border-color: rgba(139, 92, 246, 0.4) !important;
+    }
+  }
+
+  .ed-pagination__total,
+  .el-pagination__total,
+  .ed-pagination__jump,
+  .el-pagination__jump {
+    color: @dark-text-muted !important;
+  }
+}
+
+
+/* ============================================
+ * 用户管理 - 角色选择下拉菜单深色主题
+ * ============================================ */
+.user-role-select-popper.ed-select-dropdown,
+.user-role-select-popper.el-select-dropdown,
+.ed-select-dropdown.user-role-select-popper,
+.el-select-dropdown.user-role-select-popper {
+  background: linear-gradient(145deg, rgba(30, 22, 45, 0.98) 0%, rgba(24, 18, 38, 0.98) 100%) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(139, 92, 246, 0.35) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  padding: 6px !important;
+
+  .ed-select-dropdown__item,
+  .el-select-dropdown__item {
+    color: rgba(226, 232, 240, 0.95) !important;
+    padding: 10px 14px !important;
+    border-radius: 8px !important;
+    margin: 4px 0 !important;
+    transition: all 0.25s ease !important;
+
+    &:hover {
+      background: rgba(139, 92, 246, 0.15) !important;
+      color: rgba(255, 255, 255, 1) !important;
+    }
+
+    &.is-selected,
+    &.selected {
+      background: rgba(139, 92, 246, 0.2) !important;
+      color: #a78bfa !important;
+      font-weight: 500 !important;
+    }
+  }
+
+  .role-option-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+
+    .role-icon {
+      font-size: 16px !important;
+
+      &.admin-icon {
+        color: #fbbf24 !important;
+      }
+
+      &.member-icon {
+        color: #a78bfa !important;
+      }
+    }
+  }
+}
+
+
+/* ============================================
+ * MessageBox 深色主题修复 - 确保对话框可见
+ * ============================================ */
+
+/* MessageBox 遮罩层 - 确保可见 */
+.el-overlay,
+.ed-overlay {
+  z-index: 9998 !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* MessageBox 容器 - 确保在最上层 */
+.el-overlay-message-box,
+.ed-overlay-message-box {
+  z-index: 9999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* MessageBox 主体 - 深色主题高级设计 */
+.el-message-box,
+.ed-message-box {
+  position: relative !important;
+  background: linear-gradient(145deg, rgba(30, 18, 69, 0.98) 0%, rgba(26, 16, 51, 0.98) 100%) !important;
+  border: 1px solid rgba(139, 92, 246, 0.5) !important;
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.8),
+    0 10px 40px rgba(139, 92, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  border-radius: 20px !important;
+  padding: 32px !important;
+  z-index: 9999 !important;
+  min-width: 420px !important;
+  max-width: 520px !important;
+  
+  /* 顶部光晕效果 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #a78bfa 50%, transparent 100%);
+    border-radius: 20px 20px 0 0;
+  }
+  
+  .el-message-box__header,
+  .ed-message-box__header {
+    padding-bottom: 20px !important;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+    margin-bottom: 24px !important;
+    
+    .el-message-box__title,
+    .ed-message-box__title {
+      color: #f8fafc !important;
+      font-weight: 700 !important;
+      font-size: 20px !important;
+      letter-spacing: -0.3px !important;
+      line-height: 1.4 !important;
+    }
+  }
+  
+  .el-message-box__content,
+  .ed-message-box__content {
+    padding: 0 !important;
+    
+    .el-message-box__message,
+    .ed-message-box__message {
+      color: #e2e8f0 !important;
+      font-weight: 500 !important;
+      font-size: 15px !important;
+      line-height: 1.7 !important;
+      margin-bottom: 16px !important;
+    }
+    
+    /* tip 提示文本样式 */
+    .tip {
+      margin-top: 16px !important;
+      padding: 14px 18px !important;
+      background: rgba(139, 92, 246, 0.12) !important;
+      border: 1px solid rgba(139, 92, 246, 0.25) !important;
+      border-radius: 12px !important;
+      color: #c4b5fd !important;
+      font-size: 13px !important;
+      line-height: 1.6 !important;
+      font-weight: 500 !important;
+      
+      &::before {
+        content: '💡 ';
+        margin-right: 6px;
+      }
+    }
+  }
+  
+  .el-message-box__btns,
+  .ed-message-box__btns {
+    padding-top: 24px !important;
+    margin-top: 24px !important;
+    border-top: 1px solid rgba(139, 92, 246, 0.15) !important;
+    display: flex !important;
+    gap: 12px !important;
+    justify-content: flex-end !important;
+    
+    .el-button,
+    .ed-button {
+      font-weight: 600 !important;
+      min-width: 100px !important;
+      height: 44px !important;
+      font-size: 15px !important;
+      border-radius: 12px !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      
+      /* 主要按钮 - 紫色渐变 */
+      &.el-button--primary,
+      &.ed-button--primary {
+        background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%) !important;
+        border: none !important;
+        box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4) !important;
+        
+        &:hover {
+          background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%) !important;
+          box-shadow: 0 6px 24px rgba(139, 92, 246, 0.5) !important;
+          transform: translateY(-2px) !important;
+        }
+        
+        &:active {
+          transform: translateY(0) !important;
+        }
+      }
+      
+      /* 危险按钮 - 红色渐变 */
+      &.el-button--danger,
+      &.ed-button--danger {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%) !important;
+        border: none !important;
+        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4) !important;
+        color: #fff !important;
+        
+        &:hover {
+          background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%) !important;
+          box-shadow: 0 6px 24px rgba(239, 68, 68, 0.5) !important;
+          transform: translateY(-2px) !important;
+        }
+        
+        &:active {
+          transform: translateY(0) !important;
+        }
+      }
+      
+      /* 默认/取消按钮 */
+      &.el-button--default,
+      &.ed-button--default {
+        background: rgba(139, 92, 246, 0.1) !important;
+        border: 1px solid rgba(139, 92, 246, 0.3) !important;
+        color: #c4b5fd !important;
+        
+        &:hover {
+          background: rgba(139, 92, 246, 0.2) !important;
+          border-color: rgba(139, 92, 246, 0.4) !important;
+          color: #ddd6fe !important;
+          transform: translateY(-2px) !important;
+        }
+        
+        &:active {
+          transform: translateY(0) !important;
+        }
+      }
+    }
+  }
+  
+  /* MessageBox 图标样式 */
+  .el-message-box__status,
+  .ed-message-box__status {
+    &.el-icon,
+    &.ed-icon {
+      font-size: 28px !important;
+      margin-right: 16px !important;
+      
+      &.el-message-box-icon--warning,
+      &.ed-message-box-icon--warning {
+        color: #fbbf24 !important;
+        filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+      }
+      
+      &.el-message-box-icon--error,
+      &.ed-message-box-icon--error {
+        color: #f87171 !important;
+        filter: drop-shadow(0 0 8px rgba(248, 113, 113, 0.5));
+      }
+      
+      &.el-message-box-icon--success,
+      &.ed-message-box-icon--success {
+        color: #34d399 !important;
+        filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.5));
+      }
+      
+      &.el-message-box-icon--info,
+      &.ed-message-box-icon--info {
+        color: #60a5fa !important;
+        filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.5));
+      }
+    }
+  }
+}
+
+/* 无图标的 MessageBox 样式 */
+.confirm-no_icon.el-message-box,
+.confirm-no_icon.ed-message-box {
+  .el-message-box__header,
+  .ed-message-box__header {
+    .el-message-box__title,
+    .ed-message-box__title {
+      font-size: 18px !important;
+    }
+  }
+  
+  .el-message-box__content,
+  .ed-message-box__content {
+    .el-message-box__message,
+    .ed-message-box__message {
+      font-size: 14px !important;
+    }
+  }
+}
+
+/* 确保 MessageBox 在所有情况下都可见 */
+.el-overlay.is-message-box,
+.ed-overlay.is-message-box {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* MessageBox 动画效果 */
+.el-message-box,
+.ed-message-box {
+  animation: messageBoxFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes messageBoxFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

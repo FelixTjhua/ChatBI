@@ -1,0 +1,281 @@
+/**
+ * Drawer 输入框样式修复 - 最高优先级
+ * 确保所有 drawer 中的输入框都显示为浅紫色背景，文字清晰可见
+ */
+
+// 使用属性选择器匹配所有包含 drawer 类名的元素
+[class*="drawer"],
+[class*="-drawer"],
+.el-drawer,
+.ed-drawer {
+  // 输入框 wrapper
+  .el-input__wrapper,
+  .ed-input__wrapper {
+    background: rgba(139, 92, 246, 0.08) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.2) !important;
+    box-shadow: none !important;
+    
+    &:hover {
+      border-color: rgba(139, 92, 246, 0.35) !important;
+    }
+    
+    &.is-focus,
+    &:focus-within {
+      border-color: #8b5cf6 !important;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15) !important;
+    }
+  }
+  
+  // 输入框内部 - 确保文字是白色
+  .el-input__inner,
+  .ed-input__inner {
+    color: rgba(255, 255, 255, 0.95) !important;
+    background: transparent !important;
+    
+    &::placeholder {
+      color: #c4b5fd !important;
+    }
+  }
+  
+  // 文本域 - 确保文字是白色
+  .el-textarea__inner,
+  .ed-textarea__inner {
+    background: rgba(139, 92, 246, 0.08) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.2) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: none !important;
+    
+    &::placeholder {
+      color: #c4b5fd !important;
+    }
+    
+    &:hover {
+      border-color: rgba(139, 92, 246, 0.35) !important;
+    }
+    
+    &:focus {
+      border-color: #8b5cf6 !important;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15) !important;
+    }
+  }
+  
+  // Select 下拉框
+  .el-select .el-input__wrapper,
+  .ed-select .ed-input__wrapper {
+    background: rgba(139, 92, 246, 0.08) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.2) !important;
+    box-shadow: none !important;
+    
+    &:hover {
+      border-color: rgba(139, 92, 246, 0.35) !important;
+    }
+    
+    &.is-focus,
+    &.is-focused,
+    &:focus-within {
+      border-color: #8b5cf6 !important;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15) !important;
+    }
+  }
+  
+  // Select 选中的文字 - 确保是白色
+  .el-select .el-input__inner,
+  .ed-select .ed-input__inner,
+  .el-select__selected-item,
+  .ed-select__selected-item {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  // Select placeholder
+  .el-select .el-input__inner::placeholder,
+  .ed-select .ed-input__inner::placeholder {
+    color: #c4b5fd !important;
+  }
+  
+  // Form label - 确保标签文字清晰
+  .el-form-item__label,
+  .ed-form-item__label {
+    color: rgba(196, 181, 253, 0.9) !important;
+  }
+  
+  // Radio 文字 - 确保清晰
+  .el-radio__label,
+  .ed-radio__label {
+    color: rgba(196, 181, 253, 0.85) !important;
+  }
+  
+  // Checkbox 文字 - 确保清晰
+  .el-checkbox__label,
+  .ed-checkbox__label {
+    color: rgba(196, 181, 253, 0.85) !important;
+  }
+  
+  // 提示文字
+  .tips,
+  .el-form-item__error,
+  .ed-form-item__error {
+    color: rgba(196, 181, 253, 0.7) !important;
+  }
+  
+  // 多选标签文字
+  .el-tag,
+  .ed-tag {
+    color: rgba(255, 255, 255, 0.95) !important;
+    background: rgba(139, 92, 246, 0.2) !important;
+    border-color: rgba(139, 92, 246, 0.3) !important;
+  }
+}
+
+// 额外的高优先级选择器 - 直接针对 drawer 容器
+.el-drawer__container,
+.ed-drawer__container {
+  .el-input__wrapper,
+  .ed-input__wrapper {
+    background: rgba(139, 92, 246, 0.08) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.2) !important;
+    box-shadow: none !important;
+  }
+  
+  .el-input__inner,
+  .ed-input__inner {
+    color: rgba(255, 255, 255, 0.95) !important;
+    
+    &::placeholder {
+      color: #c4b5fd !important;
+    }
+  }
+  
+  .el-textarea__inner,
+  .ed-textarea__inner {
+    background: rgba(139, 92, 246, 0.08) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.2) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    
+    &::placeholder {
+      color: #c4b5fd !important;
+    }
+  }
+  
+  // Select 选中的文字
+  .el-select .el-input__inner,
+  .ed-select .ed-input__inner,
+  .el-select__selected-item,
+  .ed-select__selected-item {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  // Form label
+  .el-form-item__label,
+  .ed-form-item__label {
+    color: rgba(196, 181, 253, 0.9) !important;
+  }
+  
+  // Radio 和 Checkbox 文字
+  .el-radio__label,
+  .ed-radio__label,
+  .el-checkbox__label,
+  .ed-checkbox__label {
+    color: rgba(196, 181, 253, 0.85) !important;
+  }
+}
+
+// 最高优先级 - 针对特定 drawer 类
+.el-drawer.training-add_drawer,
+.el-drawer.training-term_drawer,
+.el-drawer.professional-add_drawer,
+.el-drawer.professional-term_drawer,
+.el-drawer.prompt-add_drawer,
+.el-drawer.prompt-term_drawer {
+  // 所有文字元素确保可见
+  .el-form-item__label,
+  .ed-form-item__label,
+  label {
+    color: rgba(196, 181, 253, 0.9) !important;
+  }
+  
+  // 输入框文字
+  .el-input__inner,
+  .ed-input__inner,
+  .el-textarea__inner,
+  .ed-textarea__inner {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  // Select 选中项文字
+  .el-select__selected-item,
+  .ed-select__selected-item,
+  .el-select .el-input__inner,
+  .ed-select .ed-input__inner {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  // Radio 和 Checkbox
+  .el-radio__label,
+  .ed-radio__label,
+  .el-checkbox__label,
+  .ed-checkbox__label {
+    color: rgba(196, 181, 253, 0.85) !important;
+  }
+  
+  // 提示文字
+  .tips,
+  .form-tips,
+  .el-form-item__error,
+  .ed-form-item__error {
+    color: rgba(196, 181, 253, 0.7) !important;
+  }
+  
+  // 多选标签
+  .el-tag,
+  .ed-tag {
+    color: rgba(255, 255, 255, 0.95) !important;
+    background: rgba(139, 92, 246, 0.2) !important;
+    border-color: rgba(139, 92, 246, 0.3) !important;
+  }
+  
+  // 描述文字
+  .el-descriptions__label,
+  .ed-descriptions__label {
+    color: rgba(196, 181, 253, 0.9) !important;
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.08) 100%) !important;
+  }
+  
+  .el-descriptions__content,
+  .ed-descriptions__content {
+    color: rgba(255, 255, 255, 0.95) !important;
+    background: rgba(26, 18, 37, 0.3) !important;
+  }
+  
+  // Descriptions 容器
+  .el-descriptions,
+  .ed-descriptions {
+    background: transparent !important;
+    
+    &.is-bordered {
+      background: linear-gradient(145deg, rgba(26, 18, 37, 0.5) 0%, rgba(20, 14, 32, 0.6) 100%) !important;
+      border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    }
+    
+    .el-descriptions__table,
+    .ed-descriptions__table,
+    .el-descriptions__body,
+    .ed-descriptions__body,
+    .el-descriptions__header,
+    .ed-descriptions__header,
+    tbody,
+    tr {
+      background: transparent !important;
+    }
+    
+    .el-descriptions__cell,
+    .ed-descriptions__cell {
+      background: transparent !important;
+      border-color: rgba(139, 92, 246, 0.12) !important;
+    }
+    
+    .el-descriptions__row,
+    .ed-descriptions__row {
+      background: transparent !important;
+    }
+  }
+}

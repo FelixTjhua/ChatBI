@@ -1,0 +1,382 @@
+/**
+ * ChatBI 聊天组件共享样式
+ * 消除重复设计，统一视觉风格
+ */
+
+// ============================================
+// 1. 共享变量 - 深色主题
+// ============================================
+@chat-primary-300: #c4b5fd;
+@chat-primary-400: #a78bfa;
+@chat-primary-500: #8b5cf6;
+@chat-primary-600: #7c3aed;
+
+@chat-dark-bg: #0f0a1a;
+@chat-dark-bg-secondary: #1a1225;
+@chat-dark-bg-card: rgba(26, 18, 37, 0.9);
+@chat-dark-border: rgba(139, 92, 246, 0.2);
+@chat-dark-border-hover: rgba(139, 92, 246, 0.35);
+@chat-dark-border-active: rgba(139, 92, 246, 0.5);
+
+@chat-dark-text: rgba(255, 255, 255, 0.95);
+@chat-dark-text-secondary: rgba(196, 181, 253, 0.8);
+@chat-dark-text-muted: rgba(196, 181, 253, 0.5);
+
+// 语义色
+@chat-error: #f87171;
+@chat-warning: #fbbf24;
+@chat-success: #4ade80;
+@chat-info: #60a5fa;
+
+// ============================================
+// 2. 共享渐变
+// ============================================
+@chat-gradient-primary: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%);
+@chat-gradient-primary-hover: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(168, 85, 247, 0.18) 100%);
+@chat-gradient-card: linear-gradient(145deg, rgba(139, 92, 246, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%);
+@chat-gradient-card-hover: linear-gradient(145deg, rgba(139, 92, 246, 0.2) 0%, rgba(168, 85, 247, 0.14) 100%);
+
+// ============================================
+// 3. 共享阴影
+// ============================================
+@chat-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+@chat-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+@chat-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+@chat-shadow-primary: 0 4px 16px rgba(139, 92, 246, 0.25);
+@chat-shadow-primary-lg: 0 8px 24px rgba(139, 92, 246, 0.35);
+
+// ============================================
+// 4. 共享动画曲线
+// ============================================
+@chat-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+@chat-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+// ============================================
+// 5. 共享 Mixin - 玻璃卡片
+// ============================================
+.chat-glass-card() {
+  background: @chat-gradient-card;
+  border: 1px solid @chat-dark-border;
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+  
+  // 顶部高光线
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(139, 92, 246, 0.35) 50%, transparent 100%);
+    pointer-events: none;
+  }
+}
+
+.chat-glass-card-hover() {
+  &:hover {
+    background: @chat-gradient-card-hover;
+    border-color: @chat-dark-border-hover;
+    transform: translateY(-2px);
+    box-shadow: @chat-shadow-primary;
+  }
+  
+  &:active {
+    transform: translateY(0);
+    box-shadow: @chat-shadow-sm;
+  }
+}
+
+// ============================================
+// 6. 共享 Mixin - 按钮样式
+// ============================================
+.chat-btn-base() {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s @chat-ease-smooth;
+  border: 1px solid @chat-dark-border;
+  background: @chat-gradient-card;
+  color: @chat-dark-text-secondary;
+  position: relative;
+  overflow: hidden;
+  
+  // 顶部高光
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+    pointer-events: none;
+  }
+  
+  &:hover {
+    background: @chat-gradient-card-hover;
+    border-color: @chat-dark-border-hover;
+    color: @chat-primary-400;
+    transform: translateY(-2px);
+    box-shadow: @chat-shadow-primary;
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+.chat-btn-primary() {
+  background: linear-gradient(135deg, @chat-primary-500 0%, @chat-primary-600 100%);
+  border: none;
+  color: #fff;
+  box-shadow: @chat-shadow-primary;
+  
+  &:hover {
+    background: linear-gradient(135deg, @chat-primary-400 0%, @chat-primary-500 100%);
+    box-shadow: @chat-shadow-primary-lg;
+    color: #fff;
+  }
+}
+
+// ============================================
+// 7. 共享 Mixin - 空状态
+// ============================================
+.chat-empty-state() {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 16px;
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px dashed @chat-dark-border;
+  border-radius: 14px;
+  animation: chatFadeIn 0.3s ease;
+  
+  .empty-icon {
+    font-size: 28px;
+    opacity: 0.7;
+  }
+  
+  .empty-text {
+    font-size: 13px;
+    color: @chat-dark-text-muted;
+    text-align: center;
+  }
+}
+
+// ============================================
+// 8. 共享 Mixin - 错误卡片
+// ============================================
+.chat-error-card(@color: @chat-error) {
+  .chat-glass-card();
+  background: linear-gradient(145deg, fade(@color, 12%) 0%, fade(@color, 8%) 100%);
+  border-color: fade(@color, 28%);
+  
+  &::before {
+    background: linear-gradient(90deg, transparent 0%, fade(@color, 35%) 50%, transparent 100%);
+  }
+  
+  .error-icon {
+    filter: drop-shadow(0 2px 4px fade(@color, 30%));
+  }
+  
+  .error-title {
+    color: lighten(@color, 15%);
+  }
+  
+  .error-desc {
+    color: fade(lighten(@color, 15%), 80%);
+  }
+}
+
+// ============================================
+// 9. 共享 Mixin - 加载骨架屏
+// ============================================
+.chat-skeleton() {
+  background: linear-gradient(90deg, 
+    rgba(139, 92, 246, 0.1) 0%, 
+    rgba(139, 92, 246, 0.2) 50%, 
+    rgba(139, 92, 246, 0.1) 100%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: chatShimmer 1.5s ease-in-out infinite;
+}
+
+// ============================================
+// 10. 共享 Mixin - 滚动条
+// ============================================
+.chat-scrollbar() {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(139, 92, 246, 0.05);
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.35) 0%, rgba(168, 85, 247, 0.25) 100%);
+    border-radius: 3px;
+    
+    &:hover {
+      background: linear-gradient(180deg, rgba(139, 92, 246, 0.5) 0%, rgba(168, 85, 247, 0.4) 100%);
+    }
+  }
+}
+
+// ============================================
+// 11. 共享 Mixin - 弹窗/抽屉
+// ============================================
+.chat-popover() {
+  background: linear-gradient(165deg, rgba(26, 18, 37, 0.98) 0%, rgba(18, 16, 28, 0.99) 100%) !important;
+  border: 1px solid rgba(139, 92, 246, 0.25) !important;
+  border-radius: 16px !important;
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(139, 92, 246, 0.08) inset !important;
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+  
+  // 顶部高光线
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(139, 92, 246, 0.4) 50%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+// ============================================
+// 12. 共享动画关键帧
+// ============================================
+@keyframes chatFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes chatSlideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes chatShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes chatPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes chatBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes chatSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes chatCardFadeIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+// ============================================
+// 13. 响应式 Mixin
+// ============================================
+.chat-responsive-padding() {
+  padding: 18px 20px;
+  
+  @media (max-width: 768px) {
+    padding: 14px 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px 14px;
+  }
+}
+
+.chat-responsive-radius() {
+  border-radius: 14px;
+  
+  @media (max-width: 768px) {
+    border-radius: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    border-radius: 10px;
+  }
+}
+
+.chat-responsive-font() {
+  font-size: 14px;
+  line-height: 1.6;
+  
+  @media (max-width: 768px) {
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+
+// ============================================
+// 14. 工具类
+// ============================================
+.chat-text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-text-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.chat-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

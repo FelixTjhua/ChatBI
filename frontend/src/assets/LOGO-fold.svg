@@ -1,0 +1,21 @@
+<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="chatida-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="50%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- 圆角矩形背景 -->
+  <rect width="30" height="30" rx="6" fill="url(#chatida-gradient)"/>
+  
+  <!-- 聊天气泡 -->
+  <path d="M5 7C5 5.89543 5.89543 5 7 5H23C24.1046 5 25 5.89543 25 7V17C25 18.1046 24.1046 19 23 19H13L8 24V19H7C5.89543 19 5 18.1046 5 17V7Z" fill="white" fill-opacity="0.95"/>
+  
+  <!-- 数据柱状图 -->
+  <rect x="8" y="13" width="3" height="4" rx="0.75" fill="#a78bfa"/>
+  <rect x="12" y="9" width="3" height="8" rx="0.75" fill="#7c3aed"/>
+  <rect x="16" y="11" width="3" height="6" rx="0.75" fill="#a78bfa"/>
+  <rect x="20" y="7" width="3" height="10" rx="0.75" fill="#7c3aed"/>
+</svg>

@@ -1,0 +1,22 @@
+services:
+  chatbi:
+    image: chatbi/chatbi:CHATBI_TAG
+    container_name: chatbi
+    restart: always
+    privileged: true
+    networks:
+      - chatbi-network
+    ports:
+      - ${CHATBI_WEB_PORT}:8000
+      - ${CHATBI_MCP_PORT}:8001
+    env_file:
+      - conf/chatbi.conf
+    volumes:
+      - ./data/chatbi/excel:/opt/chatbi/data/excel
+      - ./data/chatbi/file:/opt/chatbi/data/file
+      - ./data/chatbi/images:/opt/chatbi/images
+      - ./data/chatbi/logs:/opt/chatbi/app/logs
+      - ./data/postgresql:/var/lib/postgresql/data
+
+networks:
+  chatbi-network:

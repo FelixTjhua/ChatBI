@@ -1,0 +1,146 @@
+{
+  "i18n_default_workspace": "Default Workspace",
+  "i18n_ds_name_exist": "Name already exists",
+  "i18n_concat_admin": "Please contact the administrator!",
+  "i18n_exist": "{msg} already exists!",
+  "i18n_name": "Name",
+  "i18n_not_exist": "{msg} does not exist!",
+  "i18n_error": "{key} error!",
+  "i18n_miss_args": "Missing {key} parameter!",
+  "i18n_format_invalid": "{key} format is incorrect!",
+  "i18n_login": {
+    "account_pwd_error": "Incorrect account or password!",
+    "no_associated_ws": "No associated workspace, {msg}",
+    "user_disable": "Account is disabled, {msg}"
+  },
+  "i18n_register": {
+    "account_exists": "This account is already registered!",
+    "email_exists": "This email is already registered!",
+    "email_invalid": "Invalid email format!",
+    "pwd_invalid": "Invalid password format! Must be 8-20 characters with uppercase, lowercase, number and special character",
+    "no_workspace": "No workspace created yet, please contact administrator!",
+    "success": "Registration successful! Please login",
+    "rate_limit_exceeded": "Too many registration attempts, please try again later"
+  },
+  "i18n_user": {
+    "account": "Account",
+    "email": "Email",
+    "password": "Password",
+    "language_not_support": "The system does not support [{key}] language!",
+    "ws_miss": "Current user is not in the workspace [{ws}]!",
+    "batch_delete_limit": "Batch delete supports up to {limit} records"
+  },
+  "i18n_ws": {
+    "title": "Workspace",
+    "cannot_delete_default": "Cannot delete the default workspace",
+    "has_datasources": "This workspace has {count} datasource(s), please delete or migrate them first",
+    "last_admin_cannot_demote": "Cannot demote the last administrator"
+  },
+  "i18n_permission": {
+    "only_admin": "Only administrators are allowed to call!",
+    "no_permission": "No permission to call {url}{msg}",
+    "authenticate_invalid": "Authentication invalid【{msg}】",
+    "token_expired": "Token expired"
+  },
+  "i18n_llm": {
+    "validate_error": "Validation failed [{msg}]",
+    "delete_default_error": "Cannot delete the default model [{key}]!",
+    "miss_default": "Default large language model has not been configured"
+  },
+  "i18n_ds_invalid": "Datasource connection is invalid",
+  "i18n_embedded": {
+    "invalid_origin": "Domain name validation failed【{origin}】"
+  },
+  "i18n_terminology": {
+    "terminology_not_exists": "This terminology does not exist",
+    "datasource_cannot_be_none": "Datasource cannot be empty",
+    "cannot_be_repeated": "Terminology name and synonyms cannot be repeated",
+    "exists_in_db": "Terminology name and synonyms already exist",
+    "term_name": "Terminology Name",
+    "term_description": "Terminology Description",
+    "effective_data_sources": "Effective Data Sources",
+    "all_data_sources": "All Data Sources",
+    "synonyms": "Synonyms"
+  },
+  "i18n_data_training": {
+    "datasource_cannot_be_none": "Datasource cannot be empty",
+    "datasource_assistant_cannot_be_none": "Datasource or advanced application cannot both be empty",
+    "data_training_not_exists": "This example does not exist",
+    "exists_in_db": "This question already exists",
+    "data_training": "SQL Example Library",
+    "problem_description": "Problem Description",
+    "sample_sql": "Sample SQL",
+    "effective_data_sources": "Effective Data Sources",
+    "advanced_application": "Advanced Application"
+  },
+  "i18n_custom_prompt": {
+    "exists_in_db": "Template name already exists",
+    "not_exists": "This template does not exist",
+    "prompt_word_name": "Prompt word name",
+    "prompt_word_content": "Prompt word content",
+    "effective_data_sources": "Effective Data Sources",
+    "all_data_sources": "All Data Sources"
+  },
+  "i18n_excel_export": {
+    "data_is_empty": "Form data is empty, unable to export data"
+  },
+  "i18n_chat": {
+    "rename_failed": "Failed to rename chat",
+    "delete_failed": "Failed to delete chat",
+    "delete_record_failed": "Failed to delete chat record",
+    "create_failed": "Failed to create chat",
+    "create_assistant_failed": "Failed to create assistant chat"
+  },
+  "i18n_file": {
+    "file_empty": "File cannot be empty",
+    "unsupported_type": "Unsupported file type: {ext}, allowed types: {types}",
+    "size_exceeded": "File size exceeds limit: {size}MB",
+    "upload_failed": "File upload failed: {msg}",
+    "filename_empty": "Filename cannot be empty",
+    "file_is_empty": "Uploaded file is empty",
+    "size_limit": "File size exceeds limit (max {max}MB), current: {current}MB",
+    "unsupported_ds_type": "Unsupported datasource type: {type}, valid types: {types}",
+    "import_failed": "Data import failed, please check file format",
+    "unsupported_format": "Unsupported format: .{ext}, supported: {types}",
+    "doc_process_failed": "Document processing failed: {msg}"
+  },
+  "i18n_ds_permission": {
+    "save_failed": "Failed to save permission",
+    "delete_failed": "Failed to delete permission",
+    "save_success": "Saved successfully",
+    "create_success": "Created successfully",
+    "delete_success": "Deleted successfully"
+  },
+  "i18n_document": {
+    "not_found": "Document not found",
+    "no_permission": "No permission",
+    "ds_not_found": "Datasource not found",
+    "not_pdf_ds": "Not a PDF datasource",
+    "scanned_pdf": "PDF is scanned ({pages} image-only pages). OCR failed to extract text. Please ensure tesseract and poppler are installed, or upload a text-based PDF.",
+    "empty_pdf": "No text content extracted from PDF ({pages} pages). File may be blank or corrupted.",
+    "scanned_warning": "{scanned} of {total} pages are scanned images where OCR failed, and cannot be searched.",
+    "vectorize_warning": "{vectorized} of {total} chunks were vectorized."
+  },
+  "i18n_dashboard": {
+    "chart_limit": "Dashboard chart count has reached the limit ({limit}), please delete some charts first",
+    "default_name": "Default Dashboard",
+    "untitled": "Untitled",
+    "data_count": "{count} data entries",
+    "summary_prompt": "You are an enterprise intelligence analysis expert. Based on the charts and data in the following dashboard, summarize key insights in 2-3 sentences from a business analysis perspective.\nFocus on: business trend changes, key metric performance, potential business opportunities or risk signals.\nPlease provide analysis conclusions with business decision reference value.",
+    "summary_prompt_lang": "Please answer in English, keep it concise and professional, highlighting business value.",
+    "fallback_summary": "The current dashboard contains {count} visualization charts ({types}). It is recommended to further interpret the trends of each metric in combination with business objectives."
+  },
+  "i18n_validator": {
+    "unsupported_ds_type": "Unsupported datasource type: {type}, valid types: {valid}",
+    "unsupported_file_format": "Unsupported file format: {ext}, supported: {supported}",
+    "crypto_key_missing": "Encryption key not configured. Please set CHATBI_CRYPTO_KEY env variable or SECRET_KEY",
+    "unsupported_file_type": "Unsupported file type, only supported: {types}"
+  },
+  "i18n_schema": {
+    "system_table": "You are a database expert skilled at understanding the business meaning of database tables.",
+    "system_field": "You are a database expert skilled at understanding the business meaning of database fields.",
+    "infer_table": "Based on the table name and field names, infer the business meaning of this database table.\n\nTable name: {table}\nFields: {fields}\n\nPlease describe the business purpose of this table in one concise sentence. Return only the description text, nothing else.",
+    "infer_field": "Based on the field name and type, infer the business meaning of this field.\n\nTable name: {table}\nField name: {field}\nField type: {type}\n\nPlease describe the business meaning of this field in one concise sentence. Return only the description text, nothing else.",
+    "relationship_desc": "{from_table} is related to {to_table} through {key}"
+  }
+}

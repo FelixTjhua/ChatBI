@@ -1,0 +1,64 @@
+# ========================
+# ChatBI .gitignore
+# ========================
+
+# --- Environment variables (contains secrets) ---
+.env
+.env.local
+.env.*.local
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- IDE ---
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# --- Runtime data (generated at runtime, not source code) ---
+data/
+logs/
+*.log
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+*.egg
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+.coverage
+htmlcov/
+.cache/
+
+# --- Database files ---
+*.db
+*.sqlite3
+
+# --- Node ---
+node_modules/
+dist/
+dist-ssr/
+
+# --- Build artifacts ---
+*.local
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- Models (large binary files, download at runtime) ---
+backend/models/
+
+# --- Large font files (download separately) ---
+g2-ssr/Arial_Unicode.ttf
+g2-ssr/node_modules/
+
+# --- Auto-generated type declarations ---
+frontend/auto-imports.d.ts
+frontend/components.d.ts
+frontend/.eslintrc-auto-import.json

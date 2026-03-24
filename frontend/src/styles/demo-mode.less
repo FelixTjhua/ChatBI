@@ -1,0 +1,253 @@
+// 演示模式样式
+// 放大字体和图标，提升可视性
+
+:root {
+  --demo-font-scale: 1;
+}
+
+// 演示模式下的全局样式调整
+.demo-mode {
+  // 基础字体放大
+  font-size: calc(16px * var(--demo-font-scale));
+
+  // 聊天界面优化
+  .chat-container {
+    .welcome-content {
+      .greeting {
+        font-size: calc(32px * var(--demo-font-scale)) !important;
+      }
+
+      .sub {
+        font-size: calc(18px * var(--demo-font-scale)) !important;
+      }
+
+      .rag-flow-intro {
+        .step-title {
+          font-size: calc(14px * var(--demo-font-scale)) !important;
+        }
+
+        .step-desc {
+          font-size: calc(12px * var(--demo-font-scale)) !important;
+        }
+      }
+    }
+
+    // 消息内容放大
+    .answer-container {
+      font-size: calc(16px * var(--demo-font-scale)) !important;
+      line-height: 1.7 !important;
+    }
+
+    // 思考过程区域
+    .reasoning-content {
+      .rag-badge {
+        font-size: calc(13px * var(--demo-font-scale)) !important;
+        padding: 8px 14px !important;
+      }
+
+      .tech-tag {
+        font-size: calc(12px * var(--demo-font-scale)) !important;
+        padding: 5px 12px !important;
+      }
+
+      .step-label {
+        font-size: calc(11px * var(--demo-font-scale)) !important;
+      }
+
+      .reasoning {
+        font-size: calc(15px * var(--demo-font-scale)) !important;
+        line-height: 1.7 !important;
+      }
+    }
+
+    // RAG上下文区域
+    .rag-context-section {
+      .rag-context-header {
+        font-size: calc(14px * var(--demo-font-scale)) !important;
+      }
+
+      .context-item {
+        .term-word {
+          font-size: calc(14px * var(--demo-font-scale)) !important;
+        }
+
+        .item-description {
+          font-size: calc(13px * var(--demo-font-scale)) !important;
+        }
+
+        .sql-question {
+          font-size: calc(14px * var(--demo-font-scale)) !important;
+        }
+
+        .sql-answer code {
+          font-size: calc(12px * var(--demo-font-scale)) !important;
+        }
+      }
+    }
+
+    // SQL代码块
+    .sql-code-block {
+      .code-header {
+        .code-lang {
+          font-size: calc(13px * var(--demo-font-scale)) !important;
+        }
+
+        .copy-btn {
+          font-size: calc(13px * var(--demo-font-scale)) !important;
+        }
+      }
+
+      .hljs {
+        font-size: calc(14px * var(--demo-font-scale)) !important;
+      }
+    }
+
+    // 图表区域
+    .chart-wrapper {
+      .export-btn {
+        font-size: calc(13px * var(--demo-font-scale)) !important;
+      }
+    }
+
+    // 输入框
+    .input-wrapper {
+      .input-area {
+        :deep(.ed-textarea__inner) {
+          font-size: calc(15px * var(--demo-font-scale)) !important;
+        }
+      }
+    }
+
+    // 推荐问题
+    .recommend-question {
+      .question-card {
+        font-size: calc(14px * var(--demo-font-scale)) !important;
+      }
+    }
+  }
+
+  // 侧边栏
+  .chatbi-chat-sidebar {
+    .header-title .title-text {
+      font-size: calc(16px * var(--demo-font-scale)) !important;
+    }
+
+    .new-chat-btn {
+      font-size: calc(15px * var(--demo-font-scale)) !important;
+      height: 48px !important;
+    }
+
+    .search-input {
+      :deep(.ed-input__inner) {
+        font-size: calc(14px * var(--demo-font-scale)) !important;
+      }
+    }
+  }
+
+  // RAG管理页面
+  .tab-content {
+    .tab-toolbar {
+      .search-input {
+        :deep(.ed-input__inner) {
+          font-size: calc(14px * var(--demo-font-scale)) !important;
+        }
+      }
+    }
+
+    .tab-table {
+      :deep(.el-table) {
+        .cell {
+          font-size: calc(14px * var(--demo-font-scale)) !important;
+        }
+      }
+    }
+  }
+
+  // 表格
+  :deep(.el-table) {
+    th {
+      font-size: calc(14px * var(--demo-font-scale)) !important;
+    }
+
+    td .cell {
+      font-size: calc(14px * var(--demo-font-scale)) !important;
+    }
+  }
+
+  // 按钮
+  .el-button {
+    font-size: calc(14px * var(--demo-font-scale)) !important;
+  }
+
+  // 抽屉
+  .el-drawer {
+    .el-drawer__title {
+      font-size: calc(18px * var(--demo-font-scale)) !important;
+    }
+
+    .el-form-item__label {
+      font-size: calc(14px * var(--demo-font-scale)) !important;
+    }
+
+    .el-input__inner,
+    .el-textarea__inner {
+      font-size: calc(14px * var(--demo-font-scale)) !important;
+    }
+  }
+
+  // 描述列表
+  .el-descriptions {
+    .el-descriptions__label {
+      font-size: calc(14px * var(--demo-font-scale)) !important;
+    }
+
+    .el-descriptions__content {
+      font-size: calc(14px * var(--demo-font-scale)) !important;
+    }
+  }
+}
+
+// 演示模式指示器
+.demo-mode-indicator {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  animation: pulse-demo 2s ease-in-out infinite;
+
+  .indicator-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: blink 1s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-demo {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

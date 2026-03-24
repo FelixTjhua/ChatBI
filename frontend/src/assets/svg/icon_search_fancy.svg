@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 放大镜镜片 -->
+  <circle cx="10.5" cy="10.5" r="7" />
+  <!-- 放大镜手柄 -->
+  <line x1="15.5" y1="15.5" x2="21" y2="21" stroke-width="2.2" />
+  <!-- 镜片上的高光弧线，增加高级感 -->
+  <path d="M7 7.5a5 5 0 0 1 4.5-2.5" stroke-width="1.2" opacity="0.5" />
+  <!-- 镜片中心的小星芒点缀 -->
+  <circle cx="10.5" cy="10.5" r="0.6" fill="currentColor" stroke="none" opacity="0.35" />
+</svg>

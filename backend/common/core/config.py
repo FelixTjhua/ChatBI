@@ -1,0 +1,165 @@
+import logging
+import secrets
+from typing import Annotated, Any, Literal
+
+from pydantic import (
+    AnyUrl,
+    BeforeValidator,
+    PostgresDsn,
+    computed_field,
+    field_validator
+)
+from pydantic_core import MultiHostUrl
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_config_logger = logging.getLogger(__name__)
+
+
+def parse_cors(v: Any) -> list[str] | str:
+    if isinstance(v, str) and not v.startswith("["):
+        return [i.strip() for i in v.split(",")]
+    elif isinstance(v, list | str):
+        return v
+    raise ValueError(v)
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        # Use top level .env file (one level above ./backend/)
+        env_file="../.env",
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+    PROJECT_NAME: str = "ChatBI"
+    API_V1_STR: str = "/api/v1"
+    # 使用固定默认值而非 secrets.token_urlsafe(32)
+    # 生产环境必须通过 .env 文件配置固定的 SECRET_KEY
+    SECRET_KEY: str = "CHANGE_ME_IN_PRODUCTION_USE_ENV_FILE"
+
+    @field_validator('SECRET_KEY')
+    @classmethod
+    def validate_secret_key(cls, v: str) -> str:
+        """生产环境必须配置安全的 SECRET_KEY，禁止使用默认值"""
+        if v == "CHANGE_ME_IN_PRODUCTION_USE_ENV_FILE":
+            import logging
+            logging.getLogger(__name__).warning(
+                "⚠️ SECRET_KEY 使用默认值，JWT Token 安全性无法保证！"
+                "请在 .env 文件中配置一个随机的 SECRET_KEY（至少32字符）"
+            )
+        return v
+    # 60 minutes * 24 hours * 8 days = 8 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    FRONTEND_HOST: str = "http://localhost:5173"
+
+    BACKEND_CORS_ORIGINS: Annotated[
+        list[AnyUrl] | str, BeforeValidator(parse_cors)
+    ] = []
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def all_cors_origins(self) -> list[str]:
+        return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
+            self.FRONTEND_HOST
+        ]
+
+    POSTGRES_SERVER: str = 'localhost'
+    POSTGRES_PORT: int = 5432
+    POSTGRES_USER: str = 'root'
+    POSTGRES_PASSWORD: str = ""  # 必须通过环境变量或.env文件配置
+    POSTGRES_DB: str = "chatbi"
+    CHATBI_DB_URL: str = ''
+    # CHATBI_DB_URL: str = 'mysql+pymysql://root:Password123%40mysql@127.0.0.1:3306/chatbi'
+
+    TOKEN_KEY: str = "X-CHATBI-TOKEN"
+    DEFAULT_PWD: str = "ChatBI@123456"
+    ASSISTANT_TOKEN_KEY: str = "X-CHATBI-ASSISTANT-TOKEN"
+
+    CACHE_TYPE: Literal["redis", "memory", "None"] = "memory"
+    CACHE_REDIS_URL: str | None = None  # Redis URL, e.g., "redis://[[username]:[password]]@localhost:6379/0"
+
+    LOG_LEVEL: str = "INFO"  # DEBUG, INFO, WARNING, ERROR
+    LOG_DIR: str = "logs"
+    LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s:%(lineno)d - %(message)s"
+    SQL_DEBUG: bool = False
+
+    UPLOAD_DIR: str = "/opt/chatbi/data/file"
+    CHATBI_KEY_EXPIRED: int = 100  # License key expiration timestamp, 0 means no expiration
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn | str:
+        if self.CHATBI_DB_URL:
+            return self.CHATBI_DB_URL
+        return MultiHostUrl.build(
+            scheme="postgresql+psycopg",
+            username=self.POSTGRES_USER,
+            password=self.POSTGRES_PASSWORD,
+            host=self.POSTGRES_SERVER,
+            port=self.POSTGRES_PORT,
+            path=self.POSTGRES_DB,
+        )
+
+    MCP_IMAGE_PATH: str = '/opt/chatbi/images'
+    DATA_PATH: str = '/opt/chatbi/data'
+    MCP_IMAGE_HOST: str = 'http://localhost:3000'
+    SERVER_IMAGE_HOST: str = 'http://YOUR_SERVE_IP:MCP_PORT/images/'
+
+    LOCAL_MODEL_PATH: str = '/opt/chatbi/models'
+    DEFAULT_EMBEDDING_MODEL: str = 'BAAI/bge-base-zh-v1.5'
+    # 将 embedding 向量维度提取为配置项，避免硬编码在模型和迁移中
+    EMBEDDING_DIMENSION: int = 768
+    EMBEDDING_ENABLED: bool = True
+    EMBEDDING_DEFAULT_SIMILARITY: float = 0.35
+    EMBEDDING_TERMINOLOGY_SIMILARITY: float = EMBEDDING_DEFAULT_SIMILARITY
+    EMBEDDING_DATA_TRAINING_SIMILARITY: float = 0.28
+    EMBEDDING_DEFAULT_TOP_COUNT: int = 8
+    EMBEDDING_TERMINOLOGY_TOP_COUNT: int = EMBEDDING_DEFAULT_TOP_COUNT
+    EMBEDDING_DATA_TRAINING_TOP_COUNT: int = EMBEDDING_DEFAULT_TOP_COUNT
+
+    GENERATE_SQL_QUERY_LIMIT_ENABLED: bool = True
+
+    PARSE_REASONING_BLOCK_ENABLED: bool = True
+    DEFAULT_REASONING_CONTENT_START: str = '<think>'
+    DEFAULT_REASONING_CONTENT_END: str = '</think>'
+
+    PG_POOL_SIZE: int = 20
+    PG_MAX_OVERFLOW: int = 30
+    PG_POOL_RECYCLE: int = 3600
+    PG_POOL_PRE_PING: bool = True
+
+    TABLE_EMBEDDING_ENABLED: bool = True
+    TABLE_EMBEDDING_COUNT: int = 15
+    DS_EMBEDDING_COUNT: int = 10
+
+    ORACLE_CLIENT_PATH: str = '/opt/chatbi/db_client/oracle_instant_client'
+
+    CHATBI_CRYPTO_KEY: str = ''  # AES加密密钥，为空时使用SECRET_KEY
+
+    @field_validator('SQL_DEBUG',
+                     'EMBEDDING_ENABLED',
+                     'GENERATE_SQL_QUERY_LIMIT_ENABLED',
+                     'PARSE_REASONING_BLOCK_ENABLED',
+                     'PG_POOL_PRE_PING',
+                     'TABLE_EMBEDDING_ENABLED',
+                     mode='before')
+    @classmethod
+    def lowercase_bool(cls, v: Any) -> Any:
+        """将字符串形式的布尔值转换为Python布尔值"""
+        if isinstance(v, str):
+            v_lower = v.lower().strip()
+            if v_lower == 'true':
+                return True
+            elif v_lower == 'false':
+                return False
+        return v
+
+
+settings = Settings()  # type: ignore
+
+# 启动时检查 SECRET_KEY 是否已配置
+if settings.SECRET_KEY == "CHANGE_ME_IN_PRODUCTION_USE_ENV_FILE":
+    _config_logger.warning(
+        "⚠️  SECRET_KEY 未配置！正在使用不安全的默认值。"
+        "请在 .env 文件中设置 SECRET_KEY=<随机字符串>，否则 JWT Token 和加密数据不安全。"
+        "可使用命令生成: python -c \"import secrets; print(secrets.token_urlsafe(32))\""
+    )

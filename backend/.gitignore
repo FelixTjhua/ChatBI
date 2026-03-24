@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg
+*.egg-info/
+.venv/
+
+# Testing
+.pytest_cache/
+.hypothesis/
+.coverage
+htmlcov/
+.mypy_cache/
+.cache/
+
+# Runtime data
+data/
+logs/
+models/
+*.db
+*.sqlite3
+
+# Lock file (uv.lock should be committed for reproducible builds)
+# *.lock

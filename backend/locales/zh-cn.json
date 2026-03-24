@@ -1,0 +1,146 @@
+{
+  "i18n_default_workspace": "默认工作空间",
+  "i18n_ds_name_exist": "名称已存在",
+  "i18n_concat_admin": "请联系管理员！",
+  "i18n_exist": "{msg}已存在！",
+  "i18n_name": "名称",
+  "i18n_not_exist": "{msg}不存在！",
+  "i18n_error": "{key}错误！",
+  "i18n_miss_args": "缺失{key}参数！",
+  "i18n_format_invalid": "{key}格式不正确！",
+  "i18n_login": {
+    "account_pwd_error": "账号或密码错误！",
+    "no_associated_ws": "没有关联的工作空间，{msg}",
+    "user_disable": "账号已禁用，{msg}"
+  },
+  "i18n_register": {
+    "account_exists": "该账号已被注册！",
+    "email_exists": "该邮箱已被注册！",
+    "email_invalid": "邮箱格式不正确！",
+    "pwd_invalid": "密码格式不正确！需要8-20位，包含大小写字母、数字和特殊字符",
+    "no_workspace": "系统尚未创建工作空间，请联系管理员！",
+    "success": "注册成功！请登录",
+    "rate_limit_exceeded": "注册请求过于频繁，请稍后再试"
+  },
+  "i18n_user": {
+    "account": "账号",
+    "email": "邮箱",
+    "password": "密码",
+    "language_not_support": "系统不支持[{key}]语言！",
+    "ws_miss": "当前用户不在工作空间[{ws}]中！",
+    "batch_delete_limit": "批量删除最多支持{limit}条记录"
+  },
+  "i18n_ws": {
+    "title": "工作空间",
+    "cannot_delete_default": "无法删除默认工作空间",
+    "has_datasources": "该工作空间下有 {count} 个数据源，请先删除或迁移数据源",
+    "last_admin_cannot_demote": "无法降级最后一个管理员"
+  },
+  "i18n_permission": {
+    "only_admin": "仅支持管理员调用！",
+    "no_permission": "无权调用{url}{msg}",
+    "authenticate_invalid": "认证无效【{msg}】",
+    "token_expired": "Token 已过期"
+  },
+  "i18n_llm": {
+    "validate_error": "校验失败[{msg}]",
+    "delete_default_error": "无法删除默认模型[{key}]！",
+    "miss_default": "尚未配置默认大语言模型"
+  },
+  "i18n_ds_invalid": "数据源连接无效",
+  "i18n_embedded": {
+    "invalid_origin": "域名校验失败【{origin}】"
+  },
+  "i18n_terminology": {
+    "terminology_not_exists": "该术语不存在",
+    "datasource_cannot_be_none": "数据源不能为空",
+    "cannot_be_repeated": "术语名称，同义词不能重复",
+    "exists_in_db": "术语名称，同义词已存在",
+    "term_name": "术语名称",
+    "term_description": "术语描述",
+    "effective_data_sources": "生效数据源",
+    "all_data_sources": "所有数据源",
+    "synonyms": "同义词"
+  },
+  "i18n_data_training": {
+    "datasource_cannot_be_none": "数据源不能为空",
+    "datasource_assistant_cannot_be_none": "数据源或高级应用不能都为空",
+    "data_training_not_exists": "该示例不存在",
+    "exists_in_db": "该问题已存在",
+    "data_training": "SQL 示例库",
+    "problem_description": "问题描述",
+    "sample_sql": "示例 SQL",
+    "effective_data_sources": "生效数据源",
+    "advanced_application": "高级应用"
+  },
+  "i18n_custom_prompt": {
+    "exists_in_db": "模版名称已存在",
+    "not_exists": "该模版不存在",
+    "prompt_word_name": "提示词名称",
+    "prompt_word_content": "提示词内容",
+    "effective_data_sources": "生效数据源",
+    "all_data_sources": "所有数据源"
+  },
+  "i18n_excel_export": {
+    "data_is_empty": "表单数据为空，无法导出数据"
+  },
+  "i18n_chat": {
+    "rename_failed": "重命名会话失败",
+    "delete_failed": "删除会话失败",
+    "delete_record_failed": "删除聊天记录失败",
+    "create_failed": "创建会话失败",
+    "create_assistant_failed": "创建助手会话失败"
+  },
+  "i18n_file": {
+    "file_empty": "文件不能为空",
+    "unsupported_type": "不支持的文件类型: {ext}，允许的类型: {types}",
+    "size_exceeded": "文件大小超过限制: {size}MB",
+    "upload_failed": "文件上传失败: {msg}",
+    "filename_empty": "文件名不能为空",
+    "file_is_empty": "上传的文件为空",
+    "size_limit": "文件大小超过限制（最大{max}MB），当前文件: {current}MB",
+    "unsupported_ds_type": "不支持的数据源类型: {type}，合法类型: {types}",
+    "import_failed": "数据导入失败，请检查文件格式",
+    "unsupported_format": "不支持的文件格式: .{ext}，支持: {types}",
+    "doc_process_failed": "文档处理失败: {msg}"
+  },
+  "i18n_ds_permission": {
+    "save_failed": "保存权限失败",
+    "delete_failed": "删除权限失败",
+    "save_success": "保存成功",
+    "create_success": "创建成功",
+    "delete_success": "删除成功"
+  },
+  "i18n_document": {
+    "not_found": "文档不存在",
+    "no_permission": "无权限",
+    "ds_not_found": "数据源不存在",
+    "not_pdf_ds": "非PDF数据源",
+    "scanned_pdf": "PDF为扫描版（共{pages}页均为图片），OCR识别未能提取有效文字。请确认已安装tesseract和poppler，或上传文字版PDF。",
+    "empty_pdf": "PDF未提取到任何文本内容（共{pages}页），文件可能为空白或已损坏。",
+    "scanned_warning": "PDF中有{scanned}/{total}页为扫描图片且OCR识别失败，这些页面的内容无法被检索。",
+    "vectorize_warning": "共{total}个文本块中有{vectorized}个成功向量化。"
+  },
+  "i18n_dashboard": {
+    "chart_limit": "仪表板图表数量已达上限({limit}个)，请删除部分图表后重试",
+    "default_name": "默认仪表板",
+    "untitled": "未命名",
+    "data_count": "{count} 条数据",
+    "summary_prompt": "你是一位商业智能分析专家。请基于以下仪表板中的图表和数据，从商业数据分析角度用2-3句话总结关键洞察。\n重点关注：业务趋势变化、关键指标表现、潜在的业务机会或风险信号。\n请给出具有业务决策参考价值的分析结论。",
+    "summary_prompt_lang": "请用中文回答，保持简洁专业，突出业务价值。",
+    "fallback_summary": "当前仪表板包含 {count} 个可视化图表（{types}），建议结合业务目标进一步解读各指标趋势。"
+  },
+  "i18n_validator": {
+    "unsupported_ds_type": "不支持的数据源类型: {type}，合法类型: {valid}",
+    "unsupported_file_format": "不支持的文件格式: {ext}，支持: {supported}",
+    "crypto_key_missing": "加密密钥未配置，请设置 CHATBI_CRYPTO_KEY 环境变量或 SECRET_KEY",
+    "unsupported_file_type": "不支持的文件类型，仅支持: {types}"
+  },
+  "i18n_schema": {
+    "system_table": "你是一个数据库专家，擅长理解数据库表的业务含义。",
+    "system_field": "你是一个数据库专家，擅长理解数据库字段的业务含义。",
+    "infer_table": "请根据表名和字段名，推断这个数据库表的业务含义。\n\n表名: {table}\n字段: {fields}\n\n请用一句话简洁地描述这个表的业务用途。只返回描述文字，不要其他内容。",
+    "infer_field": "请根据字段名和类型，推断这个字段的业务含义。\n\n表名: {table}\n字段名: {field}\n字段类型: {type}\n\n请用一句话简洁地描述这个字段的业务含义。只返回描述文字，不要其他内容。",
+    "relationship_desc": "{from_table} 通过 {key} 关联到 {to_table}"
+  }
+}

@@ -1,0 +1,28 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- PostgreSQL 图标 - 参考官方蓝色品牌色和大象 Slonik -->
+  <defs>
+    <linearGradient id="pgBg" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#336791"/>
+      <stop offset="100%" stop-color="#264D73"/>
+    </linearGradient>
+    <filter id="pgShadow" x="-2" y="-1" width="52" height="52">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <!-- 圆角矩形背景 -->
+  <rect x="4" y="4" width="40" height="40" rx="10" fill="url(#pgBg)" filter="url(#pgShadow)"/>
+  <!-- 大象头部轮廓 - PostgreSQL 标志性 Slonik -->
+  <!-- 头部 -->
+  <path d="M24 10C18 10 14 14 14 20C14 23 15 25 17 27L16 33C16 34 17 35 18 34L21 31C22 31.5 23 32 24 32C25 32 26 31.5 27 31L30 34C31 35 32 34 32 33L31 27C33 25 34 23 34 20C34 14 30 10 24 10Z" fill="white" fill-opacity="0.9"/>
+  <!-- 耳朵 -->
+  <path d="M15 16C13 14 12 16 13 18L14 20" stroke="white" stroke-width="2" stroke-linecap="round" fill="none" stroke-opacity="0.7"/>
+  <!-- 眼睛 -->
+  <circle cx="20" cy="19" r="2" fill="#336791"/>
+  <circle cx="20" cy="19" r="0.8" fill="#1a3a5c"/>
+  <!-- 象鼻 -->
+  <path d="M24 22C24 22 26 24 28 24C30 24 31 22 31 21" stroke="#336791" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <!-- 象牙 -->
+  <path d="M22 26L21 29" stroke="#e0e0e0" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- PostgreSQL 文字 -->
+  <text x="24" y="42" font-family="system-ui,-apple-system,sans-serif" font-size="4" font-weight="700" fill="white" text-anchor="middle" letter-spacing="0.3" fill-opacity="0.85">PostgreSQL</text>
+</svg>

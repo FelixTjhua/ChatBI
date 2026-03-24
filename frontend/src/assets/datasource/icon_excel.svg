@@ -1,0 +1,29 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Excel 图标 - 参考 Microsoft Excel 官方绿色品牌色 -->
+  <defs>
+    <linearGradient id="excelBg" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#21A366"/>
+      <stop offset="100%" stop-color="#107C41"/>
+    </linearGradient>
+    <linearGradient id="excelSheet" x1="18" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#e8f5e9" stop-opacity="0.9"/>
+    </linearGradient>
+    <filter id="excelShadow" x="-2" y="-1" width="52" height="52">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <!-- 白色文档底层 -->
+  <rect x="16" y="6" width="28" height="36" rx="2.5" fill="url(#excelSheet)" filter="url(#excelShadow)"/>
+  <!-- 表格网格线 -->
+  <line x1="22" y1="14" x2="38" y2="14" stroke="#107C41" stroke-width="0.6" stroke-opacity="0.4"/>
+  <line x1="22" y1="20" x2="38" y2="20" stroke="#107C41" stroke-width="0.6" stroke-opacity="0.4"/>
+  <line x1="22" y1="26" x2="38" y2="26" stroke="#107C41" stroke-width="0.6" stroke-opacity="0.4"/>
+  <line x1="22" y1="32" x2="38" y2="32" stroke="#107C41" stroke-width="0.6" stroke-opacity="0.4"/>
+  <line x1="30" y1="10" x2="30" y2="36" stroke="#107C41" stroke-width="0.6" stroke-opacity="0.4"/>
+  <!-- 绿色左侧面板 -->
+  <rect x="4" y="10" width="20" height="28" rx="2.5" fill="url(#excelBg)" filter="url(#excelShadow)"/>
+  <!-- X 标志 -->
+  <path d="M9 17L13.5 24L9 31" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M19 17L14.5 24L19 31" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

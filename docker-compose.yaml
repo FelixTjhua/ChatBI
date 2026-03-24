@@ -1,0 +1,40 @@
+services:
+  chatbi:
+    image: chatbi/chatbi
+    container_name: chatbi
+    restart: always
+    networks:
+      - chatbi-network
+    ports:
+      - 8000:8000
+      - 8001:8001
+    env_file:
+      - .env
+    environment:
+      # Database configuration
+      POSTGRES_SERVER: ${POSTGRES_SERVER:-localhost}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-chatbi}
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?请在.env文件中设置POSTGRES_PASSWORD}
+      # Project basic settings
+      PROJECT_NAME: "ChatBI"
+      DEFAULT_PWD: ${DEFAULT_PWD:-ChatBI@123456}
+      # MCP settings
+      SERVER_IMAGE_HOST: ${SERVER_IMAGE_HOST:-http://localhost:8001/images/}
+      # Auth & Security
+      SECRET_KEY: ${SECRET_KEY:?请在.env文件中设置SECRET_KEY}
+      # CORS settings
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-"http://localhost,http://localhost:5173"}
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      SQL_DEBUG: ${SQL_DEBUG:-False}
+    volumes:
+      - ./data/chatbi/excel:/opt/chatbi/data/excel
+      - ./data/chatbi/file:/opt/chatbi/data/file
+      - ./data/chatbi/images:/opt/chatbi/images
+      - ./data/chatbi/logs:/opt/chatbi/app/logs
+      - ./data/postgresql:/var/lib/postgresql/data
+
+networks:
+  chatbi-network:
