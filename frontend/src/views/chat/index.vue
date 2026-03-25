@@ -942,6 +942,17 @@ function onClickHistory(chat: ChatInfo) {
   
   // 移除所有数据预加载，避免与子组件 onMounted 的数据加载竞态
   // ChartAnswer/AnalysisAnswer/PredictAnswer 组件挂载时会自行检查并加载数据
+
+  // 切换对话后，检查最后一条记录是否缺少推荐问题
+  // 如果推荐问题为空（可能是上次SSE中断导致），自动重新请求
+  nextTick(() => {
+    if (chat.records && chat.records.length > 0) {
+      const lastRecord = chat.records[chat.records.length - 1]
+      if (lastRecord && lastRecord.finish && !lastRecord.error && !lastRecord.recommended_question) {
+        getRecommendQuestions(lastRecord.id)
+      }
+    }
+  })
 }
 
 const currentChatEngineType = computed(() => {

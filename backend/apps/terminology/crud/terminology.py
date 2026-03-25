@@ -488,13 +488,43 @@ def save_embeddings(session_maker, ids: List[int]):
         session_maker.remove()
 
 
-embedding_sql = f"""SELECT id, pid, word, similarity, specific_ds,
-    CASE
-    """
+embedding_sql = """WITH scored AS (
+     SELECT t.id, t.pid, t.word,
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity,
+            t.specific_ds,
+            CASE WHEN t.specific_ds = true THEN t.datasource_ids ELSE NULL END AS datasource_ids
+     FROM business_term t
+     WHERE t.oid = :oid
+       AND t.embedding IS NOT NULL
+       AND t.pid IS NULL
+       AND t.enabled = true
+       AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= :similarity_threshold
+     ORDER BY similarity DESC
+     LIMIT :top_count
+)
+SELECT id, pid, word, similarity, specific_ds,
+       CASE WHEN specific_ds = true THEN datasource_ids ELSE NULL END AS datasource_ids
+FROM scored"""
 
-embedding_sql_with_datasource = f"""SELECT id, pid, word, similarity, specific_ds,
-    CASE
-    """
+embedding_sql_with_datasource = """WITH scored AS (
+     SELECT t.id, t.pid, t.word,
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity,
+            t.specific_ds,
+            CASE WHEN t.specific_ds = true THEN t.datasource_ids ELSE NULL END AS datasource_ids
+     FROM business_term t
+     WHERE t.oid = :oid
+       AND t.embedding IS NOT NULL
+       AND t.pid IS NULL
+       AND t.enabled = true
+       AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= :similarity_threshold
+       AND (t.specific_ds = false OR t.specific_ds IS NULL
+            OR (t.specific_ds = true AND t.datasource_ids @> jsonb_build_array(:datasource)))
+     ORDER BY similarity DESC
+     LIMIT :top_count
+)
+SELECT id, pid, word, similarity, specific_ds,
+       CASE WHEN specific_ds = true THEN datasource_ids ELSE NULL END AS datasource_ids
+FROM scored"""
 
 
 def select_terminology_by_word(session: SessionDep, word: str, oid: int, datasource: int = None):
@@ -554,10 +584,14 @@ def select_terminology_by_word(session: SessionDep, word: str, oid: int, datasou
                 if datasource is not None:
                     results = session.execute(text(embedding_sql_with_datasource),
                                               {'embedding_array': str(embedding), 'oid': oid,
-                                               'datasource': datasource}).fetchall()
+                                               'datasource': datasource,
+                                               'similarity_threshold': settings.EMBEDDING_TERMINOLOGY_SIMILARITY,
+                                               'top_count': settings.EMBEDDING_TERMINOLOGY_TOP_COUNT}).fetchall()
                 else:
                     results = session.execute(text(embedding_sql),
-                                              {'embedding_array': str(embedding), 'oid': oid}).fetchall()
+                                              {'embedding_array': str(embedding), 'oid': oid,
+                                               'similarity_threshold': settings.EMBEDDING_TERMINOLOGY_SIMILARITY,
+                                               'top_count': settings.EMBEDDING_TERMINOLOGY_TOP_COUNT}).fetchall()
 
                 for row in results:
                     _list.append(Terminology(id=row.id, word=row.word, pid=row.pid))
@@ -756,7 +790,19 @@ def select_terminology_by_word_with_details(session: SessionDep, word: str, oid:
             if datasource is not None:
                 embedding_sql_detail = """WITH scored AS (
      SELECT t.id, t.pid, t.word, t.description, t.sql_mapping,
-     """
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity
+     FROM business_term t
+     WHERE t.oid = :oid
+       AND t.embedding IS NOT NULL
+       AND t.pid IS NULL
+       AND t.enabled = true
+       AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= :similarity_threshold
+       AND (t.specific_ds = false OR t.specific_ds IS NULL
+            OR (t.specific_ds = true AND t.datasource_ids @> jsonb_build_array(:datasource)))
+     ORDER BY similarity DESC
+     LIMIT :top_count
+)
+SELECT id, pid, word, description, sql_mapping, similarity FROM scored"""
                 vector_results = session.execute(
                     text(embedding_sql_detail),
                     {
@@ -770,7 +816,17 @@ def select_terminology_by_word_with_details(session: SessionDep, word: str, oid:
             else:
                 embedding_sql_detail = """WITH scored AS (
      SELECT t.id, t.pid, t.word, t.description, t.sql_mapping,
-     """
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity
+     FROM business_term t
+     WHERE t.oid = :oid
+       AND t.embedding IS NOT NULL
+       AND t.pid IS NULL
+       AND t.enabled = true
+       AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= :similarity_threshold
+     ORDER BY similarity DESC
+     LIMIT :top_count
+)
+SELECT id, pid, word, description, sql_mapping, similarity FROM scored"""
                 vector_results = session.execute(
                     text(embedding_sql_detail),
                     {

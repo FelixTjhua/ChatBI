@@ -132,13 +132,13 @@ def search_document_chunks(
      c.info,
      c.library_id,
      d.filename,
-     1 - (c.embedding <=> :embedding::vector) AS similarity
+     1 - (c.embedding <=> cast(:embedding AS vector)) AS similarity
 FROM core_document_chunk c
 JOIN core_document d ON c.document_id = d.id
 WHERE d.oid = :oid
   AND c.embedding IS NOT NULL
   AND (c.chunk_type IS NULL OR c.chunk_type != 'table_overlap')
-  AND 1 - (c.embedding <=> :embedding::vector) >= :threshold"""
+  AND 1 - (c.embedding <=> cast(:embedding AS vector)) >= :threshold"""
         
         params = {
             "embedding": emb_str,
@@ -163,7 +163,7 @@ WHERE d.oid = :oid
         if not results and ds_id is not None:
             try:
                 from apps.datasource.models.datasource import CoreDatasource
-                from common.utils.aes_util import aes_decrypt
+                from apps.datasource.utils.utils import aes_decrypt
                 import json as _json
                 ds_record = session.query(CoreDatasource).filter(CoreDatasource.id == ds_id).first()
                 if ds_record and ds_record.type and ds_record.type.lower() == 'pdf' and ds_record.configuration:

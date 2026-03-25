@@ -5060,8 +5060,8 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
                                 'type': 'chart_image',
                                 'url': image_url
                             }).decode() + '\n\n'
-                    except Exception as e:
-                        ChatBILogUtil.error(f"[chart-image] Failed to generate chart image: {e}")
+                    except Exception:
+                        pass  # G2 SSR截图服务未启动时静默跳过，不影响核心功能
                 
                 # ==========  UX优化：延迟执行内联分析/预测（finish后执行） ==========
                 if _deferred_inline_analysis:

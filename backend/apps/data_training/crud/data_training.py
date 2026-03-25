@@ -420,12 +420,38 @@ def save_embeddings(session_maker, ids: List[int]):
         session_maker.remove()
 
 
-embedding_sql = f"""SELECT id, datasource, datasource_ids, question, similarity, specific_ds,
-    CASE
-    """
-embedding_sql_in_advanced_application = f"""SELECT id, advanced_application, question, similarity
-    FROM
-    """
+embedding_sql = """WITH scored AS (
+     SELECT t.id, t.datasource, t.datasource_ids, t.question,
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity,
+            t.specific_ds,
+            CASE WHEN t.specific_ds = true THEN t.datasource_ids ELSE NULL END AS ds_ids
+     FROM business_sql_example t
+     WHERE t.oid = :oid
+       AND t.embedding IS NOT NULL
+       AND t.enabled = true
+       AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= 0.28
+       AND (t.specific_ds = false OR t.specific_ds IS NULL
+            OR (t.specific_ds = true AND (t.datasource = :datasource OR t.datasource_ids @> jsonb_build_array(:datasource))))
+     ORDER BY similarity DESC
+     LIMIT 8
+)
+SELECT id, datasource, datasource_ids, question, similarity, specific_ds,
+       CASE WHEN specific_ds = true THEN ds_ids ELSE NULL END AS datasource_ids
+FROM scored"""
+
+embedding_sql_in_advanced_application = """WITH scored AS (
+     SELECT t.id, t.advanced_application, t.question,
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity
+     FROM business_sql_example t
+     WHERE t.oid = :oid
+       AND t.embedding IS NOT NULL
+       AND t.enabled = true
+       AND t.advanced_application = :advanced_application
+       AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= 0.28
+     ORDER BY similarity DESC
+     LIMIT 8
+)
+SELECT id, advanced_application, question, similarity FROM scored"""
 
 
 def _build_ds_scope_filter(datasource, advanced_application_id):
@@ -492,14 +518,20 @@ def _token_fuzzy_match(session: SessionDep, question: str, oid: int,
     elif datasource is not None:
         ds_filter_sql = """AND (
      (specific_ds = false OR specific_ds IS NULL)
-     """
+     OR (specific_ds = true AND (datasource = :datasource_id OR datasource_ids @> jsonb_build_array(:datasource_id)))
+        )"""
         params['datasource_id'] = datasource
     else:
         ds_filter_sql = "AND (specific_ds = false OR specific_ds IS NULL)"
     
     sql = f"""SELECT id, question, specific_ds, match_count FROM (
     SELECT id, question, specific_ds, ({match_count_expr}) as match_count
-    """
+    FROM business_sql_example
+    WHERE oid = :oid AND enabled = true {ds_filter_sql}
+    ) sub
+    WHERE match_count >= {min_match}
+    ORDER BY match_count DESC
+    LIMIT 5"""
     
     try:
         results = session.execute(text(sql), params).fetchall()
@@ -582,9 +614,20 @@ def select_training_by_question(session: SessionDep, question: str, oid: int, da
                                               {'embedding_array': str(embedding), 'oid': oid, 'datasource': datasource})
                 else:
                     # 没有指定数据源时，只检索全局知识库
-                    global_embedding_sql = f"""SELECT id, datasource, question, similarity, specific_ds
-    FROM
-    """
+                    global_embedding_sql = """WITH scored AS (
+     SELECT t.id, t.datasource, t.question,
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity,
+            t.specific_ds
+     FROM business_sql_example t
+     WHERE t.oid = :oid
+       AND t.embedding IS NOT NULL
+       AND t.enabled = true
+       AND (t.specific_ds = false OR t.specific_ds IS NULL)
+       AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= 0.28
+     ORDER BY similarity DESC
+     LIMIT 8
+)
+SELECT id, datasource, question, similarity, specific_ds FROM scored"""
                     results = session.execute(text(global_embedding_sql),
                                               {'embedding_array': str(embedding), 'oid': oid})
 
@@ -762,25 +805,52 @@ def select_training_by_question_with_details(session: SessionDep, question: str,
             embedding = _embed_cache.get_or_compute(question)
 
             # 使用 CTE 避免重复计算余弦距离（与 terminology.py 对齐）
-            embedding_sql_detail = """WITH scored AS (
-     SELECT t.id, t.question, t.description,
-     """
+            embedding_sql_detail = ""
             
             # 修改查询逻辑：同时检索全局知识库和特定数据源的知识库
             if datasource is not None:
-                # 在 CTE 内部已经过滤了 oid/enabled/embedding，这里追加 specific_ds 过滤
-                # 由于 CTE 没有 SELECT specific_ds，需要重写为在 CTE 内部过滤
                 embedding_sql_detail = """WITH scored AS (
      SELECT t.id, t.question, t.description,
-     """
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity
+     FROM business_sql_example t
+     WHERE t.oid = :oid
+       AND t.embedding IS NOT NULL
+       AND t.enabled = true
+       AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= :similarity_threshold
+       AND (t.specific_ds = false OR t.specific_ds IS NULL
+            OR (t.specific_ds = true AND (t.datasource = :datasource OR t.datasource_ids @> jsonb_build_array(:datasource))))
+     ORDER BY similarity DESC
+     LIMIT :top_count
+)
+SELECT id, question, description, similarity FROM scored"""
             elif advanced_application_id is not None:
                 embedding_sql_detail = """WITH scored AS (
      SELECT t.id, t.question, t.description,
-     """
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity
+     FROM business_sql_example t
+     WHERE t.oid = :oid
+       AND t.embedding IS NOT NULL
+       AND t.enabled = true
+       AND t.advanced_application = :advanced_application
+       AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= :similarity_threshold
+     ORDER BY similarity DESC
+     LIMIT :top_count
+)
+SELECT id, question, description, similarity FROM scored"""
             else:
                 embedding_sql_detail = """WITH scored AS (
      SELECT t.id, t.question, t.description,
-     """
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity
+     FROM business_sql_example t
+     WHERE t.oid = :oid
+       AND t.embedding IS NOT NULL
+       AND t.enabled = true
+       AND (t.specific_ds = false OR t.specific_ds IS NULL)
+       AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= :similarity_threshold
+     ORDER BY similarity DESC
+     LIMIT :top_count
+)
+SELECT id, question, description, similarity FROM scored"""
 
             params = {
                 'embedding_array': str(embedding), 

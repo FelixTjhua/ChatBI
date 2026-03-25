@@ -90,7 +90,7 @@ class SecureEncryption:
             return decrypted.decode('utf-8')
         except Exception as e:
             import logging
-            logging.getLogger(__name__).error(f"decrypt_from_single_string 失败: {e}")
+            logging.getLogger(__name__).debug(f"decrypt_from_single_string: {e}")
             raise
     
     @staticmethod
