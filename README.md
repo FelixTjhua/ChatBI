@@ -116,6 +116,8 @@ docker run -p 8000:8000 chatbi
 - 账号: `admin`
 - 密码: `ChatBI@123456`
 
+> 首次登录后请立即修改默认密码。生产环境部署前，请在 `.env` 中配置强密码的 `SECRET_KEY` 和 `POSTGRES_PASSWORD`。
+
 ## 论文信息
 
 - **题目**: 基于RAG与大语言模型的商业智能分析对话系统

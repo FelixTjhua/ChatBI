@@ -22,29 +22,11 @@ const props = withDefaults(
   }
 )
 
-// 处理阶段配置 - 根据路径类型显示不同阶段
+// 处理阶段配置 - 只显示生成阶段（查询理解和RAG检索在后台静默执行）
 const stages = computed(() => {
   if (props.isDirectAnswer) {
-    // 直接回答路径（非SQL）：查询理解 → RAG知识检索 → LLM生成回答
+    // 直接回答路径：只显示LLM生成
     return [
-      {
-        key: 'query',
-        icon: '🎯',
-        label: t('rag_process.query_understanding'),
-        desc: t('rag_process.query_understanding_desc'),
-        show: true,
-        detail: t('rag_process.detail_query_understanding'),
-        ragPhase: 'Q',
-      },
-      {
-        key: 'rag',
-        icon: '🔍',
-        label: t('rag_process.rag_retrieval'),
-        desc: t('rag_process.rag_desc_direct'),
-        show: props.ragEnabled,
-        detail: t('rag_process.detail_terminology_doc'),
-        ragPhase: 'R+A',
-      },
       {
         key: 'direct',
         icon: '💬',
@@ -56,29 +38,9 @@ const stages = computed(() => {
       },
     ]
   }
-  // PDF数据源走文档问答路径，不走SQL路径
-  // PDF路径增加"上下文增强"步骤，展示完整的RAG三阶段
-  // 后端 augment() 对PDF文档片段执行了预算控制和压缩，之前前端未展示
   if (props.dsType?.toLowerCase() === 'pdf') {
+    // PDF路径：只显示生成回答
     return [
-      {
-        key: 'query',
-        icon: '🎯',
-        label: t('rag_process.query_understanding'),
-        desc: t('rag_process.query_understanding_desc_pdf'),
-        show: true,
-        detail: t('rag_process.detail_query_understanding'),
-        ragPhase: 'Q',
-      },
-      {
-        key: 'rag',
-        icon: '🔍',
-        label: t('rag_process.rag_retrieval'),
-        desc: t('rag_process.rag_desc_pdf'),
-        show: props.ragEnabled,
-        detail: t('rag_process.detail_pdf_retrieval_full'),
-        ragPhase: 'R',
-      },
       {
         key: 'direct',
         icon: '💬',
@@ -86,32 +48,12 @@ const stages = computed(() => {
         desc: t('rag_process.answer_desc_pdf'),
         show: true,
         detail: t('rag_process.detail_llm_text'),
-        ragPhase: 'A+G',
+        ragPhase: 'G',
       },
     ]
   }
-  // 结构化数据源（Database/Excel/CSV）：SQL查询路径
-  // 可用知识库：商业术语库(向量检索) + SQL示例库(向量检索) + 自定义提示词(规则注入)
-  // 完整流程：查询理解 → RAG知识检索 → SQL生成 → SQL执行 → 图表生成 [→ 数据分析/预测]
+  // 结构化数据源（Database/Excel/CSV）：只显示生成阶段
   const baseStages = [
-    {
-      key: 'query',
-      icon: '🎯',
-      label: t('rag_process.query_understanding'),
-      desc: t('rag_process.query_understanding_desc'),
-      show: true,
-      detail: t('rag_process.detail_query_understanding'),
-      ragPhase: 'Q',
-    },
-    {
-      key: 'rag',
-      icon: '🔍',
-      label: t('rag_process.rag_retrieval'),
-      desc: t('rag_process.rag_desc_structured'),
-      show: props.ragEnabled,
-      detail: t('rag_process.detail_structured_retrieval'),
-      ragPhase: 'R+A',
-    },
     {
       key: 'sql',
       icon: '🧠',
@@ -173,6 +115,8 @@ const stages = computed(() => {
 const visibleStages = computed(() => stages.value.filter((s) => s.show))
 
 const currentStageIndex = computed(() => {
+  // query/rag 阶段在后台静默执行，映射到第一个可见步骤（显示为准备中）
+  if (props.stage === 'query' || props.stage === 'rag') return 0
   const idx = visibleStages.value.findIndex((s) => s.key === props.stage)
   return idx >= 0 ? idx : -1
 })

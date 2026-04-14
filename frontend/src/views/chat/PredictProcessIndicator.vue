@@ -17,33 +17,6 @@ const props = withDefaults(
 
 const stages = computed(() => [
   {
-    key: 'query',
-    icon: '🎯',
-    label: t('predict_process.query_understanding'),
-    desc: t('predict_process.query_understanding_desc'),
-    detail: t('predict_process.detail_query_understanding'),
-    show: true,
-    ragPhase: 'Q',
-  },
-  {
-    key: 'rag',
-    icon: '🔍',
-    label: t('predict_process.rag_retrieve'),
-    desc: t('predict_process.rag_retrieve_desc'),
-    detail: t('rag.terminology') + ' + ' + t('rag.sql_examples'),
-    show: true,
-    ragPhase: 'R',
-  },
-  {
-    key: 'augment',
-    icon: '',
-    label: t('thinking.step_context_augmentation'),
-    desc: t('predict_process.context_augmentation_desc'),
-    detail: t('predict_process.context_augmentation_detail'),
-    show: true,
-    ragPhase: 'A',
-  },
-  {
     key: 'predicting',
     icon: '🔮',
     label: t('predict_process.ai_predict'),
@@ -55,13 +28,9 @@ const stages = computed(() => [
 ])
 
 const currentStageIndex = computed(() => {
-  if (props.stage === 'query') return 0
-  if (props.stage === 'rag') return 1
-  // 新增上下文增强阶段
-  if (props.stage === 'augment') return 2
-  if (['loading', 'predicting', 'generating', 'chart'].includes(props.stage)) return 3
-  // 'failed' 状态回退到最后一个已知阶段
-  if (props.stage === 'failed') return 3
+  // 所有阶段都映射到唯一的 predicting 步骤（index 0）
+  if (['query', 'rag', 'augment', 'loading', 'predicting', 'generating', 'chart'].includes(props.stage)) return 0
+  if (props.stage === 'failed') return 0
   return -1
 })
 

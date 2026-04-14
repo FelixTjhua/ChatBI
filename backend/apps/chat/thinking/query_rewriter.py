@@ -844,8 +844,10 @@ class QueryRewriter:
                 return 'fact_query'
 
         # ========== 默认：根据是否包含数据上下文决定路由 ==========
+        # 包含数据指标关键词的名词短语（如"华东地区电子产品的销售额"）
+        # 是明确的数据查询意图，应路由到 fact_query 而非 ambiguous_query
         if any(kw in question_lower for kw in data_context_patterns):
-            return 'ambiguous_query'
+            return 'fact_query'
         return 'irrelevant_query'
 
     @staticmethod
@@ -1001,11 +1003,27 @@ class QueryRewriter:
         """
         生成扩展查询，用于多路检索提升召回率
         
-         原代码检查intent=='aggregation'和'ranking'，但_detect_intent
-        从不返回这些值（它返回data_query/analysis/prediction/general_chat）
-        现在使用实际的intent值 + 关键词检测来生成扩展查询
+        策略：
+        1. 短查询扩展：对 ≤6 字的短查询，自动补充业务上下文生成更具体的变体
+        2. 意图驱动扩展：根据检测到的意图，去除意图修饰词提取核心实体
+        3. 关键词组合：用提取的关键词拼接生成简短查询
         """
         expanded = []
+
+        # 短查询扩展策略：≤6 字的查询语义太泛，向量检索容易漏召回
+        # 通过补充常见业务操作词，生成更具体的变体
+        # 排除寒暄和无关查询（"你好统计"没有意义）
+        q_stripped = question.strip()
+        if len(q_stripped) <= 6 and keywords and intent not in ('irrelevant_query', 'unknown'):
+            _biz_suffixes_cn = ['统计', '查询', '分析', '汇总', '排名']
+            _biz_suffixes_en = ['statistics', 'query', 'analysis', 'summary', 'ranking']
+            # 判断是否为中文
+            has_cn = any('\u4e00' <= c <= '\u9fff' for c in q_stripped)
+            suffixes = _biz_suffixes_cn if has_cn else _biz_suffixes_en
+            for suffix in suffixes[:2]:
+                variant = f'{q_stripped}{suffix}'
+                if variant != question and variant not in expanded:
+                    expanded.append(variant)
 
         # 基于关键词检测聚合意图
         if intent in ('data_query', 'fact_query', 'trend_analysis'):
@@ -1077,6 +1095,13 @@ class QueryRewriter:
             if short_query != question and short_query not in expanded:
                 expanded.append(short_query)
 
+        # HyDE 风格假设文档生成（规则版，不调 LLM）
+        # 将用户问题转换为"假设回答"的形式，提升向量检索的语义匹配度
+        # 例如："总销售额是多少" → "总销售额为XXX万元"
+        hyde_query = QueryRewriter._generate_hyde_query(question, keywords, intent)
+        if hyde_query and hyde_query not in expanded:
+            expanded.append(hyde_query)
+
         seen = set()
         deduped = []
         for q in expanded:
@@ -1085,8 +1110,66 @@ class QueryRewriter:
                 seen.add(q_stripped)
                 deduped.append(q_stripped)
 
-        return deduped[:3]  # 最多3个扩展查询
+        return deduped[:5]  # 最多5个扩展查询
 
+    @staticmethod
+    def _generate_hyde_query(question: str, keywords: List[str], intent: str) -> Optional[str]:
+        """HyDE 风格假设文档生成（规则版）
+
+        将用户问题转换为"假设回答"的陈述句形式。
+        原理：向量检索时，"假设回答"与知识库中的真实文档/术语描述
+        在语义空间中更接近，从而提升召回率。
+
+        例如：
+        - "总销售额是多少" → "总销售额为一定金额，通过SUM函数计算销售额字段得到"
+        - "各产品类别的销售额" → "按产品类别分组统计销售额，使用GROUP BY产品类别"
+        - "毛利率是什么" → "毛利率是销售收入减去成本后占收入的百分比"
+        """
+        if not question or not keywords:
+            return None
+
+        q = question.strip()
+
+        # 术语解释类：生成定义式假设文档
+        if intent == 'term_explanation':
+            core = re.sub(r'(是什么|什么是|什么意思|怎么计算|计算公式|定义|含义|解释)', '', q).strip()
+            if core and len(core) >= 2:
+                return f'{core}是一个业务指标，用于衡量企业经营状况，通过特定公式计算得到'
+
+        # 聚合查询类：生成 SQL 操作描述
+        # 只匹配查询开头或独立出现的聚合词，避免"退货数量"中的"数量"误匹配
+        if intent in ('fact_query', 'statistical_analysis'):
+            agg_patterns = [
+                (r'^总(.{2,})', 'SUM', '总'),
+                (r'^平均(.{2,})', 'AVG', '平均'),
+                (r'最大(.{2,})', 'MAX', '最大'),
+                (r'最小(.{2,})', 'MIN', '最小'),
+            ]
+            for pattern, func, prefix in agg_patterns:
+                m = re.search(pattern, q)
+                if m:
+                    entity = m.group(1).replace('是多少', '').replace('查询', '').strip()
+                    if entity and len(entity) >= 2:
+                        return f'使用{func}函数计算{entity}字段，得到{prefix}{entity}的数值结果'
+                        break
+
+        # 分组统计类：生成 GROUP BY 描述
+        if intent in ('fact_query', 'statistical_analysis') and any(w in q for w in ['各', '每个', '按']):
+            return f'按维度字段分组统计，使用GROUP BY对{" ".join(keywords[:2])}进行聚合分析'
+
+        # 趋势分析类：生成时间序列描述
+        if intent == 'trend_analysis':
+            return f'{" ".join(keywords[:2])}随时间变化的趋势，按月份或季度统计数据变化规律'
+
+        # 对比分析类
+        if intent == 'comparison_analysis':
+            return f'对比不同维度下的{" ".join(keywords[:2])}差异，分析各组之间的数据表现'
+
+        # 预测类
+        if intent == 'prediction':
+            return f'基于历史{" ".join(keywords[:2])}数据，预测未来时间段的数值走势和变化趋势'
+
+        return None
 
     @staticmethod
     def decompose_complex_query(question: str) -> Dict[str, any]:

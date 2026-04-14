@@ -864,17 +864,27 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
         
         # 保存推荐问题答案，如果失败则使用空数组
         try:
-            self.record = save_recommend_question_answer(session=_session, record_id=self.record.id,
+            result = save_recommend_question_answer(session=_session, record_id=self.record.id,
                                                          answer={'content': filtered_guess_text})
-            ChatBILogUtil.info(f"推荐问题保存成功，recommended_question: {self.record.recommended_question}")
+            if result:
+                self.record = result
+                ChatBILogUtil.info(f"推荐问题保存成功，recommended_question: {self.record.recommended_question}")
+            else:
+                ChatBILogUtil.warning(f"推荐问题保存跳过（record可能已被删除）")
+                return
         except Exception as e:
             ChatBILogUtil.exception()
             # 如果保存失败，使用空数组作为默认值
-            self.record = save_recommend_question_answer(session=_session, record_id=self.record.id,
-                                                         answer={'content': '[]'})
+            try:
+                result = save_recommend_question_answer(session=_session, record_id=self.record.id,
+                                                             answer={'content': '[]'})
+                if result:
+                    self.record = result
+            except Exception:
+                pass
             ChatBILogUtil.warning(f"推荐问题保存失败，使用空数组作为默认值")
 
-        yield {'recommended_question': self.record.recommended_question}
+        yield {'recommended_question': getattr(self.record, 'recommended_question', '[]')}
 
         # 分层推荐问题引擎
         # 在LLM生成的推荐问题基础上，补充前置概览类推荐
@@ -1434,10 +1444,22 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
     def _execute_query_understanding(self, session, ds_type: str, path_label: str = '') -> Dict:
         """修复 QU-5：统一的查询理解流程，select_datasource 和 existing_ds 共用"""
         from apps.chat.thinking.query_rewriter import QueryRewriter
+        from apps.chat.thinking.llm_query_rewriter import llm_enhanced_rewrite
 
-        # Step 1: 查询重写（术语扩展由RAG阶段的post_expand_with_terminologies完成）
-        rewrite_result = QueryRewriter.rewrite(
-            self.chat_question.question, ds_type=ds_type
+        # 构建对话历史（供 LLM 重写使用）
+        dialogue_history = None
+        if hasattr(self, 'dialogue_tracker') and self.dialogue_tracker and self.dialogue_tracker.turns:
+            dialogue_history = [
+                {'question': t.question, 'answer': getattr(t, 'answer', '')}
+                for t in self.dialogue_tracker.turns[-5:]
+            ]
+
+        # 混合查询重写：规则层 + LLM层（自动判断是否需要 LLM）
+        rewrite_result = llm_enhanced_rewrite(
+            question=self.chat_question.question,
+            ds_type=ds_type,
+            dialogue_history=dialogue_history,
+            llm=self.llm if hasattr(self, 'llm') else None,
         )
         self._rewrite_result = rewrite_result
         retrieval_question = rewrite_result['rewritten']

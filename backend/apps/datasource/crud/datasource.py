@@ -521,6 +521,53 @@ def get_table_schema_with_details(session: SessionDep, current_user: CurrentUser
     all_tables = []  # temp save all tables
     # 记录表名映射（id → 表名/注释），用于后续构建 table_candidates
     _table_name_map = {}
+
+    # 预取文本列的枚举值（低基数列），帮助 LLM 生成正确的 WHERE 条件
+    _TEXT_TYPES = {'text', 'varchar', 'char', 'character varying', 'nvarchar', 'nchar', 'character'}
+    _field_examples = {}  # key: (table_name, field_name), value: list[str]
+    try:
+        _ds_type_lower_enum = (ds.type or '').lower()
+        for obj in table_objs:
+            _tbl_name = obj.table.table_name
+            if not obj.fields:
+                continue
+            for field in obj.fields:
+                if not field.field_type:
+                    continue
+                ft = field.field_type.lower().split('(')[0].strip()
+                if ft not in _TEXT_TYPES:
+                    continue
+                try:
+                    _safe_tbl = '"' + _tbl_name.replace('"', '""') + '"'
+                    _safe_fld = '"' + field.field_name.replace('"', '""') + '"'
+                    _enum_sql = (
+                        f'SELECT DISTINCT {_safe_fld} FROM {_safe_tbl} '
+                        f'WHERE {_safe_fld} IS NOT NULL '
+                        f'ORDER BY {_safe_fld} LIMIT 21'
+                    )
+                    _enum_values = []
+                    if _ds_type_lower_enum in ('excel', 'csv'):
+                        _engine_enum = get_engine_conn()
+                        with _engine_enum.connect() as _conn_enum:
+                            _rows = _conn_enum.execute(text(_enum_sql)).fetchall()
+                            _enum_values = [str(r[0]) for r in _rows if r[0] is not None]
+                    else:
+                        from apps.db.db import exec_sql as _enum_exec_sql
+                        _enum_result = _enum_exec_sql(ds=ds, sql=_enum_sql, origin_column=False)
+                        if _enum_result and _enum_result.get('data'):
+                            _flds = _enum_result.get('fields', [])
+                            _fld_key = _flds[0] if _flds else field.field_name
+                            _enum_values = [str(row.get(_fld_key, '')) for row in _enum_result['data']
+                                            if row.get(_fld_key) is not None]
+                    # 只注入低基数列（≤20个不同值），高基数列跳过
+                    if 0 < len(_enum_values) <= 20:
+                        _field_examples[(_tbl_name, field.field_name)] = _enum_values
+                except Exception as _e:
+                    ChatBILogUtil.warning(
+                        f"[get_table_schema] Failed to query enum values for {_tbl_name}.{field.field_name}: {_e}")
+    except Exception as _e:
+        ChatBILogUtil.warning(f"[get_table_schema] Failed to pre-fetch enum values: {_e}")
+
     for obj in table_objs:
         schema_table = ''
         schema_table += f"# Table: {db_name}.{obj.table.table_name}" if ds.type != "mysql" else f"# Table: {obj.table.table_name}"
@@ -538,10 +585,14 @@ def get_table_schema_with_details(session: SessionDep, current_user: CurrentUser
                 field_comment = ''
                 if field.custom_comment:
                     field_comment = field.custom_comment.strip()
+                _examples = _field_examples.get((obj.table.table_name, field.field_name))
+                _examples_str = ''
+                if _examples:
+                    _examples_str = ", examples:[" + ",".join(f"'{v}'" for v in _examples) + "]"
                 if field_comment == '':
-                    field_list.append(f"({field.field_name}:{field.field_type})")
+                    field_list.append(f"({field.field_name}:{field.field_type}{_examples_str})")
                 else:
-                    field_list.append(f"({field.field_name}:{field.field_type}, {field_comment})")
+                    field_list.append(f"({field.field_name}:{field.field_type}, {field_comment}{_examples_str})")
             schema_table += ",\n".join(field_list)
         schema_table += '\n]\n'
 

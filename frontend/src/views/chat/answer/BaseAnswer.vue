@@ -472,31 +472,27 @@ const progressPercent = computed(() => {
     return 100
   }
   if (props.scenarioType === 'general_chat') {
-    if (stage === 'query') return 25
-    if (stage === 'rag') return 50
-    if (stage === 'direct') return 75
+    if (stage === 'query' || stage === 'rag') return 15
+    if (stage === 'direct') return 60
     return 12
   }
   if (props.scenarioType === 'sql_analysis' || props.scenarioType === 'sql_prediction') {
-    if (stage === 'query') return 10
-    if (stage === 'rag') return 22
-    if (stage === 'sql') return 40
-    if (stage === 'execute') return 55
+    if (stage === 'query' || stage === 'rag') return 8
+    if (stage === 'sql') return 30
+    if (stage === 'execute') return 50
     if (stage === 'chart') return 70
     if (stage === 'analysis' || stage === 'predict') return 88
     return 5
   }
   if (props.scenarioType === 'analysis' || props.scenarioType === 'predict') {
-    if (stage === 'query') return 15
-    if (stage === 'rag') return 35
-    if (stage === 'analysis' || stage === 'predict') return 75
+    if (stage === 'query' || stage === 'rag') return 10
+    if (stage === 'analysis' || stage === 'predict') return 60
     return 8
   }
-  if (stage === 'query') return 10
-  if (stage === 'rag') return 25
-  if (stage === 'sql') return 45
-  if (stage === 'execute') return 65
-  if (stage === 'chart') return 85
+  if (stage === 'query' || stage === 'rag') return 8
+  if (stage === 'sql') return 30
+  if (stage === 'execute') return 55
+  if (stage === 'chart') return 80
   return 5
 })
 
@@ -509,8 +505,7 @@ const progressLabel = computed(() => {
     if (props.deferredPredictLoading) return t('thinking.ai_predict')
     return t('thinking.all_completed')
   }
-  if (stage === 'query') return t('rag_process.query_understanding')
-  if (stage === 'rag') return t('thinking.retrieving')
+  if (stage === 'query' || stage === 'rag') return t('thinking.preparing')
   if (stage === 'sql') return t('thinking.generating_sql')
   if (stage === 'execute') return t('thinking.executing')
   if (stage === 'chart') return t('thinking.generating') + ' ' + t('thinking.generate_chart')
@@ -706,7 +701,7 @@ const customPromptSummary = computed(() => {
     <button v-if="shouldShowReasoningToggle" class="tp-toggle" :class="{ active: show, thinking: isCurrentlyTyping, done: isProcessDone || hasReachedDone }" @click="clickShow" :style="{ '--progress': displayProgress + '%' }">
       <span class="tp-toggle-icon">🧠</span>
       <span class="tp-toggle-label">{{ t('thinking.title') }}</span>
-      <span v-if="tokenUsage" class="tp-toggle-tokens">{{ formatTokens(tokenUsage.total) }} 令牌</span>
+      <span v-if="tokenUsage" class="tp-toggle-tokens">{{ formatTokens(tokenUsage.total) }} {{ t('thinking.unit_tokens') }}</span>
       <span class="tp-toggle-arrow"><el-icon><icon_down_outlined v-if="!show" /><icon_up_outlined v-else /></el-icon></span>
     </button>
 
@@ -727,276 +722,13 @@ const customPromptSummary = computed(() => {
       <!-- ===== 推理链 ===== -->
       <div class="tp-chain">
 
-        <!-- ══════ 步骤1: 查询理解 ══════ -->
-        <div v-if="queryUnderstandingStage || isCurrentlyTyping" class="tp-step" :class="{ done: queryUnderstandingStage?.status === 'completed' || queryUnderstandingStage }">
-          <div class="tp-step-bar"><div class="tp-step-dot"></div><div class="tp-step-line"></div></div>
-          <div class="tp-step-body">
-            <div class="tp-step-head">
-              <span class="tp-step-num">1</span>
-              <span class="tp-step-emoji">🎯</span>
-              <span class="tp-step-name">{{ t('thinking.step_query_understanding') }}</span>
-              <span class="tp-rag-phase">{{ t('thinking.rag_phase_query') }}</span>
-              <span class="tp-step-badge" v-if="queryUnderstandingStage?.duration">{{ formatDuration(queryUnderstandingStage.duration) }}</span>
-              <span class="tp-step-badge tp-badge-green" v-if="queryUnderstandingStage?.rewrite_applied">{{ t('thinking.badge_query_rewritten') }}</span>
-              <span class="tp-step-badge tp-badge-blue" v-if="dialogueContext">{{ t('thinking.badge_dialogue_turn', { n: dialogueContext.turn }) }}</span>
-              <span class="tp-step-badge tp-badge-blue" v-if="queryDecompositionStage?.sub_tasks?.length">{{ t('thinking.badge_sub_tasks', { n: queryDecompositionStage.sub_tasks.length }) }}</span>
-              <span class="tp-scenario-tag">
-                {{ scenarioType === 'general_chat' ? t('thinking.scenario_knowledge_qa') :
-                   scenarioType === 'sql_analysis' ? t('thinking.scenario_sql_analysis') :
-                   scenarioType === 'sql_prediction' ? t('thinking.scenario_sql_prediction') :
-                   scenarioType === 'analysis' ? t('thinking.scenario_data_analysis') :
-                   scenarioType === 'predict' ? t('thinking.scenario_data_prediction') :
-                   t('thinking.scenario_sql_query') }}
-              </span>
-              <span class="tp-step-status">✓</span>
-            </div>
-            <div class="tp-step-summary">
-              <QueryUnderstandingDisplay :data="queryUnderstandingStage" />
-            </div>
-          </div>
-        </div>
+        <!-- ══════ 步骤1: 查询理解（后台静默执行，不在面板展示） ══════ -->
 
-        <!-- ══════ 步骤2: 知识检索 ══════ -->
-        <div v-if="shouldShowRagStep && queryUnderstandingStage" class="tp-step" :class="{ done: !isRagSkipped && (ragStage || hasRagResults), skipped: isRagSkipped, loading: isCurrentlyTyping && props.processStage === 'rag' && !hasRagResults && !isRagSkipped }">
-          <div class="tp-step-bar"><div class="tp-step-dot"></div><div class="tp-step-line"></div></div>
-          <div class="tp-step-body">
-            <div class="tp-step-head clickable" @click="hasRagResults ? toggleStep('step2') : null">
-              <span class="tp-step-num">2</span>
-              <span class="tp-step-emoji">🔍</span>
-              <span class="tp-step-name">{{ t('thinking.step_knowledge_retrieval') }}</span>
-              <span class="tp-rag-phase">{{ t('thinking.rag_phase_retrieve') }}</span>
-              <span class="tp-step-badge tp-badge-dim" v-if="isRagSkipped">{{ t('thinking.badge_skipped') }}</span>
-              <span class="tp-step-badge" v-else-if="ragStage?.duration">{{ formatDuration(ragStage.duration) }}</span>
-              <span class="tp-step-badge tp-badge-green" v-if="!isRagSkipped && hasRagResults">{{ t('thinking.badge_hit_count', { n: ragTotalCount }) }}</span>
-              <span class="tp-step-status tp-status-skipped" v-if="isRagSkipped">⊘</span>
-              <span class="tp-step-status" v-else-if="ragStage || hasRagResults">✓</span>
-              <span class="tp-step-status tp-status-loading" v-else-if="isCurrentlyTyping && !hasRagResults"></span>
-              <span v-if="hasRagResults && !isRagSkipped" class="tp-step-expand">{{ isExpanded('step2') ? '▾' : '▸' }}</span>
-            </div>
-            <div class="tp-step-summary" v-if="!isRagSkipped">
-              <!-- 检索流水线可视化（直接展示，不隐藏在悬浮提示中） -->
-              <div class="tp-flow-viz" v-if="hasRagResults || ragStage">
-                <!--  PDF 查询时只执行"语义搜索"步骤，
-                     解析/分块/向量化是上传时完成的，不应在查询流程中展示 -->
-                <div class="tp-flow-steps" v-if="isPdfScenario">
-                  <span class="tp-flow-node">❓ {{ t('thinking.pdf_flow_question') }}</span>
-                  <span class="tp-flow-arrow">→</span>
-                  <span class="tp-flow-node">🧮 {{ t('thinking.pdf_flow_embed') }}</span>
-                  <span class="tp-flow-arrow">→</span>
-                  <span class="tp-flow-node tp-flow-active">🎯 {{ t('thinking.pdf_flow_search') }}</span>
-                </div>
-                <div class="tp-flow-steps" v-else>
-                  <span class="tp-flow-node">📊 {{ t('thinking.structured_flow_datasource') }}</span>
-                  <span class="tp-flow-arrow">→</span>
-                  <span class="tp-flow-node">📘 {{ t('thinking.structured_flow_terminology') }}</span>
-                  <span class="tp-flow-arrow">→</span>
-                  <span class="tp-flow-node">🗃️ {{ t('thinking.structured_flow_examples') }}</span>
-                  <span class="tp-flow-arrow">→</span>
-                  <span class="tp-flow-node tp-flow-active">🔄 {{ t('thinking.structured_flow_rerank') }}</span>
-                </div>
-              </div>
-              <!-- 表检索芯片（结构化数据源：只显示数量，详情在展开区查看） -->
-              <div class="tp-kb-hits" v-if="hasRagResults || (ragSelectedTables.length > 0 && !isPdfScenario)">
-                <span v-if="ragSelectedTables.length > 0 && !isPdfScenario" class="tp-kb-chip active" style="background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.2);">
-                  🗂️ {{ t('thinking.kb_table_retrieval') }}
-                  <span class="tp-kb-count">{{ ragSelectedTables.length }}</span>
-                </span>
-                <span v-for="kb in knowledgeBaseSummary" :key="kb.name" class="tp-kb-chip" :class="{ active: kb.active }">
-                  {{ kb.icon }} {{ kb.name }}
-                  <span v-if="kb.active && kb.count > 0" class="tp-kb-count">{{ kb.count }}</span>
-                </span>
-                <!-- PDF场景：意图标签紧跟芯片后面，不单独占一行 -->
-                <span v-if="isPdfScenario && effectiveRagResults?.design_intent" class="tp-kb-chip active" style="background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.2);">
-                  🎯 {{ effectiveRagResults.design_intent === 'document_qa' ? t('thinking.design_intent_document_qa') : effectiveRagResults.design_intent === 'data_query' ? t('thinking.design_intent_data_query') : effectiveRagResults.design_intent === 'data_analysis' ? t('thinking.design_intent_data_analysis') : effectiveRagResults.design_intent === 'data_prediction' ? t('thinking.design_intent_data_prediction') : effectiveRagResults.design_intent }}
-                </span>
-              </div>
-              <!-- RAG质量评分 -->
-              <div class="tp-rag-quality" v-if="effectiveRagResults?.rag_impact">
-                <span class="tp-rq-score">{{ t('thinking.rag_quality_label') }} {{ (effectiveRagResults.rag_impact.quality_score * 100 || 0).toFixed(0) }}/100</span>
-                <span class="tp-rq-improve" v-if="effectiveRagResults.rag_impact.expected_improvement_display">{{ t('thinking.rag_quality_improve') }} {{ effectiveRagResults.rag_impact.expected_improvement_display }}</span>
-                <span class="tp-rq-badge" :class="effectiveRagResults.rag_impact.confidence || 'none'">{{ getConfidenceLabel(effectiveRagResults.rag_impact.confidence) }}</span>
-              </div>
-            </div>
-            <!-- 展开详情 -->
-            <div v-if="isExpanded('step2') && hasRagResults" class="tp-step-detail">
-              <!-- 表检索详情（Embedding 向量匹配） -->
-              <div v-if="ragTableCandidates.length > 0 && !isPdfScenario" class="tp-detail-block">
-                <div class="tp-detail-block-title">🗂️ {{ t('thinking.detail_table_retrieval', { n: ragSelectedTables.length, total: ragTableCandidates.length }) }}
-                  <el-popover trigger="hover" placement="bottom" :width="680" :show-after="200" popper-class="tp-help-popover">
-                    <template #reference>
-                      <span class="tp-help-icon">❓</span>
-                    </template>
-                    <div class="tp-retrieval-method">
-                      <span class="tp-rm-icon">🧮</span>
-                      <span class="tp-rm-text">{{ t('thinking.retrieval_method_table_embedding') }}</span>
-                    </div>
-                  </el-popover>
-                </div>
-                <div class="tp-rg-list">
-                  <div v-for="(tbl, idx) in ragTableCandidates.filter(t => ragSelectedTables.includes(t.name)).slice(0, 10)" :key="'tc-' + idx" class="tp-rg-item">
-                    <span class="tp-rg-name">{{ cleanTableName(tbl.name) }}<span v-if="tbl.comment" style="opacity: 0.6; margin-left: 4px;">{{ cleanTableComment(tbl.comment) }}</span></span>
-                    <span class="tp-match-tag vector">{{ t('thinking.match_semantic') }}</span>
-                    <span class="tp-rg-score" :class="{ high: (tbl.similarity || 0) >= 0.7 }">{{ ((tbl.similarity || 0) * 100).toFixed(0) }}%</span>
-                  </div>
-                </div>
-              </div>
-              <div v-if="ragTerminologies.length > 0" class="tp-detail-block">
-                <div class="tp-detail-block-title">📘 {{ t('thinking.detail_terminology_library', { n: ragTerminologies.length }) }}
-                  <el-popover trigger="hover" placement="bottom" :width="680" :show-after="200" popper-class="tp-help-popover">
-                    <template #reference>
-                      <span class="tp-help-icon">❓</span>
-                    </template>
-                    <div class="tp-retrieval-method">
-                      <span class="tp-rm-icon">🔍</span>
-                      <span class="tp-rm-text">{{ t('thinking.retrieval_method_terminology') }}</span>
-                    </div>
-                  </el-popover>
-                </div>
-                <div class="tp-rg-list">
-                  <div v-for="(term, idx) in ragTerminologies" :key="idx" class="tp-rg-item">
-                    <span class="tp-rg-name">{{ term.word }}</span>
-                    <span class="tp-match-tag" :class="term.match_type === 'keyword' ? 'keyword' : 'vector'">{{ term.match_type === 'keyword' ? t('thinking.match_keyword') : t('thinking.match_semantic') }}</span>
-                    <span v-if="term.match_type !== 'keyword'" class="tp-rg-score" :class="{ high: (term.similarity || 0) >= 0.7 }">{{ ((term.similarity || 0) * 100).toFixed(0) }}%</span>
-                  </div>
-                </div>
-              </div>
-              <div v-if="ragSqlExamples.length > 0" class="tp-detail-block">
-                <div class="tp-detail-block-title">🗃️ {{ t('thinking.detail_sql_examples_library', { n: ragSqlExamples.length }) }}
-                  <el-popover trigger="hover" placement="bottom" :width="680" :show-after="200" popper-class="tp-help-popover">
-                    <template #reference>
-                      <span class="tp-help-icon">❓</span>
-                    </template>
-                    <div class="tp-retrieval-method">
-                      <span class="tp-rm-icon">🧮</span>
-                      <span class="tp-rm-text">{{ t('thinking.retrieval_method_sql_examples') }}</span>
-                    </div>
-                  </el-popover>
-                </div>
-                <div class="tp-rg-list">
-                  <div v-for="(ex, idx) in ragSqlExamples" :key="idx" class="tp-rg-item">
-                    <span class="tp-rg-name">{{ ex.question }}</span>
-                    <span class="tp-match-tag" :class="ex.match_type === 'keyword' ? 'keyword' : ex.match_type === 'substring' ? 'substring' : ex.match_type === 'token_fuzzy' ? 'token-fuzzy' : 'vector'">{{ ex.match_type === 'keyword' ? t('thinking.match_keyword') : ex.match_type === 'substring' ? t('thinking.match_substring') : ex.match_type === 'token_fuzzy' ? t('thinking.match_token_fuzzy') : t('thinking.match_semantic') }}</span>
-                    <span v-if="ex.match_type !== 'keyword' && ex.match_type !== 'substring'" class="tp-rg-score" :class="{ high: (ex.similarity || 0) >= 0.7 }">{{ ((ex.similarity || 0) * 100).toFixed(0) }}%</span>
-                  </div>
-                </div>
-              </div>
-              <div v-if="ragDocumentChunks.length > 0" class="tp-detail-block">
-                <div class="tp-detail-block-title">📚 {{ t('thinking.detail_document_knowledge', { n: ragDocumentChunks.length }) }}
-                  <el-popover trigger="hover" placement="bottom" :width="680" :show-after="200" popper-class="tp-help-popover">
-                    <template #reference>
-                      <span class="tp-help-icon">❓</span>
-                    </template>
-                    <div class="tp-retrieval-method">
-                      <span class="tp-rm-icon">🧮</span>
-                      <span class="tp-rm-text">{{ t('thinking.retrieval_method_embedding') }}</span>
-                    </div>
-                  </el-popover>
-                </div>
-                <div v-if="effectiveRagResults?.pdf_source_summary" class="tp-kv-list" style="margin-bottom: 8px;">
-                  <div class="tp-kv"><span class="tp-kv-k">{{ t('thinking.detail_cited_pages') }}</span><span class="tp-kv-v">{{ effectiveRagResults.pdf_source_summary.pages?.join(', ') || t('thinking.detail_none') }}</span></div>
-                  <div class="tp-kv" v-if="effectiveRagResults.pdf_source_summary.sections?.length"><span class="tp-kv-k">{{ t('thinking.detail_sections') }}</span><span class="tp-kv-v">{{ effectiveRagResults.pdf_source_summary.sections.join('、') }}</span></div>
-                  <div class="tp-kv"><span class="tp-kv-k">{{ t('thinking.detail_avg_relevance') }}</span><span class="tp-kv-v">{{ ((effectiveRagResults.pdf_source_summary.avg_similarity || 0) * 100).toFixed(0) }}%</span></div>
-                </div>
-                <div class="tp-rg-list">
-                  <div v-for="(chunk, idx) in ragDocumentChunks" :key="idx" class="tp-rg-item tp-rg-doc">
-                    <div class="tp-doc-source">
-                      <span class="tp-doc-type">{{ chunk.source_type === 'pdf' ? 'PDF' : chunk.source_type === 'excel' ? 'Excel' : chunk.source_type === 'csv' ? 'CSV' : '文件' }}</span>
-                      {{ chunk.source_name || chunk.source_file }}
-                      <span v-if="chunk.page_number" class="tp-tag tp-tag-dim" style="margin-left: 4px;">{{ t('thinking.page_number', { n: chunk.page_number }) }}</span>
-                      <span class="tp-match-tag vector">{{ t('thinking.match_semantic') }}</span>
-                    </div>
-                    <div class="tp-doc-text clickable" @click="toggleStep('doc_chunk_' + idx)">
-                      <template v-if="isExpanded('doc_chunk_' + idx)">{{ chunk.text }}</template>
-                      <template v-else>{{ chunk.text.substring(0, 120) }}{{ chunk.text.length > 120 ? '...' : '' }}</template>
-                      <span v-if="chunk.text.length > 120" class="tp-doc-expand-hint">{{ isExpanded('doc_chunk_' + idx) ? '▾ ' + t('thinking.collapse') : '▸ ' + t('thinking.expand') }}</span>
-                    </div>
-                    <span class="tp-rg-score" :class="{ high: (chunk.similarity || 0) >= 0.7 }">{{ ((chunk.similarity || 0) * 100).toFixed(0) }}%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- ══════ 步骤2: 知识检索（后台静默执行，不在面板展示） ══════ -->
 
-        <!-- ══════ 步骤3: 上下文增强 ══════ -->
-        <!--  Step 3 显示条件 + 状态区分 -->
-        <!-- contextCompressionStage 到达时显示为 loading 状态，promptConstructionStage 完成后才标记 done -->
-        <div v-if="(promptConstructionStage || contextCompressionStage) && (ragStage || hasRagResults || isRagSkipped)" class="tp-step" :class="{ done: promptConstructionStage?.status === 'completed', loading: !promptConstructionStage?.status && contextCompressionStage }">
-          <div class="tp-step-bar"><div class="tp-step-dot"></div><div class="tp-step-line"></div></div>
-          <div class="tp-step-body">
-            <div class="tp-step-head clickable" @click="toggleStep('step3')">
-              <span class="tp-step-num">3</span>
-              <span class="tp-step-emoji"></span>
-              <span class="tp-step-name">{{ t('thinking.step_context_augmentation') }}</span>
-              <span class="tp-rag-phase">{{ t('thinking.rag_phase_augment') }}</span>
-              <span class="tp-step-badge" v-if="promptConstructionStage?.duration">{{ formatDuration(promptConstructionStage.duration) }}</span>
-              <span class="tp-step-badge tp-badge-blue" v-if="promptConstructionStage?.prompt_type">
-                {{ promptConstructionStage.prompt_type === 'sql_generation' ? t('thinking.scene_sql') :
-                   promptConstructionStage.prompt_type === 'analysis' ? t('thinking.scene_analysis') :
-                   promptConstructionStage.prompt_type === 'prediction' ? t('thinking.scene_prediction') :
-                   promptConstructionStage.prompt_type === 'direct_answer' ? t('thinking.scene_direct') : t('thinking.scene_general') }}
-              </span>
-              <span class="tp-step-status" v-if="promptConstructionStage?.status === 'completed'">✓</span>
-              <span class="tp-step-expand">{{ isExpanded('step3') ? '▾' : '▸' }}</span>
-            </div>
-            <div class="tp-step-summary">
-              <!-- 上下文注入组件（RAG的A阶段：将检索结果+规则注入Prompt） -->
-              <div class="tp-tags-row">
-                <span class="tp-tag tp-tag-green" v-if="!isPdfScenario && promptConstructionStage?.rag_components?.schema">📋 {{ t('thinking.kb_schema') }}</span>
-                <span class="tp-tag tp-tag-green" v-if="!isPdfScenario && promptConstructionStage?.rag_components?.terminologies">📘 {{ t('thinking.kb_terminology') }} {{ ragTerminologies.length || promptConstructionStage?.component_counts?.terminology_count || '' }}{{ t('thinking.items') }}</span>
-                <span class="tp-tag tp-tag-green" v-if="!isPdfScenario && promptConstructionStage?.rag_components?.sql_examples">🗃️ {{ t('thinking.sql_examples') }} {{ promptConstructionStage?.component_counts?.sql_example_count || '' }}{{ t('thinking.items') }}</span>
-                <span class="tp-tag tp-tag-green" v-if="promptConstructionStage?.rag_components?.document_chunks">📚 {{ t('thinking.kb_document') }} {{ promptConstructionStage?.component_counts?.doc_chunk_count || '' }}{{ t('thinking.items') }}</span>
-                <span class="tp-tag tp-tag-green" v-if="promptConstructionStage?.rag_components?.dialogue_context">💬 {{ t('thinking.dialogue_state_title') }}</span>
-              </div>
-              <div class="tp-prompt-size" v-if="promptConstructionStage?.total_prompt_length">
-                <span class="tp-ps-label">{{ t('thinking.prompt_label') }}</span>
-                <span class="tp-ps-value">{{ promptConstructionStage.total_prompt_length > 1000 ? (promptConstructionStage.total_prompt_length / 1000).toFixed(1) + 'K' : promptConstructionStage.total_prompt_length }} {{ t('thinking.chars') }}</span>
-                <span class="tp-ps-model" v-if="promptConstructionStage?.model_name">{{ promptConstructionStage.model_name }}</span>
-              </div>
-              <!-- 自定义提示词注入状态（规则型 Augmentation：按场景注入的业务规则） -->
-              <div class="tp-tags-row" v-if="customPromptSummary.length > 0" style="margin-top: 6px;">
-                <span v-for="cp in customPromptSummary" :key="cp.type" class="tp-tag" :class="cp.injected ? 'tp-tag-green' : cp.empty ? 'tp-tag-dim' : 'tp-tag-amber'">
-                  {{ cp.icon }} {{ cp.type }}
-                  <span v-if="cp.injected" style="margin-left: 2px;">✓</span>
-                  <span v-else-if="cp.empty" style="margin-left: 2px; opacity: 0.6;">{{ t('thinking.badge_not_configured') }}</span>
-                </span>
-              </div>
-            </div>
-            <div v-if="isExpanded('step3')" class="tp-step-detail">
-              <!-- 上下文压缩（R-layer最后一步：压缩检索结果，为Augment阶段的Prompt构建做准备） -->
-              <div class="tp-detail-block" v-if="contextCompressionStage || retrievalValidationStage">
-                <div class="tp-detail-block-title">🗜️ {{ t('thinking.detail_context_compression') }}</div>
-                <div class="tp-kv-list">
-                  <div class="tp-kv" v-if="retrievalValidationStage?.second_retrieval_triggered">
-                    <span class="tp-kv-k">{{ t('thinking.detail_second_retrieval') }}</span>
-                    <span class="tp-kv-v"><span class="tp-tag tp-tag-amber">{{ t('thinking.detail_triggered') }}</span></span>
-                  </div>
-                  <div class="tp-kv" v-if="contextCompressionStage?.compression_applied">
-                    <span class="tp-kv-k">{{ t('thinking.detail_compression') }}</span>
-                    <span class="tp-kv-v">{{ contextCompressionStage?.original_length || 0 }} → {{ contextCompressionStage?.compressed_length || 0 }} {{ t('thinking.chars') }} <span class="tp-tag tp-tag-green">{{ t('thinking.detail_saved') }} {{ ((1 - (contextCompressionStage?.compression_ratio || 1)) * 100).toFixed(0) }}%</span></span>
-                  </div>
-                  <div class="tp-kv" v-else-if="contextCompressionStage?.compression_skipped">
-                    <span class="tp-kv-k">{{ t('thinking.detail_compression') }}</span>
-                    <span class="tp-kv-v">
-                      <span class="tp-tag tp-tag-green">{{ t('thinking.compression_within_budget') }}</span>
-                      <span v-if="contextCompressionStage?.estimated_tokens" style="margin-left: 6px; font-size: 11px; color: rgba(255,255,255,0.45);">≈{{ contextCompressionStage.estimated_tokens }}<span v-if="contextCompressionStage?.token_budget">/{{ contextCompressionStage.token_budget }}</span> {{ t('thinking.unit_tokens') }}</span>
-                    </span>
-                  </div>
-                  <div class="tp-kv" v-else-if="contextCompressionStage">
-                    <span class="tp-kv-k">{{ t('thinking.detail_compression') }}</span>
-                    <span class="tp-kv-v">
-                      {{ contextCompressionStage?.original_length || 0 }} {{ t('thinking.chars') }}
-                      <span class="tp-tag tp-tag-dim" style="margin-left: 4px;">≈{{ contextCompressionStage?.estimated_tokens || '?' }}<span v-if="contextCompressionStage?.token_budget">/{{ contextCompressionStage.token_budget }}</span> {{ t('thinking.unit_tokens') }}</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <PromptConstructionDisplay :data="promptConstructionData" />
-            </div>
-          </div>
-        </div>
+        <!-- ══════ 步骤3: 上下文增强（后台静默执行，不在面板展示） ══════ -->
 
-        <!-- ══════ 步骤4: 大模型推理 ══════ -->
+        <!-- ══════ 步骤1: 大模型推理 ══════ -->
         <div v-if="(promptConstructionStage?.status === 'completed') || currentLLMStage || executionStage" class="tp-step" :class="{ done: currentLLMStage || executionStage || chartStage || analysisStage || predictStage, loading: isCurrentlyTyping && !currentLLMStage && props.processStage !== 'idle' && props.processStage !== 'rag' }">
           <div class="tp-step-bar">
             <div class="tp-step-dot"></div>
@@ -1004,7 +736,7 @@ const customPromptSummary = computed(() => {
           </div>
           <div class="tp-step-body">
             <div class="tp-step-head clickable" @click="(reasoningContent[0] || analysisReasoningContent || streamingReasoning) ? toggleStep('step4') : null">
-              <span class="tp-step-num">4</span>
+              <span class="tp-step-num">1</span>
               <span class="tp-step-emoji">🤖</span>
               <span class="tp-step-name">{{ t('thinking.step_llm_reasoning') }}</span>
               <span class="tp-rag-phase">{{ t('thinking.rag_phase_generate') }}</span>
@@ -1027,7 +759,7 @@ const customPromptSummary = computed(() => {
           </div>
         </div>
 
-        <!-- ══════ 步骤5: 结果输出（SQL场景，纯文本输出时隐藏） ══════ -->
+        <!-- ══════ 步骤2: 结果输出（SQL场景，纯文本输出时隐藏） ══════ -->
         <div v-if="!isTextOnlyOutput && (scenarioType === 'sql' || scenarioType === 'sql_analysis' || scenarioType === 'sql_prediction') && (currentLLMStage || executionStage || chartStage) && (sqlStage || executionStage || chartStage)" class="tp-step" :class="{ done: chartStage || analysisStage || predictStage, loading: isCurrentlyTyping && (executionStage && !chartStage) || (sqlStage && !executionStage) }">
           <div class="tp-step-bar">
             <div class="tp-step-dot"></div>
@@ -1035,7 +767,7 @@ const customPromptSummary = computed(() => {
           </div>
           <div class="tp-step-body">
             <div class="tp-step-head clickable" @click="(message?.record?.sql || reasoningContent[1]) ? toggleStep('step5') : null">
-              <span class="tp-step-num">5</span>
+              <span class="tp-step-num">2</span>
               <span class="tp-step-emoji">📊</span>
               <span class="tp-step-name">{{ t('thinking.step_data_visualization') }}</span>
               <span class="tp-rag-phase">{{ t('thinking.rag_phase_generate') }}</span>
@@ -1083,12 +815,12 @@ const customPromptSummary = computed(() => {
 
         <!-- ══════ 引用来源（不再作为思考链步骤，移至回答区域下方） ══════ -->
 
-        <!-- ══════ 步骤6: 深度分析（sql_analysis/sql_prediction） ══════ -->
+        <!-- ══════ 步骤3: 深度分析（sql_analysis/sql_prediction） ══════ -->
         <div v-if="(scenarioType === 'sql_analysis' || scenarioType === 'sql_prediction') && chartStage" class="tp-step" :class="{ done: analysisStage || predictStage, loading: (isCurrentlyTyping && chartStage && !analysisStage && !predictStage) || (deferredAnalysisLoading && !analysisStage) || (deferredPredictLoading && !predictStage) }">
           <div class="tp-step-bar"><div class="tp-step-dot tp-dot-star"></div></div>
           <div class="tp-step-body">
             <div class="tp-step-head">
-              <span class="tp-step-num tp-num-star">6</span>
+              <span class="tp-step-num tp-num-star">3</span>
               <span class="tp-step-emoji">{{ scenarioType === 'sql_prediction' ? '🔮' : '' }}</span>
               <span class="tp-step-name">{{ scenarioType === 'sql_prediction' ? t('thinking.step_smart_prediction') : t('thinking.step_deep_analysis') }}</span>
               <span class="tp-rag-phase">{{ t('thinking.rag_phase_generate') }}</span>

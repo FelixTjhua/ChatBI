@@ -1954,6 +1954,7 @@
     "chart_generation_process": "Chart Configuration Generation",
     "reasoning_in_progress": "Reasoning in progress",
     "generating_sql": "Generating SQL query",
+    "preparing": "Preparing",
     "all_completed": "All completed",
     "document_understanding": "Data Summarization & Answer Generation",
     "generate_answer": "LLM Generate Answer",

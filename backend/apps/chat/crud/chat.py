@@ -917,7 +917,9 @@ def save_recommend_question_answer(session: SessionDep, record_id: int,
     # get_chat_record_by_id 只查询部分列并手动构造新对象，
     record = session.get(ChatRecord, record_id)
     if record is None:
-        raise Exception(f"Record {record_id} not found after update")
+        # record 可能已被用户删除（推荐问题是异步生成的，存在竞态）
+        ChatBILogUtil.warning(f"Record {record_id} not found after recommend question update, possibly deleted")
+        return None
     # session.get 在 commit 后会返回最新数据，无需手动覆盖
 
     return record

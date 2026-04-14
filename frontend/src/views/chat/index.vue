@@ -96,7 +96,6 @@
                   <h1 class="brand-title">
                     <span class="brand-chat">Chat</span><span class="brand-bi">BI</span>
                   </h1>
-                  <p class="brand-tagline">{{ t('qa.tagline_tech') }}</p>
                   <p class="brand-slogan">{{ t('qa.tagline_value') }}</p>
                 </div>
 

@@ -25,14 +25,21 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         '/chat/recommend_questions',
     }
     
+    # 认证端点（防暴力破解）
+    AUTH_ENDPOINTS = {
+        '/login/access-token',
+    }
+    
     def __init__(self, app, llm_rate: int = 10, api_rate: int = 60, window: int = 60):
         super().__init__(app)
         self.llm_rate = llm_rate      # LLM端点每窗口最大请求数
         self.api_rate = api_rate      # 普通端点每窗口最大请求数
+        self.auth_rate = 5            # 认证端点每窗口最大请求数（防暴力破解）
         self.window = window          # 时间窗口（秒）
         # {client_key: (request_count, window_start_time)}
         self._llm_counters: Dict[str, Tuple[int, float]] = defaultdict(lambda: (0, 0.0))
         self._api_counters: Dict[str, Tuple[int, float]] = defaultdict(lambda: (0, 0.0))
+        self._auth_counters: Dict[str, Tuple[int, float]] = defaultdict(lambda: (0, 0.0))
         # 请求计数器，每 100 次请求触发一次清理
         self._request_count = 0
         self._cleanup_interval = 100
@@ -88,7 +95,31 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # 判断是否为LLM密集型端点
         is_llm = any(path.endswith(ep) or ep in path for ep in self.LLM_ENDPOINTS)
         
+        # 判断是否为认证端点
+        is_auth = any(path.endswith(ep) or ep in path for ep in self.AUTH_ENDPOINTS)
+        
         client_key = self._get_client_key(request)
+        
+        # 认证端点使用独立的计数器和更严格的限制
+        if is_auth:
+            now = time.time()
+            count, window_start = self._auth_counters[client_key]
+            if now - window_start > self.window:
+                self._auth_counters[client_key] = (1, now)
+            elif count >= self.auth_rate:
+                ChatBILogUtil.warning(
+                    f"Auth rate limit exceeded for {client_key} on {path} "
+                    f"(Auth: {self.auth_rate}/{self.window}s)"
+                )
+                return JSONResponse(
+                    status_code=429,
+                    content={
+                        "detail": f"登录尝试过于频繁，请稍后再试（限制：{self.auth_rate}次/{self.window}秒）",
+                        "type": "rate_limit_exceeded"
+                    }
+                )
+            else:
+                self._auth_counters[client_key] = (count + 1, window_start)
         
         if self._is_rate_limited(client_key, is_llm):
             rate_type = "LLM API" if is_llm else "API"
@@ -110,7 +141,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     def cleanup(self):
         """清理过期的计数器（可定期调用）"""
         now = time.time()
-        for counters in [self._llm_counters, self._api_counters]:
+        for counters in [self._llm_counters, self._api_counters, self._auth_counters]:
             expired = [k for k, (_, t) in counters.items() if now - t > self.window * 2]
             for k in expired:
                 del counters[k]

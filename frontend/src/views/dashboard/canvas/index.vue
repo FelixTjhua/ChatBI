@@ -273,11 +273,15 @@ function handleDownload(command: string, index: number) {
   else if (format === 'md') downloadAsMarkdown(i)
 }
 
-/** 下载为 PNG 图片 */
+/** 下载为 PNG 图片（只截取图表区域） */
 function downloadAsPng(index: number) {
   const comp = canvasData.value.componentData[index]
   const pv = comp?.propValue
-  const el = document.querySelectorAll('.canvas-component')[index] as HTMLElement
+  const wrapper = document.querySelectorAll('.canvas-component')[index] as HTMLElement
+  if (!wrapper) { ElMessage.warning(t('dashboard.download_no_data')); return }
+  // 优先截取图表区域：mini-chart（analysis/prediction）或 component-body
+  const el = wrapper.querySelector('.insight-card__mini-chart') as HTMLElement
+    || wrapper.querySelector('.component-body') as HTMLElement
   if (!el) { ElMessage.warning(t('dashboard.download_no_data')); return }
   downloadLoading.value = true
   html2canvas(el, { backgroundColor: '#0f0a1a', scale: 2, useCORS: true })
@@ -331,33 +335,7 @@ function downloadAsMarkdown(index: number) {
   triggerDownload(new Blob([md], { type: 'text/markdown; charset=utf-8' }), `${pv.title || 'report'}.md`)
 }
 
-/** 下载整个仪表板为 Excel（后端 API） */
-async function downloadDashboardExcel() {
-  if (!dashboardId.value) {
-    ElMessage.warning(t('dashboard.download_no_data'))
-    return
-  }
-  downloadLoading.value = true
-  // 先保存当前画布数据，确保导出的是最新内容
-  try {
-    await autoSave()
-  } catch { /* 静默，继续尝试导出 */ }
-  dashboardApi
-    .export_excel(dashboardId.value)
-    .then((res: any) => {
-      const blob = new Blob([res], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      })
-      triggerDownload(blob, `${dashboardName.value || 'dashboard'}.xlsx`)
-      ElMessage.success(t('dashboard.download_success'))
-    })
-    .catch(() => {
-      ElMessage.error(t('dashboard.download_no_data'))
-    })
-    .finally(() => {
-      downloadLoading.value = false
-    })
-}
+
 
 function triggerDownload(blob: Blob, filename: string) {
   const link = document.createElement('a')
@@ -424,10 +402,7 @@ onBeforeUnmount(() => {
       </div>
       <div class="toolbar-right">
         <el-button class="preview-btn" :disabled="!dashboardId" @click="previewDashboard">{{ t('dashboard.preview') }}</el-button>
-        <el-button class="preview-btn" :disabled="!dashboardId || canvasData.componentData.length === 0" :loading="downloadLoading" @click="downloadDashboardExcel">
-          <template #icon><Icon name="icon_export"><icon_export_outlined class="svg-icon" /></Icon></template>
-          {{ t('dashboard.download_excel') }}
-        </el-button>
+
         <el-button type="primary" @click="saveDashboard">{{ t('dashboard.save') }}</el-button>
       </div>
     </div>
@@ -543,7 +518,7 @@ onBeforeUnmount(() => {
         .component-btn {
           display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 7px;
           background: transparent; border: 1px solid transparent; color: #cbd5e1; cursor: pointer; transition: all 0.2s;
-          .btn-text { font-size: 13px; font-weight: 500; }
+          .btn-text { font-size: 13px; font-weight: 500; white-space: nowrap; }
           &:hover { background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.2); color: #e9d5ff; }
           &.primary { background: rgba(139,92,246,0.18); border-color: rgba(139,92,246,0.25); color: #e9d5ff; }
         }

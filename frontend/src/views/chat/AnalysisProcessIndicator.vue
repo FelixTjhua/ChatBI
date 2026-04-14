@@ -17,33 +17,6 @@ const props = withDefaults(
 
 const stages = computed(() => [
   {
-    key: 'query',
-    icon: '🎯',
-    label: t('analysis_process.query_understanding'),
-    desc: t('analysis_process.query_understanding_desc'),
-    detail: t('analysis_process.detail_query_understanding'),
-    show: true,
-    ragPhase: 'Q',
-  },
-  {
-    key: 'rag',
-    icon: '🔍',
-    label: t('analysis_process.rag_retrieve'),
-    desc: t('analysis_process.rag_retrieve_desc'),
-    detail: t('rag.terminology') + ' + ' + t('rag.sql_examples'),
-    show: true,
-    ragPhase: 'R',
-  },
-  {
-    key: 'augment',
-    icon: '',
-    label: t('thinking.step_context_augmentation'),
-    desc: t('analysis_process.context_augmentation_desc'),
-    detail: t('analysis_process.context_augmentation_detail'),
-    show: true,
-    ragPhase: 'A',
-  },
-  {
     key: 'analyzing',
     icon: '🧠',
     label: t('analysis_process.ai_analyze'),
@@ -55,16 +28,12 @@ const stages = computed(() => [
 ])
 
 const currentStageIndex = computed(() => {
-  if (props.stage === 'query') return 0
-  if (props.stage === 'rag') return 1
-  // 新增上下文增强阶段
-  if (props.stage === 'augment') return 2
-  if (['loading', 'analyzing'].includes(props.stage)) return 3
-  if (props.stage === 'generating') return 3
-  // 'chart' 阶段（加载图表数据）映射到最后一个阶段
-  if (props.stage === 'chart') return 3
-  // 'failed' 状态回退到最后一个已知阶段
-  if (props.stage === 'failed') return 3
+  // 所有阶段都映射到唯一的 analyzing 步骤（index 0）
+  if (props.stage === 'query' || props.stage === 'rag' || props.stage === 'augment') return 0
+  if (['loading', 'analyzing'].includes(props.stage)) return 0
+  if (props.stage === 'generating') return 0
+  if (props.stage === 'chart') return 0
+  if (props.stage === 'failed') return 0
   return -1
 })
 

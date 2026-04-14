@@ -247,6 +247,22 @@ class UnifiedRAGExecutor:
                 result.terminology_results = select_terminology_by_word_with_details(
                     session, result.rewritten_query, ctx.oid, ctx.ds_id
                 ) or []
+
+                # 扩展查询多路召回：用查询变体补充检索，提升短查询的召回率
+                _expanded = rewrite_out.get("expanded_queries", [])
+                if _expanded and result.terminology_results is not None:
+                    _existing_words = {t.get('word', '') for t in result.terminology_results}
+                    for eq in _expanded[:2]:
+                        try:
+                            extra = select_terminology_by_word_with_details(
+                                session, eq, ctx.oid, ctx.ds_id
+                            ) or []
+                            for et in extra:
+                                if et.get('word', '') not in _existing_words:
+                                    result.terminology_results.append(et)
+                                    _existing_words.add(et.get('word', ''))
+                        except Exception:
+                            pass
             except Exception as e:
                 ChatBILogUtil.error(f"[RAG-Retrieve] Terminology retrieval failed: {e}")
 
@@ -288,6 +304,23 @@ class UnifiedRAGExecutor:
                 result.sql_example_results = select_training_by_question_with_details(
                     session, result.rewritten_query, ctx.oid, ctx.ds_id
                 ) or []
+
+                # 扩展查询多路召回：用查询变体补充 SQL 示例检索
+                _expanded = rewrite_out.get("expanded_queries", [])
+                if _expanded and result.sql_example_results is not None:
+                    _existing_ids = {e.get('id') for e in result.sql_example_results if e.get('id')}
+                    for eq in _expanded[:2]:
+                        try:
+                            extra = select_training_by_question_with_details(
+                                session, eq, ctx.oid, ctx.ds_id
+                            ) or []
+                            for ex in extra:
+                                if ex.get('id') and ex.get('id') not in _existing_ids:
+                                    result.sql_example_results.append(ex)
+                                    _existing_ids.add(ex.get('id'))
+                        except Exception:
+                            pass
+
                 # Excel/CSV 单表场景过滤掉含复杂 JOIN 的 SQL 示例
                 if ctx.ds_type in ("excel", "csv") and result.sql_example_results:
                     filtered = []
@@ -313,7 +346,7 @@ class UnifiedRAGExecutor:
             except Exception as e:
                 ChatBILogUtil.error(f"[RAG-Retrieve] SQL example retrieval failed: {e}")
 
-        # 3c. 文档知识库检索（PDF 核心路径 + Excel/CSV 语义分块）
+        # 3c. 文档知识库检索（仅 PDF 数据源）
         from apps.chat.thinking.ds_component_router import DOCUMENT_TYPES
         _doc_retrieval_types = tuple(DOCUMENT_TYPES)
         if ctx.ds_type in _doc_retrieval_types and session:

@@ -1954,6 +1954,7 @@
     "chart_generation_process": "图表配置生成过程",
     "reasoning_in_progress": "正在推理中",
     "generating_sql": "正在生成SQL查询",
+    "preparing": "准备中",
     "all_completed": "处理完成",
     "document_understanding": "数据总结与回答生成",
     "generate_answer": "LLM生成回答",
@@ -2206,7 +2207,7 @@
     "segments_label": "({n}片段)",
     "expand": "展开全文",
     "collapse": "收起",
-    "unit_tokens": "令牌",
+    "unit_tokens": "词元",
     "kb_schema": "表结构",
     "citation_sheet": "工作表:"
   },

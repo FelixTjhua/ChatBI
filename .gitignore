@@ -62,3 +62,8 @@ g2-ssr/node_modules/
 frontend/auto-imports.d.ts
 frontend/components.d.ts
 frontend/.eslintrc-auto-import.json
+
+# --- Thesis and references (academic files, not part of source code) ---
+毕设论文（终极版）.md
+参考文献/
+backend/tests/

@@ -27,7 +27,7 @@ def normalize_ds_type(ds_type: str) -> str:
     if ds_lower in ('pg', 'postgresql', 'postgres'):
         return 'pg'
     # 其他直接返回
-    if ds_lower in ('mysql', 'oracle', 'excel', 'csv', 'pdf'):
+    if ds_lower in ('mysql', 'oracle', 'excel', 'csv', 'pdf', 'database'):
         return ds_lower
     # 未知类型：记录警告并默认为数据库（防御性处理）
     import logging

@@ -64,7 +64,12 @@ def load_resource(session: SessionDep, dashboard: QueryDashboard, current_user: 
     uid = str(current_user.id)
     
     sql = text("""SELECT cd.*,
-    creator.name AS create_name,
+    creator.name AS create_name
+    FROM core_dashboard cd
+    LEFT JOIN sys_user creator ON cd.create_by = CAST(creator.id AS VARCHAR)
+    WHERE cd.id = :dashboard_id
+    AND cd.workspace_id = :workspace_id
+    AND cd.create_by = :create_by
     """)
     result = session.execute(sql, {
         "dashboard_id": dashboard.id,
