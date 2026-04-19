@@ -1,4 +1,4 @@
-# ChatBI - 基于RAG与大语言模型的商业智能分析对话系统
+# ChatBI - 基于RAG与大语言模型的商业智能分析对话系统的设计与实现
 
 <p align="center">
   <b>ChatBI 首页</b><br/>
