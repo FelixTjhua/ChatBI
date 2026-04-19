@@ -13,7 +13,7 @@
   <img src="demo/filedemo.png" alt="文档知识问答" width="800" />
 </p>
 
-<h3 align="center">Business Intelligence Analysis Dialogue System based on RAG and Large Language Models</h3>
+<h3 align="center">Design and Implementation of a Business Intelligence Analysis Dialogue System based on RAG and Large Language Models</h3>
 
 ---
 
@@ -23,12 +23,13 @@ ChatBI 是一款面向商业智能分析的对话系统，基于 RAG（检索增
 
 ## 核心功能
 
-- **智能对话**: 自然语言转 SQL，支持销售、财务、运营等商业场景的数据分析
-- **RAG 知识库**: 商业术语库 + SQL示例库，基于 pgvector 向量检索增强生成质量
-- **文档问答**: PDF 文档语义分块与向量化检索，支持文档级知识问答
+- **智能对话**: 自然语言转 SQL，支持销售、财务、运营等商业场景的数据查询与多轮追问
+- **RAG 知识库**: 三层知识体系（术语库 + SQL示例库 + 表结构向量嵌入），基于 pgvector 向量检索增强生成质量
+- **文档问答**: PDF 文档语义分块与向量化检索，支持文档级知识问答与页码溯源
+- **数据分析与预测**: SQL 查询后自动生成分析报告，支持时间序列趋势预测与置信度评分
 - **数据源管理**: 支持 PostgreSQL、MySQL、Oracle 及 Excel/CSV、PDF 文件
-- **可视化仪表板**: 自动图表生成（折线图、柱状图、饼图等），支持保存与拖拽布局
-- **多模型支持**: 兼容 ChatGPT、DeepSeek、通义千问等主流 LLM
+- **可视化仪表板**: 规则引擎自动推荐图表类型（折线图、柱状图、饼图、KPI卡片等），支持保存与拖拽布局
+- **多模型支持**: 兼容 ChatGPT、DeepSeek、通义千问、Claude、Gemini、Grok 六家供应商
 - **多语言**: 中文 / English
 
 ## 技术栈
@@ -36,8 +37,8 @@ ChatBI 是一款面向商业智能分析的对话系统，基于 RAG（检索增
 | 层级 | 技术 |
 |------|------|
 | 前端 | Vue 3 + TypeScript, Element Plus, Vite, Pinia |
-| 后端 | Python 3.11, FastAPI, SQLModel, LangChain |
-| 数据库 | PostgreSQL 15+ with pgvector |
+| 后端 | Python 3.14, FastAPI, SQLModel, LangChain |
+| 数据库 | PostgreSQL 17+ with pgvector |
 | 向量模型 | BAAI/bge-base-zh-v1.5 (768维) |
 | 图表渲染 | AntV G2 (前端) + G2 SSR (服务端) |
 
@@ -61,9 +62,9 @@ ChatBI/
 ### 环境要求
 
 - Node.js 18+
-- Python 3.11+
+- Python 3.14+
 - uv（Python 包管理器）
-- PostgreSQL 15+（需启用 pgvector 扩展）
+- PostgreSQL 17+（需启用 pgvector 扩展）
 
 ### 安装步骤
 
@@ -120,7 +121,7 @@ docker run -p 8000:8000 chatbi
 
 ## 论文信息
 
-- **题目**: 基于RAG与大语言模型的商业智能分析对话系统
+- **题目**: 基于RAG与大语言模型的商业智能分析对话系统的设计与实现
 - **作者**: Felix Alvin Juandra (蔡威广)
 
 ## 版权声明
