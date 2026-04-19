@@ -33,7 +33,7 @@ def classify_sql_error(error_message: str) -> Dict[str, str]:
     ]):
         return {
             "error_type": "table_not_found",
-            "suggestion": "查询引用了不存在的表，请检查数据源中的表结构或换一种方式提问"
+            "suggestion": '您提问的内容可能超出了当前数据源的范围。当前数据源中没有找到对应的数据表，建议您换一种方式描述问题，或者在对话中输入"有哪些数据"来查看当前数据源包含的表和字段。'
         }
 
     if any(kw in msg_lower for kw in [
@@ -42,7 +42,7 @@ def classify_sql_error(error_message: str) -> Dict[str, str]:
     ]):
         return {
             "error_type": "column_not_found",
-            "suggestion": "查询引用了不存在的字段，请检查字段名称或换一种方式提问"
+            "suggestion": '您提问中涉及的字段在当前数据源中不存在。建议您换一种方式描述问题，或者在对话中输入"有哪些字段"来查看当前数据源包含的字段信息。'
         }
 
     # 权限错误

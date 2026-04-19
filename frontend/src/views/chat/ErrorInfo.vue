@@ -222,6 +222,16 @@ const formatTraceback = (traceback: string | undefined): string => {
       <div class="quota-tip">💬 {{ t('qa.quota_tip') }}</div>
     </div>
 
+    <!-- 友好提示（数据源范围外的查询） -->
+    <div v-else-if="errorMessage.type === 'friendly-hint'" class="friendly-hint-block">
+      <div class="hint-body">
+        <div class="hint-header">
+          <span class="hint-icon">💡</span>
+          <div class="hint-message">{{ errorMessage.message || errorMessage.friendlyMessage }}</div>
+        </div>
+      </div>
+    </div>
+
     <!-- 其他错误 -->
     <div v-else class="error-block" :class="errorMessage.type">
       <div class="error-body">
@@ -280,6 +290,7 @@ const formatTraceback = (traceback: string | undefined): string => {
 @error-color: #f87171;
 @warning-color: #fbbf24;
 @primary-400: #a78bfa;
+@hint-color: #60a5fa;
 
 .error-info-container {
   width: 100%;
@@ -303,6 +314,38 @@ const formatTraceback = (traceback: string | undefined): string => {
   }
   50% {
     opacity: 0.7;
+  }
+}
+
+.friendly-hint-block {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: linear-gradient(145deg, rgba(96, 165, 250, 0.10) 0%, rgba(59, 130, 246, 0.06) 100%);
+  border: 1.5px solid rgba(96, 165, 250, 0.25);
+  border-radius: 14px;
+  padding: 16px 18px;
+  animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .hint-body {
+    .hint-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+
+      .hint-icon {
+        font-size: 18px;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+
+      .hint-message {
+        color: @dark-text-secondary;
+        font-size: 13.5px;
+        line-height: 1.6;
+        word-break: break-word;
+      }
+    }
   }
 }
 

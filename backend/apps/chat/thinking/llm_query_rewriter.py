@@ -257,7 +257,7 @@ def llm_enhanced_rewrite(
         rule_result.pop('_ds_type', None)
         return rule_result
 
-    # ===== 第二层：LLM 增强（异步，1-3s） =====
+    # ===== 第二层：LLM 增强（目标 1-3s，超时 5s 回退） =====
     t0 = time.time()
     try:
         from langchain_core.messages import SystemMessage, HumanMessage
@@ -272,17 +272,19 @@ def llm_enhanced_rewrite(
         ]
 
         # 同步调用 LLM（查询重写不需要流式）
-        # 设置超时保护：查询重写不应阻塞主流程超过 8 秒
+        # 超时保护：查询重写是轻量任务，不应阻塞主流程超过 5 秒
         import concurrent.futures
         _executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
         try:
             future = _executor.submit(llm.invoke, messages)
-            response = future.result(timeout=8)
+            response = future.result(timeout=5)
         except concurrent.futures.TimeoutError:
             duration_ms = int((time.time() - t0) * 1000)
             ChatBILogUtil.warning(
                 f"[LLM-Rewrite] Timeout after {duration_ms}ms, falling back to rule result"
             )
+            # 取消后台任务，避免线程泄漏
+            future.cancel()
             rule_result.pop('_ds_type', None)
             return rule_result
         finally:

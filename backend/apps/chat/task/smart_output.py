@@ -89,9 +89,11 @@ def analyze_output_format(
 
     # ========== 规则1：空结果 ==========
     if row_count == 0:
+        # 空结果保持原始流程，让 run_task 中的空数据处理逻辑决定输出
+        # （分析意图会生成"无数据分析说明"，预测意图会生成"无数据预测说明"）
         return SmartOutputDecision(
             format_type=OutputFormat.KEEP_ORIGINAL,
-            reason='查询结果为空',
+            reason='查询结果为空，保持原始流程由后续逻辑处理',
             confidence=1.0
         )
 

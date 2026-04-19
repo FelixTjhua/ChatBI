@@ -67,16 +67,46 @@ class EmbeddingModelCache:
         cache_folder = config.folder
 
         if not os.path.exists(model_name):
-            # 本地路径不存在，尝试用 HuggingFace Hub ID 在线下载
+            # 本地直接路径不存在，尝试查找 HuggingFace 缓存格式
+            # HuggingFace Hub 下载的模型存储在 models--{org}--{name}/snapshots/{hash}/ 下
             basename = os.path.basename(model_name)
-            hub_id = EmbeddingModelCache._LOCAL_TO_HUB.get(basename, basename.replace("_", "/", 1))
-            logger.info(
-                f"本地模型路径不存在: {model_name}，将从 HuggingFace Hub 下载: {hub_id}"
-            )
-            model_name = hub_id
-            # cache_folder 指向 embedding 子目录，确保目录存在
-            cache_folder = os.path.dirname(config.name) or config.folder
-            os.makedirs(cache_folder, exist_ok=True)
+            parent_dir = os.path.dirname(model_name) or config.folder
+            hf_cache_dir = os.path.join(parent_dir, f"models--{basename.replace('_', '--', 1)}")
+            snapshots_dir = os.path.join(hf_cache_dir, "snapshots")
+
+            _found_local = False
+            if os.path.isdir(snapshots_dir):
+                # 取最新的 snapshot（按修改时间排序）
+                try:
+                    snaps = sorted(
+                        [d for d in os.listdir(snapshots_dir)
+                         if os.path.isdir(os.path.join(snapshots_dir, d))],
+                        key=lambda d: os.path.getmtime(os.path.join(snapshots_dir, d)),
+                        reverse=True
+                    )
+                    if snaps:
+                        resolved = os.path.join(snapshots_dir, snaps[0])
+                        # 验证 snapshot 目录包含模型文件
+                        if os.path.exists(os.path.join(resolved, "config.json")):
+                            logger.info(
+                                f"本地模型路径不存在: {model_name}，"
+                                f"但在 HuggingFace 缓存中找到: {resolved}"
+                            )
+                            model_name = resolved
+                            _found_local = True
+                except Exception as e:
+                    logger.warning(f"扫描 HuggingFace 缓存目录失败: {e}")
+
+            if not _found_local:
+                # 缓存中也没有，回退到在线下载
+                hub_id = EmbeddingModelCache._LOCAL_TO_HUB.get(basename, basename.replace("_", "/", 1))
+                logger.info(
+                    f"本地模型路径不存在: {model_name}，将从 HuggingFace Hub 下载: {hub_id}"
+                )
+                model_name = hub_id
+                # cache_folder 指向 embedding 子目录，确保目录存在
+                cache_folder = parent_dir
+                os.makedirs(cache_folder, exist_ok=True)
 
         base = HuggingFaceEmbeddings(
             model_name=model_name,

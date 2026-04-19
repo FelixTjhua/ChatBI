@@ -265,6 +265,48 @@ class QueryRewriter:
             if pattern in result:
                 result = result.replace(pattern, replacement)
         
+        # "最近N个月/半年/一年"等相对时间范围 → 转换为具体日期区间
+        # 这样 LLM 生成 SQL 时不需要自己算日期，减少时间范围计算错误
+        from dateutil.relativedelta import relativedelta
+        relative_patterns = [
+            (r'最近半年', 6),
+            (r'最近一年', 12),
+            (r'最近(\d+)个月', None),  # 动态提取月数（阿拉伯数字）
+            (r'最近([一二三四五六七八九十]+)个月', None),  # 中文数字
+            (r'近半年', 6),
+            (r'近一年', 12),
+        ]
+        _cn_num = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10}
+        for pat, months in relative_patterns:
+            m = re.search(pat, result)
+            if m:
+                if months is None:
+                    raw = m.group(1)
+                    if raw.isdigit():
+                        months = int(raw)
+                    else:
+                        months = _cn_num.get(raw, 3)  # 中文数字转换，默认3
+                start_date = now - relativedelta(months=months)
+                start_str = start_date.strftime('%Y年%m月')
+                end_str = now.strftime('%Y年%m月')
+                replacement = f'{start_str}至{end_str}'
+                result = re.sub(pat, replacement, result, count=1)
+
+        # 英文相对时间范围
+        en_relative_patterns = [
+            (r'(?i)last (\d+) months?', None),
+            (r'(?i)past half year', 6),
+            (r'(?i)past year', 12),
+        ]
+        for pat, months in en_relative_patterns:
+            m = re.search(pat, result)
+            if m:
+                if months is None:
+                    months = int(m.group(1))
+                start_date = now - relativedelta(months=months)
+                replacement = f'{start_date.strftime("%Y-%m")} to {now.strftime("%Y-%m")}'
+                result = re.sub(pat, replacement, result, count=1, flags=re.IGNORECASE)
+
         # 英文时间表达式规范化（大小写不敏感）
         en_dynamic_replacements = [
             ('next month', f'{next_month_year}-{int(next_month):02d}'),
@@ -561,6 +603,22 @@ class QueryRewriter:
             'continue', 'furthermore', 'also show', 'what about',
             'same for', 'similar to', 'change to', 'switch to',
         ]
+
+        # ========== 7b. "按X细分/拆分呢" 追问模式 ==========
+        # 用户在多轮对话中常用 "按月份细分呢"、"按地区拆分呢" 等短句追问
+        # 这类短句包含数据操作意图（细分/拆分/明细），应识别为 follow_up
+        _refine_patterns = ['细分', '拆分', '明细', '下钻', '展开',
+                            'break down', 'drill down', 'split by', 'detail']
+        _refine_suffix = ['呢', '吧', '看看', '一下']
+        if any(kw in question_lower for kw in _refine_patterns):
+            # "按月份细分呢" → follow_up（短句+细分操作词+语气词）
+            has_suffix = any(question_lower.endswith(s) for s in _refine_suffix)
+            if len(question_lower) <= 30 and has_suffix:
+                return 'follow_up'
+            # "按月份细分销售额" → fact_query（有明确数据指标）
+            if any(kw in question_lower for kw in data_context_patterns):
+                return 'fact_query'
+
         if any(kw in question_lower for kw in follow_up_patterns):
             # "继续帮我查一下销售额"同时匹配follow_up("继续")和fact_query("查")
             # 应优先路由到fact_query，因为用户有明确的数据查询意图

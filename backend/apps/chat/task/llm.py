@@ -1455,11 +1455,18 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
             ]
 
         # 混合查询重写：规则层 + LLM层（自动判断是否需要 LLM）
+        # 使用 JSON 模式 LLM（temperature=0.1，更快更确定性）而非 SQL 生成用的重量级模型
+        _rewrite_llm = None
+        if hasattr(self, 'llm') and self.llm:
+            try:
+                _rewrite_llm = self.get_json_mode_llm()
+            except Exception:
+                _rewrite_llm = self.llm  # 回退到默认模型
         rewrite_result = llm_enhanced_rewrite(
             question=self.chat_question.question,
             ds_type=ds_type,
             dialogue_history=dialogue_history,
-            llm=self.llm if hasattr(self, 'llm') else None,
+            llm=_rewrite_llm,
         )
         self._rewrite_result = rewrite_result
         retrieval_question = rewrite_result['rewritten']
@@ -4423,7 +4430,11 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
 
 
                         if not md_data or not _fields_list:
-                            yield 'The SQL execution result is empty.\n\n'
+                            _is_en_empty = (self.chat_question.lang or '').lower().startswith('en')
+                            _empty_msg = ('The query did not return any matching data. You can try adjusting the query conditions or rephrasing your question.'
+                                         if _is_en_empty else
+                                         '当前查询未返回匹配的数据。您可以尝试调整查询条件或换一种方式提问。')
+                            yield _empty_msg + '\n\n'
                         else:
                             df = pd.DataFrame(md_data, columns=_fields_list)
                             df_safe = DataFormat.safe_convert_to_string(df)
@@ -4836,7 +4847,11 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
                     # data, _fields_list, col_formats = self.format_pd_data(_column_list, result.get('data'))
 
                     if not md_data or not _fields_list:
-                        yield 'The SQL execution result is empty.\n\n'
+                        _is_en_empty2 = (self.chat_question.lang or '').lower().startswith('en')
+                        _empty_msg2 = ('The query did not return any matching data. You can try adjusting the query conditions or rephrasing your question.'
+                                      if _is_en_empty2 else
+                                      '当前查询未返回匹配的数据。您可以尝试调整查询条件或换一种方式提问。')
+                        yield _empty_msg2 + '\n\n'
                     else:
                         df = pd.DataFrame(md_data, columns=_fields_list)
                         df_safe = DataFormat.safe_convert_to_string(df)
@@ -5320,12 +5335,23 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
                 # 返回结构化错误信息（error_type + suggestion），不暴露原始堆栈
                 from common.utils.sql_error_handler import classify_sql_error
                 error_info = classify_sql_error(str(e))
-                error_msg = orjson.dumps({
-                    'message': error_info['suggestion'],
-                    'error_type': error_info['error_type'],
-                    'suggestion': error_info['suggestion'],
-                    'type': 'exec-sql-err'
-                }).decode()
+                _err_type = error_info['error_type']
+                # 表/字段不存在时，以友好的自然语言消息返回（而非红色错误框）
+                # 这样用户看到的是引导性提示，而不是报错
+                if _err_type in ('table_not_found', 'column_not_found'):
+                    error_msg = orjson.dumps({
+                        'message': error_info['suggestion'],
+                        'error_type': _err_type,
+                        'suggestion': error_info['suggestion'],
+                        'type': 'friendly-hint'
+                    }).decode()
+                else:
+                    error_msg = orjson.dumps({
+                        'message': error_info['suggestion'],
+                        'error_type': _err_type,
+                        'suggestion': error_info['suggestion'],
+                        'type': 'exec-sql-err'
+                    }).decode()
             else:
                 error_msg = orjson.dumps({'message': sanitize_error_message(str(e))}).decode()
             if _session:
