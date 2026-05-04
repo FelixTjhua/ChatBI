@@ -4,7 +4,6 @@ import { ElMessage, ElMessageBox } from 'element-plus-secondary'
 import icon_export_outlined from '@/assets/svg/icon_export_outlined.svg'
 import { promptApi } from '@/api/prompt'
 import { formatTimestamp } from '@/utils/date'
-import { datasourceApi } from '@/api/datasource'
 import icon_add_outlined from '@/assets/svg/icon_add_outlined.svg'
 import IconOpeEdit from '@/assets/svg/icon_edit_outlined.svg'
 import icon_copy_outlined from '@/assets/embedded/icon_copy_outlined.svg'
@@ -14,15 +13,11 @@ import EmptyBackground from '@/components/EmptyBackground.vue'
 import { useClipboard } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { cloneDeep } from 'lodash-es'
-import { QuestionFilled } from '@element-plus/icons-vue'
 
 interface Form {
   id?: string | null
   type: string | null
   prompt: string | null
-  specific_ds: boolean
-  datasource_ids: number[]
-  datasource_names: string[]
   name: string | null
 }
 
@@ -33,8 +28,6 @@ const keywords = ref('')
 const oldKeywords = ref('')
 const searchLoading = ref(false)
 const currentType = ref('GENERATE_SQL')
-
-const options = ref<any[]>([])
 const selectable = () => {
   return true
 }
@@ -64,10 +57,7 @@ const defaultForm = {
   id: null,
   type: null,
   prompt: null,
-  datasource_ids: [],
-  datasource_names: [],
   name: null,
-  specific_ds: false,
 }
 const pageForm = ref<Form>(cloneDeep(defaultForm))
 const copyCode = () => {
@@ -271,24 +261,11 @@ const search = () => {
 }
 
 const termFormRef = ref()
-const validatePass = (_: any, value: any, callback: any) => {
-  if (pageForm.value.specific_ds && !value.length) {
-    callback(new Error(t('datasource.Please_select') + t('common.empty') + t('ds.title')))
-  } else {
-    callback()
-  }
-}
 const rules = {
   name: [
     {
       required: true,
       message: t('datasource.please_enter') + t('common.empty') + t('prompt.prompt_word_name'),
-    },
-  ],
-  datasource_ids: [
-    {
-      validator: validatePass,
-      trigger: 'blur',
     },
   ],
   prompt: [
@@ -297,14 +274,6 @@ const rules = {
       message: t('datasource.please_enter') + t('common.empty') + t('prompt.replaced_with'),
     },
   ],
-}
-
-const list = () => {
-  datasourceApi.list().then((res: any) => {
-    options.value = res || []
-  }).catch(() => {
-    options.value = []
-  })
 }
 
 const saveHandler = () => {
@@ -347,7 +316,6 @@ const editHandler = (row: any) => {
     }
     pageForm.value = cloned
   }
-  list()
   dialogTitle.value = row?.id ? t('prompt.edit_prompt_word') : t('prompt.add_prompt_word')
   dialogFormVisible.value = true
 }
@@ -371,10 +339,6 @@ const handleRowClick = (row: any) => {
 const onRowFormClose = () => {
   pageForm.value = cloneDeep(defaultForm)
   rowInfoDialog.value = false
-}
-
-const handleChange = () => {
-  termFormRef.value.validateField('datasource_ids')
 }
 
 const typeChange = (val: any) => {
@@ -596,36 +560,6 @@ const typeChange = (val: any) => {
         </div>
       </el-form-item>
 
-      <el-form-item
-        class="is-required"
-        :class="!pageForm.specific_ds && 'no-error'"
-        prop="datasource_ids"
-      >
-        <template #label>
-          <div class="form-label-with-tip">
-            <span>{{ t('training.effective_data_sources') }}</span>
-            <el-tooltip :content="$t('training.effective_data_sources_tip')" placement="top">
-              <el-icon class="tip-icon"><QuestionFilled /></el-icon>
-            </el-tooltip>
-          </div>
-        </template>
-        <el-radio-group v-model="pageForm.specific_ds">
-          <el-radio :value="false">{{ $t('training.all_data_sources') }}</el-radio>
-          <el-radio :value="true">{{ $t('training.partial_data_sources') }}</el-radio>
-        </el-radio-group>
-        <el-select
-          v-if="pageForm.specific_ds"
-          v-model="pageForm.datasource_ids"
-          multiple
-          filterable
-          :placeholder="$t('datasource.Please_select') + $t('common.empty') + $t('ds.title')"
-          style="width: 100%; margin-top: 8px"
-          @change="handleChange"
-        >
-          <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-      </el-form-item>
-
 
     </el-form>
     <template #footer>
@@ -661,15 +595,6 @@ const typeChange = (val: any) => {
               <icon_copy_outlined></icon_copy_outlined>
             </el-icon>
           </el-tooltip>
-        </div>
-      </el-form-item>
-      <el-form-item :label="t('ds.title')">
-        <div class="content">
-          {{
-            pageForm.datasource_names.length && pageForm.specific_ds
-              ? pageForm.datasource_names.join()
-              : t('training.all_data_sources')
-          }}
         </div>
       </el-form-item>
 

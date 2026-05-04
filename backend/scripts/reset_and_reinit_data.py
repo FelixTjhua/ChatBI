@@ -185,8 +185,6 @@ def init_terminology_data(session: Session, oid: int = 1):
             description=term_data['description'],
             create_time=create_time,
             enabled=True,
-            specific_ds=False,
-            datasource_ids=[]
         )
         session.add(main_term)
         session.flush()  # 获取主术语的ID
@@ -201,8 +199,6 @@ def init_terminology_data(session: Session, oid: int = 1):
                 description=None,  # 同义词不需要描述
                 create_time=create_time,
                 enabled=True,
-                specific_ds=False,
-                datasource_ids=[]
             )
             session.add(synonym_term)
             synonym_count += 1
@@ -436,8 +432,6 @@ ORDER BY 月份'''
             question=example_data['question'],
             description=example_data['sql'],
             enabled=True,
-            specific_ds=False,
-            datasource_ids=[]
         )
         session.add(example)
         count += 1
@@ -537,8 +531,6 @@ def init_prompt_data(session: Session, oid: int = 1):
             name=item["name"],
             type="GENERATE_SQL",
             prompt=item["prompt"],
-            specific_ds=False,
-            datasource_ids=None,
             oid=oid,
             create_time=create_time
         ))
@@ -549,8 +541,6 @@ def init_prompt_data(session: Session, oid: int = 1):
             name=item["name"],
             type="ANALYSIS",
             prompt=item["prompt"],
-            specific_ds=False,
-            datasource_ids=None,
             oid=oid,
             create_time=create_time
         ))
@@ -561,8 +551,6 @@ def init_prompt_data(session: Session, oid: int = 1):
             name=item["name"],
             type="PREDICT_DATA",
             prompt=item["prompt"],
-            specific_ds=False,
-            datasource_ids=None,
             oid=oid,
             create_time=create_time
         ))

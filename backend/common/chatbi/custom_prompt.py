@@ -26,8 +26,6 @@ class PromptSQL(SQLModel, table=True):
     oid: Optional[int] = Field(default=1)
     name: Optional[str] = Field(default="")
     prompt: Optional[str] = Field(default="")
-    specific_ds: Optional[bool] = Field(default=False)
-    datasource_ids: Optional[List[int]] = Field(default=None, sa_column=Column(JSONB))
     always_inject: Optional[bool] = Field(default=False)
     create_time: Optional[datetime] = Field(default=None)
 
@@ -38,8 +36,6 @@ class PromptAnalysis(SQLModel, table=True):
     oid: Optional[int] = Field(default=1)
     name: Optional[str] = Field(default="")
     prompt: Optional[str] = Field(default="")
-    specific_ds: Optional[bool] = Field(default=False)
-    datasource_ids: Optional[List[int]] = Field(default=None, sa_column=Column(JSONB))
     always_inject: Optional[bool] = Field(default=False)
     create_time: Optional[datetime] = Field(default=None)
 
@@ -50,8 +46,6 @@ class PromptForecast(SQLModel, table=True):
     oid: Optional[int] = Field(default=1)
     name: Optional[str] = Field(default="")
     prompt: Optional[str] = Field(default="")
-    specific_ds: Optional[bool] = Field(default=False)
-    datasource_ids: Optional[List[int]] = Field(default=None, sa_column=Column(JSONB))
     always_inject: Optional[bool] = Field(default=False)
     create_time: Optional[datetime] = Field(default=None)
 
@@ -96,7 +90,7 @@ def find_custom_prompts(
     oid: int,
     ds_id: Optional[int] = None,
 ) -> str:
-    """查找并拼接所有匹配的自定义提示词内容（不做相关性筛选）。"""
+    """查找并拼接所有匹配的自定义提示词内容。"""
     try:
         Model = _get_model(prompt_type)
         stmt = select(Model).where(Model.oid == oid)
@@ -107,12 +101,6 @@ def find_custom_prompts(
 
         parts = []
         for p in prompts:
-            # 数据源过滤逻辑
-            if p.specific_ds:
-                if not ds_id:
-                    continue  # 无数据源上下文，跳过限定了特定数据源的提示词
-                if p.datasource_ids and ds_id not in p.datasource_ids:
-                    continue
             if p.prompt:
                 parts.append(p.prompt)
 
@@ -150,29 +138,6 @@ def find_relevant_custom_prompts(
                      f"共{len(prompts)}条提示词")
 
         for p in prompts:
-            # 数据源过滤逻辑
-            if p.specific_ds:
-                if not ds_id:
-                    logger.info(f"[custom_prompt]   [{p.id}] '{p.name}' → 跳过(限定数据源但当前无数据源上下文)")
-                    details.append({
-                        'id': p.id,
-                        'name': p.name or '',
-                        'reason': 'not_matched',
-                        'detail': '限定数据源但当前无数据源上下文',
-                        'score': 0,
-                    })
-                    continue
-                if p.datasource_ids and ds_id not in p.datasource_ids:
-                    logger.info(f"[custom_prompt]   [{p.id}] '{p.name}' → 跳过(数据源不匹配)")
-                    details.append({
-                        'id': p.id,
-                        'name': p.name or '',
-                        'reason': 'not_matched',
-                        'detail': '数据源不匹配',
-                        'score': 0,
-                    })
-                    continue
-
             # 全量注入（token 预算检查）
             prompt_text = p.prompt or ''
             if inject_chars + len(prompt_text) > MAX_INJECT_CHARS:

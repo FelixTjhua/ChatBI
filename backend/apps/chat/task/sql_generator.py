@@ -18,7 +18,7 @@ from apps.datasource.crud.permission import get_row_permission_filters
 from apps.db.db import exec_sql
 from apps.system.schemas.system_schema import AssistantOutDsSchema
 from common.error import SingleMessageError, ChatBIDBError, ParseSQLResultError
-from common.utils.utils import ChatBILogUtil, extract_nested_json
+from common.utils.utils import ChatBILogUtil, extract_nested_json, extract_json_robust
 from common.utils.sql_error_handler import classify_sql_error
 
 # 从 llm.py 模块级常量引用

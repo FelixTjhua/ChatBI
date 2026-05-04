@@ -134,8 +134,6 @@ def build_data_training_query(session: SessionDep, oid: int, name: Optional[str]
             DataTraining.description,
             DataTraining.enabled,
             DataTraining.advanced_application,
-            DataTraining.specific_ds,
-            DataTraining.datasource_ids,
             AssistantModel.name.label('advanced_application_name'),
         )
         .outerjoin(CoreDatasource, and_(DataTraining.datasource == CoreDatasource.id))
@@ -155,40 +153,18 @@ def execute_data_training_query(session: SessionDep, stmt) -> List[DataTrainingI
     _list = []
     result = session.execute(stmt)
 
-    # 获取所有数据源用于名称映射
-    ds_map = {}
-    ds_result = session.execute(select(CoreDatasource.id, CoreDatasource.name))
-    for ds in ds_result:
-        ds_map[ds.id] = ds.name
-
     for row in result:
-        # 获取 datasource_ids 和对应的名称
-        datasource_ids = []
-        datasource_names = []
-        
-        # 优先使用 datasource_ids 字段（多数据源）
-        if hasattr(row, 'datasource_ids') and row.datasource_ids:
-            datasource_ids = row.datasource_ids if isinstance(row.datasource_ids, list) else []
-            datasource_names = [ds_map.get(ds_id, '') for ds_id in datasource_ids if ds_id in ds_map]
-        # 向后兼容：如果没有 datasource_ids，使用单个 datasource
-        elif row.datasource:
-            datasource_ids = [row.datasource]
-            datasource_names = [row.name] if row.name else []
-        
         _list.append(DataTrainingInfoResult(
             id=str(row.id),
             oid=str(row.oid),
             datasource=row.datasource,
             datasource_name=row.name,
-            datasource_ids=datasource_ids,
-            datasource_names=datasource_names,
             question=row.question,
             create_time=row.create_time,
             description=row.description,
             enabled=row.enabled,
             advanced_application=str(row.advanced_application) if row.advanced_application else None,
             advanced_application_name=row.advanced_application_name,
-            specific_ds=row.specific_ds if hasattr(row, 'specific_ds') and row.specific_ds is not None else False,
         ))
 
     return _list
@@ -221,48 +197,22 @@ def get_all_data_training(session: SessionDep, name: Optional[str] = None, oid: 
 
 def create_training(session: SessionDep, info: DataTrainingInfo, oid: int, trans: Trans):
     create_time = datetime.datetime.now()
-    
-    # 获取 specific_ds 标志，默认为 False（全局知识库）
-    specific_ds = info.specific_ds if info.specific_ds is not None else False
-    
-    # 处理多数据源：优先使用 datasource_ids，向后兼容单个 datasource
-    datasource_ids = info.datasource_ids if info.datasource_ids else []
-    if not datasource_ids and info.datasource:
-        datasource_ids = [info.datasource]
-    
-    # 只有当 specific_ds=True 时才需要数据源或高级应用
-    if specific_ds:
-        if not datasource_ids and info.advanced_application is None:
-            if oid == 1:
-                raise Exception(trans("i18n_data_training.datasource_assistant_cannot_be_none"))
-            else:
-                raise Exception(trans("i18n_data_training.datasource_cannot_be_none"))
-
-    # 向后兼容：保留单个 datasource 字段（取第一个）
-    single_datasource = datasource_ids[0] if datasource_ids else None
 
     parent = DataTraining(question=info.question, create_time=create_time, description=info.description, oid=oid,
-                          datasource=single_datasource if specific_ds else None, 
-                          datasource_ids=datasource_ids if specific_ds else [],
+                          datasource=info.datasource,
                           enabled=info.enabled,
-                          advanced_application=info.advanced_application if specific_ds else None,
-                          specific_ds=specific_ds)
+                          advanced_application=info.advanced_application)
 
     stmt = select(DataTraining.id).where(and_(DataTraining.question == info.question, DataTraining.oid == oid))
 
-    if specific_ds:
-        # 特定数据源模式：检查同数据源下是否存在
-        if datasource_ids and info.advanced_application is not None:
-            stmt = stmt.where(
-                or_(DataTraining.datasource.in_(datasource_ids),
-                    DataTraining.advanced_application == info.advanced_application))
-        elif datasource_ids and info.advanced_application is None:
-            stmt = stmt.where(and_(DataTraining.datasource.in_(datasource_ids)))
-        elif not datasource_ids and info.advanced_application is not None:
-            stmt = stmt.where(and_(DataTraining.advanced_application == info.advanced_application))
-    else:
-        # 全局模式：检查是否已存在全局记录
-        stmt = stmt.where(or_(DataTraining.specific_ds == False, DataTraining.specific_ds.is_(None)))
+    if info.datasource and info.advanced_application is not None:
+        stmt = stmt.where(
+            or_(DataTraining.datasource == info.datasource,
+                DataTraining.advanced_application == info.advanced_application))
+    elif info.datasource and info.advanced_application is None:
+        stmt = stmt.where(and_(DataTraining.datasource == info.datasource))
+    elif not info.datasource and info.advanced_application is not None:
+        stmt = stmt.where(and_(DataTraining.advanced_application == info.advanced_application))
 
     exists = session.query(stmt.exists()).scalar()
 
@@ -285,25 +235,6 @@ def create_training(session: SessionDep, info: DataTrainingInfo, oid: int, trans
 
 
 def update_training(session: SessionDep, info: DataTrainingInfo, oid: int, trans: Trans):
-    # 获取 specific_ds 标志，默认为 False（全局知识库）
-    specific_ds = info.specific_ds if info.specific_ds is not None else False
-    
-    # 处理多数据源：优先使用 datasource_ids，向后兼容单个 datasource
-    datasource_ids = info.datasource_ids if info.datasource_ids else []
-    if not datasource_ids and info.datasource:
-        datasource_ids = [info.datasource]
-    
-    # 只有当 specific_ds=True 时才需要数据源或高级应用
-    if specific_ds:
-        if not datasource_ids and info.advanced_application is None:
-            if oid == 1:
-                raise Exception(trans("i18n_data_training.datasource_assistant_cannot_be_none"))
-            else:
-                raise Exception(trans("i18n_data_training.datasource_cannot_be_none"))
-
-    # 向后兼容：保留单个 datasource 字段（取第一个）
-    single_datasource = datasource_ids[0] if datasource_ids else None
-
     count = session.query(DataTraining).filter(
         DataTraining.id == info.id
     ).count()
@@ -313,19 +244,14 @@ def update_training(session: SessionDep, info: DataTrainingInfo, oid: int, trans
     stmt = select(DataTraining.id).where(
         and_(DataTraining.question == info.question, DataTraining.oid == oid, DataTraining.id != info.id))
 
-    if specific_ds:
-        # 特定数据源模式：检查同数据源下是否存在
-        if datasource_ids and info.advanced_application is not None:
-            stmt = stmt.where(
-                or_(DataTraining.datasource.in_(datasource_ids),
-                    DataTraining.advanced_application == info.advanced_application))
-        elif datasource_ids and info.advanced_application is None:
-            stmt = stmt.where(and_(DataTraining.datasource.in_(datasource_ids)))
-        elif not datasource_ids and info.advanced_application is not None:
-            stmt = stmt.where(and_(DataTraining.advanced_application == info.advanced_application))
-    else:
-        # 全局模式：检查是否已存在全局记录
-        stmt = stmt.where(or_(DataTraining.specific_ds == False, DataTraining.specific_ds.is_(None)))
+    if info.datasource and info.advanced_application is not None:
+        stmt = stmt.where(
+            or_(DataTraining.datasource == info.datasource,
+                DataTraining.advanced_application == info.advanced_application))
+    elif info.datasource and info.advanced_application is None:
+        stmt = stmt.where(and_(DataTraining.datasource == info.datasource))
+    elif not info.datasource and info.advanced_application is not None:
+        stmt = stmt.where(and_(DataTraining.advanced_application == info.advanced_application))
 
     exists = session.query(stmt.exists()).scalar()
 
@@ -335,11 +261,9 @@ def update_training(session: SessionDep, info: DataTrainingInfo, oid: int, trans
     stmt = update(DataTraining).where(and_(DataTraining.id == info.id)).values(
         question=info.question,
         description=info.description,
-        datasource=single_datasource if specific_ds else None,
-        datasource_ids=datasource_ids if specific_ds else [],
+        datasource=info.datasource,
         enabled=info.enabled,
-        advanced_application=info.advanced_application if specific_ds else None,
-        specific_ds=specific_ds,
+        advanced_application=info.advanced_application,
     )
     session.execute(stmt)
     session.commit()
@@ -421,22 +345,18 @@ def save_embeddings(session_maker, ids: List[int]):
 
 
 embedding_sql = """WITH scored AS (
-     SELECT t.id, t.datasource, t.datasource_ids, t.question,
-            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity,
-            t.specific_ds,
-            CASE WHEN t.specific_ds = true THEN t.datasource_ids ELSE NULL END AS ds_ids
+     SELECT t.id, t.datasource, t.question,
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity
      FROM business_sql_example t
      WHERE t.oid = :oid
        AND t.embedding IS NOT NULL
        AND t.enabled = true
        AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= 0.28
-       AND (t.specific_ds = false OR t.specific_ds IS NULL
-            OR (t.specific_ds = true AND (t.datasource = :datasource OR t.datasource_ids @> jsonb_build_array(:datasource))))
+       AND (t.datasource = :datasource OR t.datasource IS NULL)
      ORDER BY similarity DESC
      LIMIT 8
 )
-SELECT id, datasource, datasource_ids, question, similarity, specific_ds,
-       CASE WHEN specific_ds = true THEN ds_ids ELSE NULL END AS datasource_ids
+SELECT id, datasource, question, similarity
 FROM scored"""
 
 embedding_sql_in_advanced_application = """WITH scored AS (
@@ -455,25 +375,19 @@ SELECT id, advanced_application, question, similarity FROM scored"""
 
 
 def _build_ds_scope_filter(datasource, advanced_application_id):
-    """构建数据源范围过滤条件（全局+特定混合），供多个检索函数复用"""
+    """构建数据源范围过滤条件，供多个检索函数复用"""
     if advanced_application_id is not None:
         return or_(
-            or_(DataTraining.specific_ds == False, DataTraining.specific_ds.is_(None)),
-            and_(DataTraining.specific_ds == True, DataTraining.advanced_application == advanced_application_id)
+            DataTraining.advanced_application.is_(None),
+            DataTraining.advanced_application == advanced_application_id
         )
     elif datasource is not None:
         return or_(
-            or_(DataTraining.specific_ds == False, DataTraining.specific_ds.is_(None)),
-            and_(
-                DataTraining.specific_ds == True,
-                or_(
-                    DataTraining.datasource == datasource,
-                    text("datasource_ids @> jsonb_build_array(:datasource_id)")
-                )
-            )
+            DataTraining.datasource.is_(None),
+            DataTraining.datasource == datasource
         )
     else:
-        return or_(DataTraining.specific_ds == False, DataTraining.specific_ds.is_(None))
+        return DataTraining.enabled == True  # 无额外过滤
 
 
 def _token_fuzzy_match(session: SessionDep, question: str, oid: int,
@@ -510,22 +424,14 @@ def _token_fuzzy_match(session: SessionDep, question: str, oid: int,
     # 构建数据源范围过滤 SQL
     ds_filter_sql = ""
     if advanced_application_id is not None:
-        ds_filter_sql = """AND (
-            (specific_ds = false OR specific_ds IS NULL)
-            OR (specific_ds = true AND advanced_application = :adv_app_id)
-        )"""
+        ds_filter_sql = "AND (advanced_application IS NULL OR advanced_application = :adv_app_id)"
         params['adv_app_id'] = advanced_application_id
     elif datasource is not None:
-        ds_filter_sql = """AND (
-     (specific_ds = false OR specific_ds IS NULL)
-     OR (specific_ds = true AND (datasource = :datasource_id OR datasource_ids @> jsonb_build_array(:datasource_id)))
-        )"""
+        ds_filter_sql = "AND (datasource IS NULL OR datasource = :datasource_id)"
         params['datasource_id'] = datasource
-    else:
-        ds_filter_sql = "AND (specific_ds = false OR specific_ds IS NULL)"
     
-    sql = f"""SELECT id, question, specific_ds, match_count FROM (
-    SELECT id, question, specific_ds, ({match_count_expr}) as match_count
+    sql = f"""SELECT id, question, match_count FROM (
+    SELECT id, question, ({match_count_expr}) as match_count
     FROM business_sql_example
     WHERE oid = :oid AND enabled = true {ds_filter_sql}
     ) sub
@@ -541,7 +447,6 @@ def _token_fuzzy_match(session: SessionDep, question: str, oid: int,
                 matched.append({
                     'id': row.id,
                     'question': row.question,
-                    'specific_ds': row.specific_ds if row.specific_ds else False,
                     'match_count': row.match_count,
                 })
         return matched
@@ -568,7 +473,6 @@ def select_training_by_question(session: SessionDep, question: str, oid: int, da
         select(
             DataTraining.id,
             DataTraining.question,
-            DataTraining.specific_ds,
         )
         .where(
             and_(or_(text(":sentence ILIKE '%' || question || '%'"), text("question ILIKE '%' || :sentence || '%'")),
@@ -587,8 +491,7 @@ def select_training_by_question(session: SessionDep, question: str, oid: int, da
     results = session.execute(stmt, params).fetchall()
 
     for row in results:
-        is_specific = row.specific_ds if hasattr(row, 'specific_ds') else False
-        _list.append(DataTraining(id=row.id, question=row.question, specific_ds=is_specific))
+        _list.append(DataTraining(id=row.id, question=row.question))
 
     # ========== 通道2：分词级模糊匹配（新增）==========
     existing_ids = {item.id for item in _list}
@@ -596,7 +499,7 @@ def select_training_by_question(session: SessionDep, question: str, oid: int, da
         session, question, oid, datasource, advanced_application_id, exclude_ids=existing_ids
     )
     for m in token_matches:
-        _list.append(DataTraining(id=m['id'], question=m['question'], specific_ds=m['specific_ds']))
+        _list.append(DataTraining(id=m['id'], question=m['question']))
 
     if settings.EMBEDDING_ENABLED:
         with session.begin_nested():
@@ -616,24 +519,21 @@ def select_training_by_question(session: SessionDep, question: str, oid: int, da
                     # 没有指定数据源时，只检索全局知识库
                     global_embedding_sql = """WITH scored AS (
      SELECT t.id, t.datasource, t.question,
-            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity,
-            t.specific_ds
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity
      FROM business_sql_example t
      WHERE t.oid = :oid
        AND t.embedding IS NOT NULL
        AND t.enabled = true
-       AND (t.specific_ds = false OR t.specific_ds IS NULL)
        AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= 0.28
      ORDER BY similarity DESC
      LIMIT 8
 )
-SELECT id, datasource, question, similarity, specific_ds FROM scored"""
+SELECT id, datasource, question, similarity FROM scored"""
                     results = session.execute(text(global_embedding_sql),
                                               {'embedding_array': str(embedding), 'oid': oid})
 
                 for row in results:
-                    is_specific = row.specific_ds if hasattr(row, 'specific_ds') else False
-                    _list.append(DataTraining(id=row.id, question=row.question, specific_ds=is_specific))
+                    _list.append(DataTraining(id=row.id, question=row.question))
 
             except Exception:
                 from common.utils.utils import ChatBILogUtil
@@ -641,44 +541,34 @@ SELECT id, datasource, question, similarity, specific_ds FROM scored"""
                 # begin_nested() 上下文管理器在异常时自动回滚 savepoint，无需手动 rollback
                 # 移除 session.rollback()，避免回滚整个事务而非仅回滚 savepoint
 
-    # 智能去重和优先级排序
+    # 去重
     _map: dict = {}
     _ids: list[int] = []
-    _priority_map: dict = {}  # 记录优先级
     
     for row in _list:
         if row.id in _ids:
             continue
         else:
             _ids.append(row.id)
-            # 特定数据源示例优先级更高
-            _priority_map[row.id] = 1 if (hasattr(row, 'specific_ds') and row.specific_ds) else 0
 
     if len(_ids) == 0:
         return []
 
-    t_list = session.query(DataTraining.id, DataTraining.question, DataTraining.description, DataTraining.specific_ds).filter(
+    t_list = session.query(DataTraining.id, DataTraining.question, DataTraining.description).filter(
         and_(DataTraining.id.in_(_ids))).all()
 
     for row in t_list:
-        priority = _priority_map.get(row.id, 0)
         _map[row.id] = {
             'question': row.question, 
             'suggestion-answer': row.description,
-            'priority': priority,  # 添加优先级标记
-            'is_specific': row.specific_ds if row.specific_ds else False
         }
 
-    # 按优先级排序：特定数据源示例排在前面
     _results: list[dict] = []
-    sorted_items = sorted(_map.items(), key=lambda x: x[1]['priority'], reverse=True)
-    for key, value in sorted_items:
-        # 移除内部使用的priority字段
-        result_item = {
+    for key, value in _map.items():
+        _results.append({
             'question': value['question'],
             'suggestion-answer': value['suggestion-answer']
-        }
-        _results.append(result_item)
+        })
 
     return _results
 
@@ -807,7 +697,7 @@ def select_training_by_question_with_details(session: SessionDep, question: str,
             # 使用 CTE 避免重复计算余弦距离（与 terminology.py 对齐）
             embedding_sql_detail = ""
             
-            # 修改查询逻辑：同时检索全局知识库和特定数据源的知识库
+            # 修改查询逻辑
             if datasource is not None:
                 embedding_sql_detail = """WITH scored AS (
      SELECT t.id, t.question, t.description,
@@ -817,8 +707,7 @@ def select_training_by_question_with_details(session: SessionDep, question: str,
        AND t.embedding IS NOT NULL
        AND t.enabled = true
        AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= :similarity_threshold
-       AND (t.specific_ds = false OR t.specific_ds IS NULL
-            OR (t.specific_ds = true AND (t.datasource = :datasource OR t.datasource_ids @> jsonb_build_array(:datasource))))
+       AND (t.datasource IS NULL OR t.datasource = :datasource)
      ORDER BY similarity DESC
      LIMIT :top_count
 )
@@ -845,7 +734,6 @@ SELECT id, question, description, similarity FROM scored"""
      WHERE t.oid = :oid
        AND t.embedding IS NOT NULL
        AND t.enabled = true
-       AND (t.specific_ds = false OR t.specific_ds IS NULL)
        AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= :similarity_threshold
      ORDER BY similarity DESC
      LIMIT :top_count

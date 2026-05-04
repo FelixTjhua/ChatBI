@@ -4,7 +4,6 @@ import { ElMessage, ElMessageBox } from 'element-plus-secondary'
 import icon_export_outlined from '@/assets/svg/icon_export_outlined.svg'
 import { trainingApi } from '@/api/training'
 import { formatTimestamp } from '@/utils/date'
-import { datasourceApi } from '@/api/datasource'
 import icon_add_outlined from '@/assets/svg/icon_add_outlined.svg'
 import IconOpeEdit from '@/assets/svg/operate/ope-edit.svg'
 import IconOpeDelete from '@/assets/svg/operate/ope-delete.svg'
@@ -14,18 +13,14 @@ import EmptyBackground from '@/components/EmptyBackground.vue'
 import { useClipboard } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { cloneDeep } from 'lodash-es'
-import { InfoFilled } from '@element-plus/icons-vue'
 
 interface Form {
   id?: string | null
   question: string | null
   datasource: number | null
   datasource_name: string | null
-  datasource_ids: number[]
-  datasource_names: string[]
   description: string | null
   create_time?: number | null
-  specific_ds: boolean
 }
 
 const { t } = useI18n()
@@ -47,7 +42,6 @@ const oldKeywords = ref('')
 const searchLoading = ref(false)
 const { copy } = useClipboard({ legacy: true })
 
-const options = ref<any[]>([])
 const selectable = () => true
 
 onMounted(() => {
@@ -73,10 +67,7 @@ const defaultForm = {
   description: null,
   datasource: null,
   datasource_name: null,
-  datasource_ids: [],
-  datasource_names: [],
   create_time: null,
-  specific_ds: false,
 }
 const pageForm = ref<Form>(cloneDeep(defaultForm))
 
@@ -241,13 +232,6 @@ const search = () => {
 }
 
 const termFormRef = ref()
-const validateDatasource = (_: any, value: any, callback: any) => {
-  if (pageForm.value.specific_ds && (!value || value.length === 0)) {
-    callback(new Error(t('datasource.Please_select') + t('common.empty') + t('ds.title')))
-  } else {
-    callback()
-  }
-}
 
 const rules = computed(() => ({
   question: [
@@ -262,27 +246,7 @@ const rules = computed(() => ({
       message: t('datasource.please_enter') + t('common.empty') + t('training.sample_sql'),
     },
   ],
-  datasource_ids: [{ validator: validateDatasource, trigger: 'blur' }],
 }))
-
-const handleDsChange = () => {
-  termFormRef.value.validateField('datasource_ids')
-}
-
-// 当切换应用范围时，清空数据源选择
-const handleScopeChange = (val: boolean) => {
-  if (!val) {
-    pageForm.value.datasource_ids = []
-  }
-}
-
-const list = () => {
-  datasourceApi.list().then((res: any) => {
-    options.value = res || []
-  }).catch(() => {
-    options.value = []
-  })
-}
 
 const saveHandler = () => {
   termFormRef.value.validate((res: any) => {
@@ -311,18 +275,7 @@ const editHandler = (row: any) => {
   pageForm.value.id = null
   if (row) {
     pageForm.value = cloneDeep(row)
-    // 确保 specific_ds 有默认值
-    if (pageForm.value.specific_ds === undefined || pageForm.value.specific_ds === null) {
-      pageForm.value.specific_ds = !!(
-        pageForm.value.datasource_ids?.length || pageForm.value.datasource
-      )
-    }
-    // 向后兼容：如果没有 datasource_ids 但有 datasource，转换为数组
-    if (!pageForm.value.datasource_ids?.length && pageForm.value.datasource) {
-      pageForm.value.datasource_ids = [pageForm.value.datasource]
-    }
   }
-  list()
   dialogTitle.value = row?.id ? t('training.edit_training_data') : t('training.add_training_data')
   dialogFormVisible.value = true
 }
@@ -508,61 +461,6 @@ const changeStatus = (id: any, val: any) => {
           type="textarea"
         />
       </el-form-item>
-      <el-form-item prop="datasource_ids" :label="t('training.effective_data_sources')">
-        <template #label>
-          <div class="form-label-row">
-            <span>{{ t('training.effective_data_sources') }}</span>
-            <el-tooltip placement="top">
-              <template #content>
-                <div style="max-width: 280px; line-height: 1.5">
-                  {{ t('training.scope_help_text') }}
-                </div>
-              </template>
-              <el-icon class="help-icon"><InfoFilled /></el-icon>
-            </el-tooltip>
-          </div>
-        </template>
-        <div class="scope-selector">
-          <el-radio-group v-model="pageForm.specific_ds" @change="handleScopeChange">
-            <el-radio :value="false">
-              <span class="scope-option">
-                <span class="scope-icon">🌐</span>
-                <span class="scope-text">{{ t('training.all_data_sources') }}</span>
-              </span>
-            </el-radio>
-            <el-radio :value="true">
-              <span class="scope-option">
-                <span class="scope-icon">🎯</span>
-                <span class="scope-text">{{ t('training.partial_data_sources') }}</span>
-              </span>
-            </el-radio>
-          </el-radio-group>
-          <transition name="fade">
-            <el-select
-              v-if="pageForm.specific_ds"
-              v-model="pageForm.datasource_ids"
-              multiple
-              filterable
-              clearable
-              :placeholder="t('datasource.Please_select')"
-              class="ds-select"
-              @change="handleDsChange"
-            >
-              <el-option
-                v-for="item in options"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
-          </transition>
-          <div class="scope-hint">
-            <el-icon><InfoFilled /></el-icon>
-            <span v-if="!pageForm.specific_ds">{{ t('training.global_hint') }}</span>
-            <span v-else>{{ t('training.specific_hint') }}</span>
-          </div>
-        </div>
-      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="onFormClose">{{ t('common.cancel') }}</el-button>
@@ -591,11 +489,6 @@ const changeStatus = (id: any, val: any) => {
           </el-tooltip>
         </div>
       </el-descriptions-item>
-      <el-descriptions-item :label="t('training.effective_data_sources')">{{
-        pageForm.specific_ds
-          ? pageForm.datasource_names?.join(', ') || pageForm.datasource_name
-          : t('training.all_data_sources')
-      }}</el-descriptions-item>
       <el-descriptions-item :label="t('dashboard.create_time')">{{
         pageForm.create_time ? formatTimestamp(pageForm.create_time, 'YYYY-MM-DD HH:mm:ss') : '-'
       }}</el-descriptions-item>
@@ -643,70 +536,6 @@ const changeStatus = (id: any, val: any) => {
     border-color: transparent !important;
     color: #fff !important;
     box-shadow: 0 2px 10px rgba(139, 92, 246, 0.35);
-  }
-}
-
-// 应用范围选择器样式
-.form-label-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-
-  .help-icon {
-    color: rgba(196, 181, 253, 0.5);
-    cursor: help;
-    font-size: 14px;
-    transition: color 0.2s;
-
-    &:hover {
-      color: #a78bfa;
-    }
-  }
-}
-
-.scope-selector {
-  width: 100%;
-
-  :deep(.el-radio-group) {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 8px;
-  }
-
-  .scope-option {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-
-    .scope-icon {
-      font-size: 14px;
-    }
-
-    .scope-text {
-      font-size: 13px;
-    }
-  }
-
-  .ds-select {
-    width: 100%;
-    margin-top: 8px;
-  }
-
-  .scope-hint {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 8px;
-    padding: 8px 12px;
-    background: rgba(139, 92, 246, 0.08);
-    border-radius: 8px;
-    font-size: 12px;
-    color: rgba(196, 181, 253, 0.7);
-
-    .el-icon {
-      color: #a78bfa;
-      font-size: 14px;
-    }
   }
 }
 

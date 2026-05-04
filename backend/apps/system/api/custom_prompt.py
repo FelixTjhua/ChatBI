@@ -8,7 +8,6 @@ from datetime import datetime
 from common.core.deps import SessionDep, CurrentUser
 from common.chatbi.custom_prompt import PromptSQL, PromptAnalysis, PromptForecast
 from common.utils.utils import ChatBILogUtil
-from apps.datasource.models.datasource import CoreDatasource
 from sqlmodel import select, func
 
 router = APIRouter(tags=["system/custom_prompt"], prefix="/system/custom_prompt")
@@ -28,8 +27,6 @@ class CustomPromptCreate(BaseModel):
     name: str
     type: str = "GENERATE_SQL"
     prompt: str
-    specific_ds: bool = False
-    datasource_ids: Optional[List[int]] = None
     always_inject: bool = False
 
 
@@ -38,20 +35,7 @@ class CustomPromptUpdate(BaseModel):
     name: Optional[str] = None
     type: Optional[str] = None
     prompt: Optional[str] = None
-    specific_ds: Optional[bool] = None
-    datasource_ids: Optional[List[int]] = None
     always_inject: Optional[bool] = None
-
-
-def get_datasource_names(session, datasource_ids: List[int]) -> List[str]:
-    if not datasource_ids:
-        return []
-    try:
-        stmt = select(CoreDatasource).where(CoreDatasource.id.in_(datasource_ids))
-        datasources = session.exec(stmt).all()
-        return [ds.name for ds in datasources if ds.name]
-    except Exception:
-        return []
 
 
 @router.get("/{prompt_type}/page/{page}/{size}")
@@ -79,16 +63,11 @@ async def get_prompts_page(
         
         data = []
         for item in items:
-            ds_ids = item.datasource_ids or []
-            ds_names = get_datasource_names(session, ds_ids) if ds_ids else []
             data.append({
                 "id": item.id,
                 "name": item.name,
                 "type": prompt_type,
                 "prompt": item.prompt,
-                "specific_ds": item.specific_ds or False,
-                "datasource_ids": ds_ids,
-                "datasource_names": ds_names,
                 "always_inject": item.always_inject or False,
                 "create_time": item.create_time.timestamp() * 1000 if item.create_time else None,
             })
@@ -108,8 +87,7 @@ async def get_prompts(session: SessionDep, current_user: CurrentUser, prompt_typ
         return [
             {
                 "id": item.id, "name": item.name, "type": prompt_type,
-                "prompt": item.prompt, "specific_ds": item.specific_ds,
-                "datasource_ids": item.datasource_ids or [],
+                "prompt": item.prompt,
                 "always_inject": item.always_inject or False,
             }
             for item in items
@@ -130,12 +108,8 @@ async def export_prompts(session: SessionDep, current_user: CurrentUser, prompt_
         items = session.exec(stmt).all()
         data = []
         for item in items:
-            ds_ids = item.datasource_ids or []
-            ds_names = get_datasource_names(session, ds_ids) if ds_ids else []
             data.append({
                 "名称": item.name, "提示词内容": item.prompt,
-                "应用范围": "指定数据源" if item.specific_ds else "所有数据源",
-                "数据源": ", ".join(ds_names) if ds_names else "-",
                 "创建时间": item.create_time.strftime("%Y-%m-%d %H:%M:%S") if item.create_time else "-",
             })
         df = pd.DataFrame(data)
@@ -157,23 +131,16 @@ async def get_prompt_detail(
     session: SessionDep, current_user: CurrentUser,
     prompt_id: int, prompt_type: Optional[str] = None
 ):
-    """获取 Prompt 详情
-    
-     三张表使用独立自增 ID，仅凭 prompt_id 可能匹配到错误的表。
-    新增 prompt_type 查询参数消歧：指定时直接查对应表，未指定时回退遍历（兼容旧前端）。
-    """
+    """获取 Prompt 详情"""
     # 优先使用 prompt_type 精确查询
     if prompt_type:
         Model = _get_model(prompt_type)
         try:
             prompt = session.get(Model, prompt_id)
             if prompt and prompt.oid == current_user.oid:
-                ds_ids = prompt.datasource_ids or []
-                ds_names = get_datasource_names(session, ds_ids) if ds_ids else []
                 return {
                     "id": prompt.id, "name": prompt.name, "type": prompt_type,
-                    "prompt": prompt.prompt, "specific_ds": prompt.specific_ds or False,
-                    "datasource_ids": ds_ids, "datasource_names": ds_names,
+                    "prompt": prompt.prompt,
                     "always_inject": prompt.always_inject or False,
                     "create_time": prompt.create_time.timestamp() * 1000 if prompt.create_time else None,
                 }
@@ -186,12 +153,9 @@ async def get_prompt_detail(
         try:
             prompt = session.get(Model, prompt_id)
             if prompt and prompt.oid == current_user.oid:
-                ds_ids = prompt.datasource_ids or []
-                ds_names = get_datasource_names(session, ds_ids) if ds_ids else []
                 return {
                     "id": prompt.id, "name": prompt.name, "type": ptype,
-                    "prompt": prompt.prompt, "specific_ds": prompt.specific_ds or False,
-                    "datasource_ids": ds_ids, "datasource_names": ds_names,
+                    "prompt": prompt.prompt,
                     "always_inject": prompt.always_inject or False,
                     "create_time": prompt.create_time.timestamp() * 1000 if prompt.create_time else None,
                 }
@@ -205,7 +169,6 @@ async def create_prompt(session: SessionDep, current_user: CurrentUser, data: Cu
     Model = _get_model(data.type)
     prompt = Model(
         name=data.name, prompt=data.prompt,
-        specific_ds=data.specific_ds, datasource_ids=data.datasource_ids,
         always_inject=data.always_inject, oid=current_user.oid,
         create_time=datetime.now()
     )
@@ -221,7 +184,6 @@ async def update_prompt(session: SessionDep, current_user: CurrentUser, data: Cu
         Model = _get_model(data.type or 'GENERATE_SQL')
         prompt = Model(
             name=data.name, prompt=data.prompt,
-            specific_ds=data.specific_ds, datasource_ids=data.datasource_ids,
             always_inject=data.always_inject if data.always_inject is not None else False,
             oid=current_user.oid, create_time=datetime.now()
         )
@@ -251,8 +213,6 @@ async def update_prompt(session: SessionDep, current_user: CurrentUser, data: Cu
     
     if data.name is not None: prompt.name = data.name
     if data.prompt is not None: prompt.prompt = data.prompt
-    if data.specific_ds is not None: prompt.specific_ds = data.specific_ds
-    if data.datasource_ids is not None: prompt.datasource_ids = data.datasource_ids
     if data.always_inject is not None: prompt.always_inject = data.always_inject
     
     session.add(prompt)
@@ -265,10 +225,7 @@ async def delete_prompt(
     session: SessionDep, current_user: CurrentUser,
     prompt_id: int, prompt_type: Optional[str] = None
 ):
-    """删除 Prompt
-    
-     新增 prompt_type 查询参数，精确定位目标表，避免跨表 ID 冲突误删。
-    """
+    """删除 Prompt"""
     # 优先使用 prompt_type 精确查询
     if prompt_type:
         Model = _get_model(prompt_type)
@@ -312,11 +269,7 @@ class BatchDeleteRequest(BaseModel):
 
 @router.post("/batch_delete")
 async def delete_prompts_batch_post(session: SessionDep, current_user: CurrentUser, data: BatchDeleteRequest):
-    """ POST 方式的批量删除（替代 DELETE + body）
-    
-    部分代理/网关会剥离 DELETE 请求体，导致后端收到空数组。
-    前端改用 POST /batch_delete 发送批量删除请求。
-    """
+    """POST 方式的批量删除（替代 DELETE + body）"""
     try:
         for prompt_id in data.ids:
             if data.prompt_type:

@@ -4,13 +4,12 @@ from typing import List, Optional, Any
 from xml.dom.minidom import parseString
 
 import dicttoxml
-from sqlalchemy import and_, or_, select, func, delete, update, union, text, BigInteger
+from sqlalchemy import and_, or_, select, func, delete, update, union, text
 from sqlalchemy.orm import aliased
 
 from apps.ai_model.embedding import EmbeddingModelCache
-from apps.datasource.models.datasource import CoreDatasource
-from apps.template.generate_chart.generator import get_base_terminology_template
 from apps.terminology.models.terminology_model import Terminology, TerminologyInfo
+from apps.template.generate_chart.generator import get_base_terminology_template
 from common.core.config import settings
 from common.core.deps import SessionDep, Trans
 from common.utils.embedding_threads import run_save_terminology_embeddings
@@ -100,39 +99,18 @@ def build_terminology_query(session: SessionDep, oid: int, name: Optional[str] =
         .subquery()
     )
 
-    # 创建子查询来获取数据源名称
-    datasource_names_subquery = (
-        select(
-            func.jsonb_array_elements(Terminology.datasource_ids).cast(BigInteger).label('ds_id'),
-            Terminology.id.label('term_id')
-        )
-        .where(Terminology.id.in_(paginated_parent_ids))
-        .subquery()
-    )
-
     stmt = (
         select(
             Terminology.id,
             Terminology.word,
             Terminology.create_time,
             Terminology.description,
-            Terminology.specific_ds,
-            Terminology.datasource_ids,
             children_subquery.c.other_words,
-            func.jsonb_agg(CoreDatasource.name).filter(CoreDatasource.id.isnot(None)).label('datasource_names'),
             Terminology.enabled
         )
         .outerjoin(
             children_subquery,
             Terminology.id == children_subquery.c.pid
-        )
-        .outerjoin(
-            datasource_names_subquery,
-            datasource_names_subquery.c.term_id == Terminology.id
-        )
-        .outerjoin(
-            CoreDatasource,
-            CoreDatasource.id == datasource_names_subquery.c.ds_id
         )
         .where(and_(Terminology.id.in_(paginated_parent_ids), Terminology.oid == oid))
         .group_by(
@@ -140,8 +118,6 @@ def build_terminology_query(session: SessionDep, oid: int, name: Optional[str] =
             Terminology.word,
             Terminology.create_time,
             Terminology.description,
-            Terminology.specific_ds,
-            Terminology.datasource_ids,
             children_subquery.c.other_words,
             Terminology.enabled
         )
@@ -165,9 +141,6 @@ def execute_terminology_query(session: SessionDep, stmt) -> List[TerminologyInfo
             create_time=row.create_time,
             description=row.description,
             other_words=row.other_words if row.other_words else [],
-            specific_ds=row.specific_ds if row.specific_ds is not None else False,
-            datasource_ids=row.datasource_ids if row.datasource_ids is not None else [],
-            datasource_names=row.datasource_names if row.datasource_names is not None else [],
             enabled=row.enabled if row.enabled is not None else False,
         ))
 
@@ -202,16 +175,8 @@ def get_all_terminology(session: SessionDep, name: Optional[str] = None, oid: Op
 def create_terminology(session: SessionDep, info: TerminologyInfo, oid: int, trans: Trans):
     create_time = datetime.datetime.now()
 
-    specific_ds = info.specific_ds if info.specific_ds is not None else False
-    datasource_ids = info.datasource_ids if info.datasource_ids is not None else []
-
-    if specific_ds:
-        if not datasource_ids:
-            raise Exception(trans("i18n_terminology.datasource_cannot_be_none"))
-
     parent = Terminology(word=info.word, create_time=create_time, description=info.description, oid=oid,
-                         specific_ds=specific_ds, enabled=info.enabled,
-                         datasource_ids=datasource_ids)
+                         enabled=info.enabled)
 
     words = [info.word]
     for child in info.other_words:
@@ -228,25 +193,6 @@ def create_terminology(session: SessionDep, info: TerminologyInfo, oid: int, tra
 
     # 构建查询
     query = session.query(Terminology).filter(base_query)
-
-    if specific_ds:
-        # 仅当 specific_ds=False 时，检查数据源条件
-        query = query.where(
-            or_(
-                or_(Terminology.specific_ds == False, Terminology.specific_ds.is_(None)),
-                and_(
-                    Terminology.specific_ds == True,
-                    Terminology.datasource_ids.isnot(None),
-                    text("""
-                        EXISTS (
-                            SELECT 1 FROM jsonb_array_elements(datasource_ids) AS elem
-                            WHERE elem::text::int = ANY(:datasource_ids)
-                        )
-                    """)  # 检查是否包含任意目标值
-                )
-            )
-        )
-        query = query.params(datasource_ids=datasource_ids)
 
     # 转换为 EXISTS 查询并获取结果
     exists = session.query(query.exists()).scalar()
@@ -269,8 +215,7 @@ def create_terminology(session: SessionDep, info: TerminologyInfo, oid: int, tra
             if other_word.strip() == "":
                 continue
             _list.append(
-                Terminology(pid=result.id, word=other_word, create_time=create_time, oid=oid, enabled=result.enabled,
-                            specific_ds=specific_ds, datasource_ids=datasource_ids))
+                Terminology(pid=result.id, word=other_word, create_time=create_time, oid=oid, enabled=result.enabled))
     if _list:
         session.bulk_save_objects(_list)
         session.flush()
@@ -289,13 +234,6 @@ def update_terminology(session: SessionDep, info: TerminologyInfo, oid: int, tra
     ).count()
     if count == 0:
         raise Exception(trans('i18n_terminology.terminology_not_exists'))
-
-    specific_ds = info.specific_ds if info.specific_ds is not None else False
-    datasource_ids = info.datasource_ids if info.datasource_ids is not None else []
-
-    if specific_ds:
-        if not datasource_ids:
-            raise Exception(trans("i18n_terminology.datasource_cannot_be_none"))
 
     words = [info.word]
     for child in info.other_words:
@@ -318,25 +256,6 @@ def update_terminology(session: SessionDep, info: TerminologyInfo, oid: int, tra
     # 构建查询
     query = session.query(Terminology).filter(base_query)
 
-    if specific_ds:
-        # 仅当 specific_ds=False 时，检查数据源条件
-        query = query.where(
-            or_(
-                or_(Terminology.specific_ds == False, Terminology.specific_ds.is_(None)),
-                and_(
-                    Terminology.specific_ds == True,
-                    Terminology.datasource_ids.isnot(None),
-                    text("""
-                        EXISTS (
-                            SELECT 1 FROM jsonb_array_elements(datasource_ids) AS elem
-                            WHERE elem::text::int = ANY(:datasource_ids)
-                        )
-                    """)  # 检查是否包含任意目标值
-                )
-            )
-        )
-        query = query.params(datasource_ids=datasource_ids)
-
     # 转换为 EXISTS 查询并获取结果
     exists = session.query(query.exists()).scalar()
 
@@ -347,8 +266,6 @@ def update_terminology(session: SessionDep, info: TerminologyInfo, oid: int, tra
     stmt = update(Terminology).where(and_(Terminology.id == info.id)).values(
         word=info.word,
         description=info.description,
-        specific_ds=specific_ds,
-        datasource_ids=datasource_ids,
         enabled=info.enabled,
     )
     session.execute(stmt)
@@ -364,7 +281,7 @@ def update_terminology(session: SessionDep, info: TerminologyInfo, oid: int, tra
                 continue
             _list.append(
                 Terminology(pid=info.id, word=other_word, create_time=create_time, oid=oid,
-                            specific_ds=specific_ds, datasource_ids=datasource_ids, enabled=info.enabled))
+                            enabled=info.enabled))
     if _list:
         session.bulk_save_objects(_list)
         session.flush()
@@ -490,9 +407,7 @@ def save_embeddings(session_maker, ids: List[int]):
 
 embedding_sql = """WITH scored AS (
      SELECT t.id, t.pid, t.word,
-            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity,
-            t.specific_ds,
-            CASE WHEN t.specific_ds = true THEN t.datasource_ids ELSE NULL END AS datasource_ids
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity
      FROM business_term t
      WHERE t.oid = :oid
        AND t.embedding IS NOT NULL
@@ -502,28 +417,22 @@ embedding_sql = """WITH scored AS (
      ORDER BY similarity DESC
      LIMIT :top_count
 )
-SELECT id, pid, word, similarity, specific_ds,
-       CASE WHEN specific_ds = true THEN datasource_ids ELSE NULL END AS datasource_ids
+SELECT id, pid, word, similarity
 FROM scored"""
 
 embedding_sql_with_datasource = """WITH scored AS (
      SELECT t.id, t.pid, t.word,
-            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity,
-            t.specific_ds,
-            CASE WHEN t.specific_ds = true THEN t.datasource_ids ELSE NULL END AS datasource_ids
+            1 - (t.embedding <=> cast(:embedding_array AS vector)) AS similarity
      FROM business_term t
      WHERE t.oid = :oid
        AND t.embedding IS NOT NULL
        AND t.pid IS NULL
        AND t.enabled = true
        AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= :similarity_threshold
-       AND (t.specific_ds = false OR t.specific_ds IS NULL
-            OR (t.specific_ds = true AND t.datasource_ids @> jsonb_build_array(:datasource)))
      ORDER BY similarity DESC
      LIMIT :top_count
 )
-SELECT id, pid, word, similarity, specific_ds,
-       CASE WHEN specific_ds = true THEN datasource_ids ELSE NULL END AS datasource_ids
+SELECT id, pid, word, similarity
 FROM scored"""
 
 
@@ -548,24 +457,8 @@ def select_terminology_by_word(session: SessionDep, word: str, oid: int, datasou
         )
     )
 
-    if datasource is not None:
-        stmt = stmt.where(
-            or_(
-                or_(Terminology.specific_ds == False, Terminology.specific_ds.is_(None)),
-                and_(
-                    Terminology.specific_ds == True,
-                    Terminology.datasource_ids.isnot(None),
-                    text("datasource_ids @> jsonb_build_array(:datasource)")
-                )
-            )
-        )
-    else:
-        stmt = stmt.where(or_(Terminology.specific_ds == False, Terminology.specific_ds.is_(None)))
-
     # 执行查询
     params: dict[str, Any] = {'sentence': safe_word}
-    if datasource is not None:
-        params['datasource'] = datasource
 
     results = session.execute(stmt, params).fetchall()
 
@@ -584,7 +477,6 @@ def select_terminology_by_word(session: SessionDep, word: str, oid: int, datasou
                 if datasource is not None:
                     results = session.execute(text(embedding_sql_with_datasource),
                                               {'embedding_array': str(embedding), 'oid': oid,
-                                               'datasource': datasource,
                                                'similarity_threshold': settings.EMBEDDING_TERMINOLOGY_SIMILARITY,
                                                'top_count': settings.EMBEDDING_TERMINOLOGY_TOP_COUNT}).fetchall()
                 else:
@@ -695,23 +587,7 @@ def select_terminology_by_keyword_only(session: SessionDep, word: str, oid: int,
         )
     )
 
-    if datasource is not None:
-        stmt = stmt.where(
-            or_(
-                or_(Terminology.specific_ds == False, Terminology.specific_ds.is_(None)),
-                and_(
-                    Terminology.specific_ds == True,
-                    Terminology.datasource_ids.isnot(None),
-                    text("datasource_ids @> jsonb_build_array(:datasource)")
-                )
-            )
-        )
-    else:
-        stmt = stmt.where(or_(Terminology.specific_ds == False, Terminology.specific_ds.is_(None)))
-
     params: dict[str, Any] = {'sentence': safe_word}
-    if datasource is not None:
-        params['datasource'] = datasource
 
     rows = session.execute(stmt, params).fetchall()
     return [
@@ -745,23 +621,7 @@ def select_terminology_by_word_with_details(session: SessionDep, word: str, oid:
         )
     )
 
-    if datasource is not None:
-        stmt = stmt.where(
-            or_(
-                or_(Terminology.specific_ds == False, Terminology.specific_ds.is_(None)),
-                and_(
-                    Terminology.specific_ds == True,
-                    Terminology.datasource_ids.isnot(None),
-                    text("datasource_ids @> jsonb_build_array(:datasource)")
-                )
-            )
-        )
-    else:
-        stmt = stmt.where(or_(Terminology.specific_ds == False, Terminology.specific_ds.is_(None)))
-
     params: dict[str, Any] = {'sentence': safe_word}
-    if datasource is not None:
-        params['datasource'] = datasource
 
     keyword_results = session.execute(stmt, params).fetchall()
     keyword_ids = set()
@@ -797,8 +657,6 @@ def select_terminology_by_word_with_details(session: SessionDep, word: str, oid:
        AND t.pid IS NULL
        AND t.enabled = true
        AND 1 - (t.embedding <=> cast(:embedding_array AS vector)) >= :similarity_threshold
-       AND (t.specific_ds = false OR t.specific_ds IS NULL
-            OR (t.specific_ds = true AND t.datasource_ids @> jsonb_build_array(:datasource)))
      ORDER BY similarity DESC
      LIMIT :top_count
 )
@@ -808,7 +666,6 @@ SELECT id, pid, word, description, sql_mapping, similarity FROM scored"""
                     {
                         'embedding_array': str(embedding), 
                         'oid': oid, 
-                        'datasource': datasource,
                         'similarity_threshold': settings.EMBEDDING_TERMINOLOGY_SIMILARITY,
                         'top_count': settings.EMBEDDING_TERMINOLOGY_TOP_COUNT
                     }

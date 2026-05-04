@@ -445,8 +445,6 @@ def init_terminologies(session: Session, oid: int = 1) -> int:
             sql_mapping=term_data.get("sql_mapping"),
             create_time=datetime.now(),
             enabled=True,
-            specific_ds=False,
-            datasource_ids=[]
         )
         session.add(main_term)
         session.flush()
@@ -460,8 +458,6 @@ def init_terminologies(session: Session, oid: int = 1) -> int:
                 word=other_word,
                 create_time=datetime.now(),
                 enabled=True,
-                specific_ds=False,
-                datasource_ids=[]
             )
             session.add(child_term)
         
@@ -485,8 +481,6 @@ def init_sql_examples(session: Session, oid: int = 1) -> int:
             description=example["description"],
             create_time=datetime.now(),
             enabled=True,
-            specific_ds=False,
-            datasource_ids=[]
         )
         session.add(training)
         created_count += 1
@@ -512,8 +506,6 @@ def init_custom_prompts(session: Session, oid: int = 1) -> dict:
             oid=oid,
             name=prompt_data["name"],
             prompt=prompt_data["prompt"],
-            specific_ds=False,
-            datasource_ids=[],
             create_time=datetime.now()
         )
         session.add(prompt)

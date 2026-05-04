@@ -386,8 +386,6 @@ def init_terminology_data(session: Session, oid: int = 1, datasource_id: int = N
             sql_mapping=term_data.get("sql_mapping"),
             create_time=datetime.now(),
             enabled=True,
-            specific_ds=False,  # 改为False，全局适用
-            datasource_ids=[]   # 空数组表示适用于所有数据源
         )
         session.add(main_term)
         session.flush()
@@ -401,8 +399,6 @@ def init_terminology_data(session: Session, oid: int = 1, datasource_id: int = N
                 word=other_word,
                 create_time=datetime.now(),
                 enabled=True,
-                specific_ds=False,  # 改为False，全局适用
-                datasource_ids=[]   # 空数组表示适用于所有数据源
             )
             session.add(child_term)
         
@@ -448,8 +444,6 @@ def init_sql_examples(session: Session, oid: int = 1, datasource_id: int = None)
             description=example["description"],
             create_time=datetime.now(),
             enabled=True,
-            specific_ds=False,  # 全局适用
-            datasource_ids=[]   # 空数组表示适用于所有数据源
         )
         session.add(training)
         created_count += 1
@@ -501,8 +495,7 @@ def main():
         print(f"   • 运营指标: 库存周转率、坪效、人效、市场占有率")
         print(f"   • 电商指标: DAU、MAU、UV、SKU")
         print(f"\n💡 特性:")
-        print(f"   - 所有数据全局适用（specific_ds=False）")
-        print(f"   - 适用于所有数据源（datasource_ids=[]）")
+        print(f"   - 所有数据全局适用")
         print("\n💡 提示: 如需生成向量嵌入，请运行:")
         print("   python scripts/generate_embeddings.py")
 

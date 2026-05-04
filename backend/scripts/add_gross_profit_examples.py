@@ -69,8 +69,6 @@ def main():
                 description=ex["description"],
                 create_time=datetime.now(),
                 enabled=True,
-                specific_ds=False,
-                datasource_ids=[]
             )
             session.add(record)
             session.flush()

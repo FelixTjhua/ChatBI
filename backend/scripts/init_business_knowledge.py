@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from datetime import datetime
 from sqlmodel import Session, select, func
-from sqlalchemy import and_, or_
+from sqlalchemy import and_
 from common.core.db import engine
 from apps.terminology.models.terminology_model import Terminology
 from apps.data_training.models.data_training_model import DataTraining
@@ -589,8 +589,6 @@ def init_business_terminologies(session: Session, oid: int = 1):
             sql_mapping=term_data.get("sql_mapping"),
             create_time=datetime.now(),
             enabled=True,
-            specific_ds=False,
-            datasource_ids=[]
         )
         session.add(main_term)
         session.flush()
@@ -604,8 +602,6 @@ def init_business_terminologies(session: Session, oid: int = 1):
                 word=other_word,
                 create_time=datetime.now(),
                 enabled=True,
-                specific_ds=False,
-                datasource_ids=[]
             )
             session.add(child_term)
 
@@ -629,7 +625,6 @@ def init_business_sql_examples(session: Session, oid: int = 1):
                 and_(
                     DataTraining.question == example["question"],
                     DataTraining.oid == oid,
-                    or_(DataTraining.specific_ds == False, DataTraining.specific_ds.is_(None))
                 )
             )
         ).first()
@@ -646,8 +641,6 @@ def init_business_sql_examples(session: Session, oid: int = 1):
             description=example["description"],
             create_time=datetime.now(),
             enabled=True,
-            specific_ds=False,
-            datasource_ids=[]
         )
         session.add(training)
         created_count += 1

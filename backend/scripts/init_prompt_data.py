@@ -87,8 +87,6 @@ def init_prompt_data():
                 name=item["name"],
                 type="GENERATE_SQL",
                 prompt=item["prompt"],
-                specific_ds=False,
-                datasource_ids=None,
                 oid=1,
                 create_time=datetime.now()
             ))
@@ -99,8 +97,6 @@ def init_prompt_data():
                 name=item["name"],
                 type="ANALYSIS",
                 prompt=item["prompt"],
-                specific_ds=False,
-                datasource_ids=None,
                 oid=1,
                 create_time=datetime.now()
             ))
@@ -111,8 +107,6 @@ def init_prompt_data():
                 name=item["name"],
                 type="PREDICT_DATA",
                 prompt=item["prompt"],
-                specific_ds=False,
-                datasource_ids=None,
                 oid=1,
                 create_time=datetime.now()
             ))

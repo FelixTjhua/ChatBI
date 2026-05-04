@@ -37,32 +37,24 @@ def main():
             'word': '区域',
             'other_words': ['地区', '区', '地域'],
             'description': '指销售区域或地理区域。在数据表中对应"销售区域"字段。查询时应使用"销售区域"作为字段名。',
-            'specific_ds': False,
-            'datasource_ids': [],
             'enabled': True
         },
         {
             'word': '渠道',
             'other_words': ['销售渠道', '渠道类型'],
             'description': '指销售渠道，如线上、线下、电商等。在数据表中对应"销售渠道"字段。',
-            'specific_ds': False,
-            'datasource_ids': [],
             'enabled': True
         },
         {
             'word': '产品',
             'other_words': ['商品', '产品名'],
             'description': '指产品或商品。在数据表中对应"产品名称"字段。',
-            'specific_ds': False,
-            'datasource_ids': [],
             'enabled': True
         },
         {
             'word': '类别',
             'other_words': ['分类', '产品类别', '产品分类'],
             'description': '指产品类别或分类。在数据表中对应"产品类别"字段。',
-            'specific_ds': False,
-            'datasource_ids': [],
             'enabled': True
         },
     ]
@@ -74,8 +66,6 @@ def main():
                 word=term_data['word'],
                 other_words=term_data['other_words'],
                 description=term_data['description'],
-                specific_ds=term_data['specific_ds'],
-                datasource_ids=term_data['datasource_ids'],
                 enabled=term_data['enabled']
             )
             

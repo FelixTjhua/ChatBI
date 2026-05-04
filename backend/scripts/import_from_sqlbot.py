@@ -32,8 +32,6 @@ def import_terminology(csv_file: str):
                         description=row.get('description'),
                         pid=int(row['pid']) if row.get('pid') and row['pid'] != '' else None,
                         enabled=row.get('enabled', 'true').lower() in ['true', '1', 't'],
-                        specific_ds=row.get('specific_ds', 'false').lower() in ['true', '1', 't'],
-                        datasource_ids=eval(row['datasource_ids']) if row.get('datasource_ids') and row['datasource_ids'] != '' else [],
                         create_time=datetime.now()
                     )
                     session.add(term)
@@ -64,8 +62,6 @@ def import_training(csv_file: str):
                         question=row['question'],
                         description=row['description'],
                         enabled=row.get('enabled', 'true').lower() in ['true', '1', 't'],
-                        specific_ds=row.get('specific_ds', 'false').lower() in ['true', '1', 't'],
-                        datasource_ids=eval(row['datasource_ids']) if row.get('datasource_ids') and row['datasource_ids'] != '' else [],
                         create_time=datetime.now()
                     )
                     session.add(training)
@@ -95,8 +91,6 @@ def import_prompts(csv_file: str):
                         name=row['name'],
                         type=row['type'],
                         prompt=row['prompt'],
-                        specific_ds=row.get('specific_ds', 'false').lower() in ['true', '1', 't'],
-                        datasource_ids=eval(row['datasource_ids']) if row.get('datasource_ids') and row['datasource_ids'] != '' else None,
                         create_time=datetime.now()
                     )
                     session.add(prompt)
@@ -127,7 +121,7 @@ def import_from_sqlbot_db(sqlbot_db_url: str):
             try:
                 # SQLBot的terminology表结构
                 result = sqlbot_session.execute(
-                    "SELECT id, oid, pid, create_time, word, description, enabled, specific_ds, datasource_ids FROM terminology"
+                    "SELECT id, oid, pid, create_time, word, description, enabled FROM terminology"
                 )
                 count = 0
                 for row in result:
@@ -139,8 +133,6 @@ def import_from_sqlbot_db(sqlbot_db_url: str):
                             word=row[4],
                             description=row[5],
                             enabled=row[6] if row[6] is not None else True,
-                            specific_ds=row[7] if row[7] is not None else False,
-                            datasource_ids=row[8] if row[8] else []
                         )
                         chatbi_session.add(term)
                         count += 1
@@ -159,7 +151,7 @@ def import_from_sqlbot_db(sqlbot_db_url: str):
         with Session(engine) as chatbi_session:
             try:
                 result = sqlbot_session.execute(
-                    "SELECT id, oid, datasource, create_time, question, description, enabled, specific_ds, datasource_ids FROM data_training"
+                    "SELECT id, oid, datasource, create_time, question, description, enabled FROM data_training"
                 )
                 count = 0
                 for row in result:
@@ -171,8 +163,6 @@ def import_from_sqlbot_db(sqlbot_db_url: str):
                             question=row[4],
                             description=row[5],
                             enabled=row[6] if row[6] is not None else True,
-                            specific_ds=row[7] if row[7] is not None else False,
-                            datasource_ids=row[8] if row[8] else []
                         )
                         chatbi_session.add(training)
                         count += 1
@@ -191,7 +181,7 @@ def import_from_sqlbot_db(sqlbot_db_url: str):
         with Session(engine) as chatbi_session:
             try:
                 result = sqlbot_session.execute(
-                    "SELECT id, oid, type, create_time, name, prompt, specific_ds, datasource_ids FROM custom_prompt"
+                    "SELECT id, oid, type, create_time, name, prompt FROM custom_prompt"
                 )
                 count = 0
                 for row in result:
@@ -202,8 +192,6 @@ def import_from_sqlbot_db(sqlbot_db_url: str):
                             create_time=row[3] if row[3] else datetime.now(),
                             name=row[4],
                             prompt=row[5],
-                            specific_ds=row[6] if row[6] is not None else False,
-                            datasource_ids=row[7] if row[7] else None
                         )
                         chatbi_session.add(prompt)
                         count += 1
