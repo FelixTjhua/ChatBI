@@ -67,3 +67,16 @@ frontend/.eslintrc-auto-import.json
 毕设论文（终极版）.md
 参考文献/
 backend/tests/
+
+# --- Performance/thesis test scripts (not part of source code) ---
+backend/scripts/perf_*
+backend/scripts/test_*
+backend/scripts/thesis_*
+backend/scripts/defense_test.py
+backend/scripts/random_stress_test.py
+backend/scripts/final_perf.py
+backend/scripts/perf_avg3.py
+backend/scripts/thesis_perf_output.txt
+backend/perf_result.txt
+backend/test_table52.py
+backend/test_table52_v2.py

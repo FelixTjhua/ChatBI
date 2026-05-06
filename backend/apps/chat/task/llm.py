@@ -1476,13 +1476,22 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
             )
 
         # Step 3: 更新早期意图
+        # 注意：如果当前意图是通过 follow_up 继承得到的（非 follow_up 本身），
+        # 则不应被重写器的意图覆盖，因为继承意图比短句重新检测更可靠
         if rewrite_result.get('intent'):
             _old_early = self._early_intent
-            self._early_intent = rewrite_result['intent']
-            if _old_early != self._early_intent:
+            _was_inherited = getattr(self, '_intent_inherited_from_followup', False)
+            if _was_inherited and _old_early not in ('follow_up', 'irrelevant_query', 'ambiguous_query'):
+                # follow_up 继承的意图优先级高于重写器重新检测的意图
                 ChatBILogUtil.info(
-                    f"[{path_label}] Early intent updated by rewriter: '{_old_early}' -> '{self._early_intent}'"
+                    f"[{path_label}] Keeping inherited intent '{_old_early}', ignoring rewriter intent '{rewrite_result['intent']}'"
                 )
+            else:
+                self._early_intent = rewrite_result['intent']
+                if _old_early != self._early_intent:
+                    ChatBILogUtil.info(
+                        f"[{path_label}] Early intent updated by rewriter: '{_old_early}' -> '{self._early_intent}'"
+                    )
 
         # Step 4: PDF 意图调整（PDF 始终走文档问答）
         _ds_lower = (ds_type or '').lower()
@@ -2417,6 +2426,7 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
                         else:
                             ChatBILogUtil.info(f"[select_datasource][follow_up] Inherited intent: {_inherited}")
                             self._early_intent = _inherited
+                            self._intent_inherited_from_followup = True
                     else:
                         self._early_intent = 'fact_query'
                 except Exception as e:
@@ -3168,6 +3178,7 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
                                 ChatBILogUtil.info(f"[existing_ds][follow_up] Inherited intent: {_inherited}")
                                 early_intent = _inherited
                                 self._early_intent = _inherited
+                                self._intent_inherited_from_followup = True
                         else:
                             early_intent = 'fact_query'
                             self._early_intent = 'fact_query'

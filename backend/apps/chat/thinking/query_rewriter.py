@@ -618,8 +618,6 @@ class QueryRewriter:
             # "按月份细分销售额" → fact_query（有明确数据指标）
             if any(kw in question_lower for kw in data_context_patterns):
                 return 'fact_query'
-
-        if any(kw in question_lower for kw in follow_up_patterns):
             # "继续帮我查一下销售额"同时匹配follow_up("继续")和fact_query("查")
             # 应优先路由到fact_query，因为用户有明确的数据查询意图
             fact_keywords = ['查询', '统计', '计算', '列出', '显示', '对比', '分析',
@@ -629,6 +627,20 @@ class QueryRewriter:
             has_fact_intent = any(kw in question_lower for kw in fact_keywords)
             if len(question_lower) <= 40 and not has_fact_intent and \
                not any(kw in question_lower for kw in data_context_patterns[:15]):
+                return 'follow_up'
+
+        # ========== 7c. "只看X的" / "换成X" 过滤条件追问模式 ==========
+        # 用户在多轮对话中常用 "只看华东地区的"、"换成上个月的" 等短句追加过滤条件
+        _filter_patterns = ['只看', '只要', '只显示', '仅看', '仅显示',
+                            '限定', 'only show', 'filter by', 'just show']
+        _filter_suffix = ['的', '呢', '吧', '数据']
+        if any(kw in question_lower for kw in _filter_patterns):
+            if len(question_lower) <= 30:
+                return 'follow_up'
+        # "只看华东地区的" — 短句 + 以"的"结尾 + 无明确查询动词 → follow_up
+        if len(question_lower) <= 15 and question_lower.endswith('的'):
+            # 极短句以"的"结尾，大概率是追加过滤条件
+            if not any(kw in question_lower for kw in ['是什么', '什么意思', '怎么']):
                 return 'follow_up'
 
         # ========== 9. 无效/无关问题（最高优先级）==========
