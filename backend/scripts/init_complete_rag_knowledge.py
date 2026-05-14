@@ -149,6 +149,38 @@ TERMINOLOGIES = [
         "sql_mapping": '"产品类别"',
         "other_words": ["分类", "产品类别", "产品分类", "品类"]
     },
+    # ── 人员与客户 ──
+    {
+        "word": "销售人员",
+        "description": "负责销售业务的员工。在数据表中对应「销售人员」字段，用于业绩考核和人员分析。",
+        "sql_mapping": '"销售人员"',
+        "other_words": ["业务员", "销售员", "销售代表", "业务人员", "salesperson"]
+    },
+    {
+        "word": "客户",
+        "description": "购买商品或服务的客户。在数据表中对应「客户名称」字段，用于客户分析和客户管理。",
+        "sql_mapping": '"客户名称"',
+        "other_words": ["客户名称", "客户名", "买家", "顾客", "customer"]
+    },
+    # ── 数量与退货 ──
+    {
+        "word": "销售数量",
+        "description": "售出商品的数量。在数据表中对应「销售数量」字段，用于销量分析和库存管理。",
+        "sql_mapping": 'SUM("销售数量")',
+        "other_words": ["销量", "数量", "卖出数量", "出货量", "sales volume"]
+    },
+    {
+        "word": "退货数量",
+        "description": "客户退回商品的数量。在数据表中对应「退货数量」字段，用于退货率分析和质量管理。",
+        "sql_mapping": 'SUM("退货数量")',
+        "other_words": ["退货", "退货量", "退回数量", "退单量", "returns"]
+    },
+    {
+        "word": "折扣率",
+        "description": "销售折扣的比率，反映促销力度。在数据表中对应「折扣率」字段，用于促销效果分析。",
+        "sql_mapping": 'ROUND(AVG("折扣率"), 2)',
+        "other_words": ["折扣", "优惠率", "打折", "discount"]
+    },
 ]
 
 
@@ -329,6 +361,41 @@ SQL_EXAMPLES = [
     {
         "question": "各产品类别的利润占比",
         "description": 'SELECT "产品类别", SUM("毛利") AS "总毛利", ROUND(SUM("毛利") * 100.0 / NULLIF((SELECT SUM("毛利") FROM "{table}"), 0), 2) AS "利润占比%" FROM "{table}" GROUP BY "产品类别" ORDER BY "总毛利" DESC'
+    },
+    # ── 销售人员与客户分析 ──
+    {
+        "question": "各销售人员的业绩排名",
+        "description": 'SELECT "销售人员", SUM("销售额") AS "总销售额", SUM("订单数") AS "总订单数" FROM "{table}" GROUP BY "销售人员" ORDER BY "总销售额" DESC'
+    },
+    {
+        "question": "各客户的消费排名",
+        "description": 'SELECT "客户名称", SUM("销售额") AS "总消费额", SUM("订单数") AS "总订单数" FROM "{table}" GROUP BY "客户名称" ORDER BY "总消费额" DESC LIMIT 10'
+    },
+    {
+        "question": "销售人员的平均客单价",
+        "description": 'SELECT "销售人员", ROUND(AVG("客单价"), 2) AS "平均客单价", SUM("订单数") AS "总订单数" FROM "{table}" GROUP BY "销售人员" ORDER BY "平均客单价" DESC'
+    },
+    # ── 销售数量与退货分析 ──
+    {
+        "question": "各产品的销售数量排名",
+        "description": 'SELECT "产品名称", SUM("销售数量") AS "总销量" FROM "{table}" GROUP BY "产品名称" ORDER BY "总销量" DESC'
+    },
+    {
+        "question": "退货率最高的产品",
+        "description": 'SELECT "产品名称", SUM("退货数量") AS "总退货", SUM("销售数量") AS "总销量", ROUND(SUM("退货数量") * 100.0 / NULLIF(SUM("销售数量"), 0), 2) AS "退货率%" FROM "{table}" GROUP BY "产品名称" ORDER BY "退货率%" DESC LIMIT 10'
+    },
+    {
+        "question": "各区域的退货情况",
+        "description": 'SELECT "销售区域", SUM("退货数量") AS "总退货", SUM("销售数量") AS "总销量", ROUND(SUM("退货数量") * 100.0 / NULLIF(SUM("销售数量"), 0), 2) AS "退货率%" FROM "{table}" GROUP BY "销售区域" ORDER BY "退货率%" DESC'
+    },
+    # ── 折扣分析 ──
+    {
+        "question": "各渠道的平均折扣率",
+        "description": 'SELECT "渠道类型", ROUND(AVG("折扣率"), 2) AS "平均折扣率" FROM "{table}" GROUP BY "渠道类型" ORDER BY "平均折扣率" DESC'
+    },
+    {
+        "question": "折扣对销售额的影响",
+        "description": 'SELECT CASE WHEN "折扣率" >= 0.2 THEN \'高折扣(>=20%)\' WHEN "折扣率" >= 0.1 THEN \'中折扣(10%-20%)\' ELSE \'低折扣(<10%)\' END AS "折扣区间", COUNT(*) AS "订单数", ROUND(AVG("销售额"), 2) AS "平均销售额" FROM "{table}" GROUP BY "折扣区间" ORDER BY "平均销售额" DESC'
     },
 ]
 

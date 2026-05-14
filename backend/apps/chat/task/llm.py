@@ -5322,21 +5322,29 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
             ChatBILogUtil.exception()
             error_msg: str
             if isinstance(e, SingleMessageError):
-                # SingleMessageError 也需要脱敏，防止 check_save_sql/check_save_chart
-                # 中的 traceback 字段泄露 LLM 原始响应和内部错误细节
+                # SingleMessageError 包含面向用户的友好消息
+                # 以 friendly-hint 类型发送，避免前端显示红色报错框
                 raw_msg = str(e)
                 try:
                     parsed = orjson.loads(raw_msg)
                     if isinstance(parsed, dict):
                         if 'traceback' in parsed:
-                            parsed['traceback'] = sanitize_error_message(parsed['traceback'])
-                        if 'message' in parsed:
-                            parsed['message'] = sanitize_error_message(parsed['message'])
-                        error_msg = orjson.dumps(parsed).decode()
+                            del parsed['traceback']  # 完全移除traceback，不暴露给用户
+                        friendly_message = parsed.get('message', sanitize_error_message(raw_msg))
+                        error_msg = orjson.dumps({
+                            'message': friendly_message,
+                            'type': 'friendly-hint'
+                        }).decode()
                     else:
-                        error_msg = sanitize_error_message(raw_msg)
+                        error_msg = orjson.dumps({
+                            'message': sanitize_error_message(raw_msg),
+                            'type': 'friendly-hint'
+                        }).decode()
                 except Exception:
-                    error_msg = sanitize_error_message(raw_msg)
+                    error_msg = orjson.dumps({
+                        'message': sanitize_error_message(raw_msg),
+                        'type': 'friendly-hint'
+                    }).decode()
             elif isinstance(e, ChatBIDBConnectionError):
                 _is_en_err = (self.chat_question.lang or '').lower().startswith('en')
                 _conn_err_msg = 'Datasource connection error, please check connection configuration' if _is_en_err else '数据源连接异常，请检查连接配置'
@@ -5361,10 +5369,10 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
                         'message': error_info['suggestion'],
                         'error_type': _err_type,
                         'suggestion': error_info['suggestion'],
-                        'type': 'exec-sql-err'
+                        'type': 'friendly-hint'
                     }).decode()
             else:
-                error_msg = orjson.dumps({'message': sanitize_error_message(str(e))}).decode()
+                error_msg = orjson.dumps({'message': sanitize_error_message(str(e)), 'type': 'friendly-hint'}).decode()
             if _session:
                 self.save_error(session=_session, message=error_msg)
             if in_chat:
@@ -5757,22 +5765,29 @@ class LLMService(SQLGeneratorMixin, ChartGeneratorMixin, AnalysisServiceMixin, P
         except Exception as e:
             error_msg: str
             if isinstance(e, SingleMessageError):
-                # SingleMessageError 也需要脱敏处理
                 raw_msg = str(e)
                 try:
                     parsed = orjson.loads(raw_msg)
                     if isinstance(parsed, dict):
                         if 'traceback' in parsed:
-                            parsed['traceback'] = sanitize_error_message(parsed['traceback'])
-                        if 'message' in parsed:
-                            parsed['message'] = sanitize_error_message(parsed['message'])
-                        error_msg = orjson.dumps(parsed).decode()
+                            del parsed['traceback']
+                        friendly_message = parsed.get('message', sanitize_error_message(raw_msg))
+                        error_msg = orjson.dumps({
+                            'message': friendly_message,
+                            'type': 'friendly-hint'
+                        }).decode()
                     else:
-                        error_msg = sanitize_error_message(raw_msg)
+                        error_msg = orjson.dumps({
+                            'message': sanitize_error_message(raw_msg),
+                            'type': 'friendly-hint'
+                        }).decode()
                 except Exception:
-                    error_msg = sanitize_error_message(raw_msg)
+                    error_msg = orjson.dumps({
+                        'message': sanitize_error_message(raw_msg),
+                        'type': 'friendly-hint'
+                    }).decode()
             else:
-                error_msg = orjson.dumps({'message': sanitize_error_message(str(e))}).decode()
+                error_msg = orjson.dumps({'message': sanitize_error_message(str(e)), 'type': 'friendly-hint'}).decode()
             if _session:
                 self.save_error(session=_session, message=error_msg)
             yield 'data:' + orjson.dumps({'content': error_msg, 'type': 'error'}).decode() + '\n\n'
