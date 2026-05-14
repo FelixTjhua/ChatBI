@@ -39,7 +39,7 @@ TERMINOLOGIES = [
         "word": "毛利",
         "description": "销售收入减去销售成本后的利润。计算公式：毛利 = 销售收入 - 销售成本。反映企业产品的基本盈利能力。",
         "sql_mapping": 'SUM("毛利")',
-        "other_words": ["毛利润", "销售毛利", "总毛利"]
+        "other_words": ["毛利润", "销售毛利", "总毛利", "利润", "profit"]
     },
     {
         "word": "毛利率",
@@ -127,21 +127,21 @@ TERMINOLOGIES = [
     # 补充分类维度术语，与 init_rag_data.py 对齐
     {
         "word": "区域",
-        "description": "指销售区域或地理区域，用于区域销售分析和市场布局。在数据表中对应「区域」或「销售区域」字段。",
-        "sql_mapping": '"区域"',
+        "description": "指销售区域或地理区域，用于区域销售分析和市场布局。在数据表中对应「销售区域」字段。",
+        "sql_mapping": '"销售区域"',
         "other_words": ["地区", "区", "地域", "销售区域"]
     },
     {
         "word": "渠道",
         "description": "指销售渠道，如线上、线下、电商平台等。用于渠道效益分析和渠道策略优化。",
-        "sql_mapping": '"渠道"',
+        "sql_mapping": '"渠道类型"',
         "other_words": ["销售渠道", "渠道类型", "分销渠道"]
     },
     {
         "word": "产品",
-        "description": "指企业销售的商品或服务。在数据表中对应「产品」或「产品名称」字段。",
-        "sql_mapping": '"产品"',
-        "other_words": ["商品", "产品名", "品名"]
+        "description": "指企业销售的商品或服务。在数据表中对应「产品名称」字段。",
+        "sql_mapping": '"产品名称"',
+        "other_words": ["商品", "产品名", "品名", "产品名称"]
     },
     {
         "word": "类别",
@@ -275,11 +275,11 @@ SQL_EXAMPLES = [
     },
     {
         "question": "按渠道统计销售额",
-        "description": 'SELECT "渠道", SUM("销售额") AS "总销售额", SUM("订单数") AS "总订单数" FROM "{table}" GROUP BY "渠道" ORDER BY "总销售额" DESC'
+        "description": 'SELECT "渠道类型", SUM("销售额") AS "总销售额", SUM("订单数") AS "总订单数" FROM "{table}" GROUP BY "渠道类型" ORDER BY "总销售额" DESC'
     },
     {
         "question": "各产品销售排名",
-        "description": 'SELECT "产品", SUM("销售额") AS "总销售额" FROM "{table}" GROUP BY "产品" ORDER BY "总销售额" DESC LIMIT 10'
+        "description": 'SELECT "产品名称", SUM("销售额") AS "总销售额" FROM "{table}" GROUP BY "产品名称" ORDER BY "总销售额" DESC LIMIT 10'
     },
     {
         "question": "查询各类别的平均客单价",
@@ -304,15 +304,15 @@ SQL_EXAMPLES = [
     # ── 毛利/利润分析（按产品/类别维度）──
     {
         "question": "找出毛利最高的产品",
-        "description": 'SELECT "产品", SUM("毛利") AS "总毛利" FROM "{table}" GROUP BY "产品" ORDER BY "总毛利" DESC LIMIT 5'
+        "description": 'SELECT "产品名称", SUM("毛利") AS "总毛利" FROM "{table}" GROUP BY "产品名称" ORDER BY "总毛利" DESC LIMIT 5'
     },
     {
         "question": "毛利最高的5个产品",
-        "description": 'SELECT "产品", SUM("毛利") AS "总毛利" FROM "{table}" GROUP BY "产品" ORDER BY "总毛利" DESC LIMIT 5'
+        "description": 'SELECT "产品名称", SUM("毛利") AS "总毛利" FROM "{table}" GROUP BY "产品名称" ORDER BY "总毛利" DESC LIMIT 5'
     },
     {
         "question": "各产品毛利排名",
-        "description": 'SELECT "产品", SUM("毛利") AS "总毛利", ROUND(SUM("毛利") * 100.0 / NULLIF(SUM("销售额"), 0), 2) AS "毛利率%" FROM "{table}" GROUP BY "产品" ORDER BY "总毛利" DESC'
+        "description": 'SELECT "产品名称", SUM("毛利") AS "总毛利", ROUND(SUM("毛利") * 100.0 / NULLIF(SUM("销售额"), 0), 2) AS "毛利率%" FROM "{table}" GROUP BY "产品名称" ORDER BY "总毛利" DESC'
     },
     {
         "question": "各产品类别的毛利对比",
@@ -320,11 +320,15 @@ SQL_EXAMPLES = [
     },
     {
         "question": "毛利率最高的产品",
-        "description": 'SELECT "产品", ROUND(SUM("毛利") * 100.0 / NULLIF(SUM("销售额"), 0), 2) AS "毛利率%", SUM("毛利") AS "总毛利" FROM "{table}" GROUP BY "产品" ORDER BY "毛利率%" DESC LIMIT 5'
+        "description": 'SELECT "产品名称", ROUND(SUM("毛利") * 100.0 / NULLIF(SUM("销售额"), 0), 2) AS "毛利率%", SUM("毛利") AS "总毛利" FROM "{table}" GROUP BY "产品名称" ORDER BY "毛利率%" DESC LIMIT 5'
     },
     {
         "question": "各产品的利润贡献",
-        "description": 'SELECT "产品", SUM("毛利") AS "总毛利", ROUND(SUM("毛利") * 100.0 / NULLIF((SELECT SUM("毛利") FROM "{table}"), 0), 2) AS "利润贡献占比%" FROM "{table}" GROUP BY "产品" ORDER BY "总毛利" DESC'
+        "description": 'SELECT "产品名称", SUM("毛利") AS "总毛利", ROUND(SUM("毛利") * 100.0 / NULLIF((SELECT SUM("毛利") FROM "{table}"), 0), 2) AS "利润贡献占比%" FROM "{table}" GROUP BY "产品名称" ORDER BY "总毛利" DESC'
+    },
+    {
+        "question": "各产品类别的利润占比",
+        "description": 'SELECT "产品类别", SUM("毛利") AS "总毛利", ROUND(SUM("毛利") * 100.0 / NULLIF((SELECT SUM("毛利") FROM "{table}"), 0), 2) AS "利润占比%" FROM "{table}" GROUP BY "产品类别" ORDER BY "总毛利" DESC'
     },
 ]
 

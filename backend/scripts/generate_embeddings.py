@@ -104,7 +104,7 @@ def test_vector_search(session: Session):
         from sqlalchemy import text
         term_sql = f"""
         SELECT id, word, (1 - (embedding <=> :embedding)) AS similarity
-        FROM terminology
+        FROM business_term
         WHERE embedding IS NOT NULL AND enabled = true
         ORDER BY similarity DESC
         LIMIT 3
@@ -118,7 +118,7 @@ def test_vector_search(session: Session):
         # SQL示例向量检索
         training_sql = f"""
         SELECT id, question, (1 - (embedding <=> :embedding)) AS similarity
-        FROM data_training
+        FROM business_sql_example
         WHERE embedding IS NOT NULL AND enabled = true
         ORDER BY similarity DESC
         LIMIT 3
