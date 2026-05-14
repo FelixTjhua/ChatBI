@@ -25,7 +25,17 @@ def classify_sql_error(error_message: str) -> Dict[str, str]:
             "suggestion": "SQL语法错误，请尝试用更简洁的方式描述您的问题"
         }
 
-    # 表或列不存在
+    # 列不存在（必须在表不存在之前检查，因为'does not exist'会同时匹配两者）
+    if any(kw in msg_lower for kw in [
+        'unknown column', 'column not found', 'no such column',
+        'invalid column', 'ora-00904', 'undefined column',
+    ]) or ('column' in msg_lower and 'does not exist' in msg_lower):
+        return {
+            "error_type": "column_not_found",
+            "suggestion": '您提问中涉及的字段在当前数据源中不存在。建议您换一种方式描述问题，或者在对话中输入"有哪些字段"来查看当前数据源包含的字段信息。'
+        }
+
+    # 表或关系不存在
     if any(kw in msg_lower for kw in [
         'no such table', 'table not found', 'unknown table',
         'relation', 'does not exist', 'doesn\'t exist',
@@ -34,15 +44,6 @@ def classify_sql_error(error_message: str) -> Dict[str, str]:
         return {
             "error_type": "table_not_found",
             "suggestion": '您提问的内容可能超出了当前数据源的范围。当前数据源中没有找到对应的数据表，建议您换一种方式描述问题，或者在对话中输入"有哪些数据"来查看当前数据源包含的表和字段。'
-        }
-
-    if any(kw in msg_lower for kw in [
-        'unknown column', 'column not found', 'no such column',
-        'invalid column', 'ora-00904', 'undefined column',
-    ]):
-        return {
-            "error_type": "column_not_found",
-            "suggestion": '您提问中涉及的字段在当前数据源中不存在。建议您换一种方式描述问题，或者在对话中输入"有哪些字段"来查看当前数据源包含的字段信息。'
         }
 
     # 权限错误
