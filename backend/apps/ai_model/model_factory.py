@@ -13,14 +13,12 @@ from apps.system.models.system_model import AiModelDetail
 from common.core.db import engine
 from common.utils.crypto import chatbi_decrypt
 from common.utils.utils import prepare_model_arg, ChatBILogUtil
-from langchain_community.llms import VLLMOpenAI
-from langchain_openai import AzureChatOpenAI
 
 
 class LLMConfig(BaseModel):
     """Base configuration class for large language models"""
     model_id: Optional[int] = None
-    model_type: str  # Model type: openai/tongyi/vllm etc.
+    model_type: str  # Model type: openai/tongyi etc.
     model_name: str  # Specific model name
     api_key: Optional[str] = None
     api_base_url: Optional[str] = None
@@ -73,35 +71,6 @@ class BaseLLM(ABC):
         return self._llm
 
 
-class OpenAIvLLM(BaseLLM):
-    def _init_llm(self) -> VLLMOpenAI:
-        params = self._params  # 使用 deep copy 的副本
-        return VLLMOpenAI(
-            openai_api_key=self.config.api_key or 'Empty',
-            openai_api_base=self.config.api_base_url,
-            model_name=self.config.model_name,
-            streaming=True,
-            **params,
-        )
-
-
-class OpenAIAzureLLM(BaseLLM):
-    def _init_llm(self) -> AzureChatOpenAI:
-        params = self._params  # 使用 deep copy 的副本
-        # 使用 pop 的默认值处理空字符串，避免空字符串传给 API
-        api_version = params.pop("api_version", None) or None
-        deployment_name = params.pop("deployment_name", None) or None
-        return AzureChatOpenAI(
-            azure_endpoint=self.config.api_base_url,
-            api_key=self.config.api_key or 'Empty',
-            model_name=self.config.model_name,
-            api_version=api_version,
-            deployment_name=deployment_name,
-            streaming=True,
-            **params,
-        )
-
-
 class OpenAILLM(BaseLLM):
     def _init_llm(self) -> BaseChatModel:
         params = self._params  # 使用 deep copy 的副本
@@ -143,29 +112,12 @@ class OpenAILLM(BaseLLM):
         return self.llm.invoke(prompt)
 
 
-class ChatGLMLLM(BaseLLM):
-    def _init_llm(self) -> BaseChatModel:
-        params = self._params  # 使用 deep copy 的副本
-        api_base = self.config.api_base_url or 'https://open.bigmodel.cn/api/paas/v4'
-        llm = BaseChatOpenAI(
-            model=self.config.model_name,
-            api_key=self.config.api_key or 'Empty',
-            base_url=api_base,
-            stream_usage=True,
-            **params,
-        )
-        return llm
-
-
 class LLMFactory:
     """Large Language Model Factory Class"""
 
     _llm_types: Dict[str, Type[BaseLLM]] = {
         "openai": OpenAILLM,
         "tongyi": OpenAILLM,
-        "vllm": OpenAIvLLM,
-        "azure": OpenAIAzureLLM,
-        "chatglm": ChatGLMLLM,
     }
 
     # 使用 OrderedDict 实现真正的 LRU 缓存
@@ -255,7 +207,7 @@ async def get_default_config() -> LLMConfig:
 
     return LLMConfig(
         model_id=db_model.id,
-        model_type="openai" if db_model.protocol == 1 else "vllm",
+        model_type="openai",
         model_name=db_model.base_model,
         api_key=db_model.api_key,
         api_base_url=db_model.api_domain,

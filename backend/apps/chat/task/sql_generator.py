@@ -151,12 +151,46 @@ class SQLGeneratorMixin:
                 # 尝试从推理内容中提取JSON/SQL（某些模型会把结果放在thinking里）
                 _extracted = extract_json_robust(full_thinking_text)
                 if _extracted:
+                    # 检查提取到的JSON是否包含success字段，如果没有则尝试补全
+                    try:
+                        _parsed_extracted = orjson.loads(_extracted)
+                        if isinstance(_parsed_extracted, dict):
+                            if 'success' not in _parsed_extracted and 'sql' in _parsed_extracted:
+                                # 有sql字段但没有success字段，补全为标准格式
+                                _parsed_extracted['success'] = True
+                                _extracted = orjson.dumps(_parsed_extracted).decode()
+                            elif 'success' not in _parsed_extracted and 'sql' not in _parsed_extracted:
+                                # 既没有success也没有sql，可能不是SQL结果JSON
+                                _extracted = None
+                    except Exception:
+                        pass
+                
+                if _extracted:
                     full_sql_text = _extracted
                     self.sql_message[-1] = AIMessage(full_sql_text)
                     ChatBILogUtil.info(f"[generate_sql] Successfully extracted SQL from reasoning content")
+                    # 将提取到的内容yield出去，让run_task能收到完整的SQL文本
+                    yield {'content': full_sql_text, 'reasoning_content': ''}
                 else:
-                    full_sql_text = full_thinking_text
-                    self.sql_message[-1] = AIMessage(full_sql_text)
+                    # 尝试从推理内容中直接提取裸SQL语句
+                    import re
+                    _sql_match = re.search(r'(?:```sql\s*\n?([\s\S]*?)\n?```|(?:^|\n)((?:SELECT|WITH)\b[\s\S]*?)(?:\n\n|\Z))', full_thinking_text, re.IGNORECASE)
+                    if _sql_match:
+                        _raw_sql = (_sql_match.group(1) or _sql_match.group(2)).strip()
+                        if _raw_sql:
+                            # 包装为标准JSON格式
+                            full_sql_text = orjson.dumps({"success": True, "sql": _raw_sql}).decode()
+                            self.sql_message[-1] = AIMessage(full_sql_text)
+                            ChatBILogUtil.info(f"[generate_sql] Extracted raw SQL from reasoning and wrapped as JSON")
+                            yield {'content': full_sql_text, 'reasoning_content': ''}
+                        else:
+                            full_sql_text = full_thinking_text
+                            self.sql_message[-1] = AIMessage(full_sql_text)
+                            yield {'content': full_sql_text, 'reasoning_content': ''}
+                    else:
+                        full_sql_text = full_thinking_text
+                        self.sql_message[-1] = AIMessage(full_sql_text)
+                        yield {'content': full_sql_text, 'reasoning_content': ''}
             else:
                 _is_en = (self.chat_question.lang or '').lower().startswith('en')
                 _empty_msg = ('The AI model returned an empty response. This may be due to the model being overloaded or '

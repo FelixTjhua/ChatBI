@@ -64,7 +64,7 @@ frontend/components.d.ts
 frontend/.eslintrc-auto-import.json
 
 # --- Thesis and references (academic files, not part of source code) ---
-毕设论文（终极版）.md
+毕设论文*.md
 参考文献/
 backend/tests/
 
@@ -77,6 +77,8 @@ backend/scripts/random_stress_test.py
 backend/scripts/final_perf.py
 backend/scripts/perf_avg3.py
 backend/scripts/thesis_perf_output.txt
+backend/scripts/_compare_perf.py
+backend/scripts/*_result*.json
 backend/perf_result.txt
 backend/test_table52.py
 backend/test_table52_v2.py
